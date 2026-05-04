@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <application
+        android:name=".MedibookApp"
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.MediBook">
+
+        <!-- Common Activities -->
+        <activity
+            android:name=".activities.common.SplashActivity"
+            android:exported="true"
+            android:theme="@style/Theme.MediBook">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".activities.common.OnboardingActivity" />
+        <activity android:name=".activities.common.PortalSelectionActivity" />
+
+        <!-- Auth Activities -->
+        <activity android:name=".activities.auth.LoginActivity" />
+        <activity android:name=".activities.auth.SignupActivity" />
+
+        <!-- User Activities -->
+        <activity android:name=".activities.user.UserHomeActivity" />
+        <activity android:name=".activities.user.DoctorListActivity" />
+        <activity android:name=".activities.user.DoctorProfileActivity" />
+        <activity android:name=".activities.user.BookAppointmentActivity" />
+        <activity android:name=".activities.user.AppointmentsActivity" />
+        <activity android:name=".activities.user.NotificationsActivity" />
+        <activity android:name=".activities.user.ProfileActivity" />
+
+        <!-- Admin Activities -->
+        <activity android:name=".activities.admin.AdminLoginActivity" />
+        <activity android:name=".activities.admin.AdminDashboardActivity" />
+        <activity android:name=".activities.admin.ManageDoctorsActivity" />
+        <activity android:name=".activities.admin.ManageAppointmentsActivity" />
+        <activity android:name=".activities.admin.PatientRecordsActivity" />
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.MediBook">
+        </activity>
+    </application>
+
+</manifest>

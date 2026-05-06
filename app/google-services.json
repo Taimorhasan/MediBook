@@ -1,26 +1,36 @@
 {
   "project_info": {
-    "project_number": "YOUR_PROJECT_NUMBER",
-    "project_id": "your-project-id",
-    "storage_bucket": "your-project-id.appspot.com"
+    "project_number": "665861535550",
+    "project_id": "medi-book-62e9d",
+    "storage_bucket": "medi-book-62e9d.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "YOUR_MOBILE_SDK_APP_ID",
+        "mobilesdk_app_id": "1:665861535550:android:2d1cfbfcf965ac88581e6f",
         "android_client_info": {
           "package_name": "com.example.medibook"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "665861535550-16tsn95ro0lhmqva5as9ji08k51hgbed.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "YOUR_API_KEY"
+          "current_key": "AIzaSyAOg_BfCK_yMWtOwFNQpjzArQP9s2USIKg"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "665861535550-16tsn95ro0lhmqva5as9ji08k51hgbed.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

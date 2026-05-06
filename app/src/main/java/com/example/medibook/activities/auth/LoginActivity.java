@@ -9,7 +9,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.medibook.R;
+import com.example.medibook.repositories.AuthRepository;
 import com.example.medibook.repositories.NotificationRepository;
+import com.example.medibook.repositories.UserRepository;
+import com.example.medibook.models.User;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 public class LoginActivity extends AppCompatActivity {
@@ -102,6 +107,7 @@ public class LoginActivity extends AppCompatActivity {
                             }
                         });
                     });
+            }
 
             @Override
             public void onFailure(String error) {

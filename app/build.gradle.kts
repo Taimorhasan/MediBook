@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace = "com.example.medibook"
-    compileSdk = 35
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.example.medibook"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
@@ -37,7 +37,7 @@ android {
 }
 
 dependencies {
-    implementation(platform("com.google.firebase:firebase-bom:33.1.0"))
+    implementation(platform("com.google.firebase:firebase-bom:34.12.0"))
 
     // Firebase Auth
     implementation("com.google.firebase:firebase-auth")

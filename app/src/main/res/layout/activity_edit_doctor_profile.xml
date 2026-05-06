@@ -23,23 +23,15 @@
             <!-- Top gradient-like header -->
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="180dp"
-                android:background="#10B981"
+                android:layout_height="160dp"
+                android:background="#2563EB"
                 android:orientation="vertical"
                 android:gravity="center">
-                
-                <ImageView
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:src="@drawable/ic_medical_kit"
-                    android:tint="#FFFFFF"
-                    android:scaleType="centerInside"
-                    android:layout_marginBottom="12dp" />
                 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Create Patient Account"
+                    android:text="Edit Profile"
                     android:textSize="24sp"
                     android:textStyle="bold"
                     android:textColor="#FFFFFF" />
@@ -47,9 +39,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Start booking appointments today"
+                    android:text="Update your professional information"
                     android:textSize="12sp"
-                    android:textColor="#D1FAE5"
+                    android:textColor="#DBEAFE"
                     android:layout_marginTop="4dp" />
             </LinearLayout>
 
@@ -68,7 +60,7 @@
                     android:layout_height="wrap_content"
                     android:hint="Full Name"
                     app:startIconDrawable="@android:drawable/ic_menu_myplaces"
-                    app:startIconTint="#10B981">
+                    app:startIconTint="#2563EB">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/name_edit_text"
@@ -78,74 +70,74 @@
                         android:textSize="14sp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Phone Input -->
+                <!-- Specialty Input -->
                 <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/phone_layout"
+                    android:id="@+id/specialty_layout"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:hint="Phone Number"
-                    app:startIconDrawable="@android:drawable/ic_dialog_info"
-                    app:startIconTint="#10B981">
+                    android:hint="Medical Specialty"
+                    app:startIconDrawable="@android:drawable/ic_menu_info_details"
+                    app:startIconTint="#2563EB">
 
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/phone_edit_text"
+                        android:id="@+id/specialty_edit_text"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="phone"
+                        android:inputType="text"
                         android:textSize="14sp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Email Input -->
+                <!-- Bio Input -->
                 <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/email_layout"
+                    android:id="@+id/bio_layout"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:hint="Email Address"
-                    app:startIconDrawable="@android:drawable/ic_dialog_email"
-                    app:startIconTint="#10B981">
+                    android:hint="Professional Bio"
+                    app:startIconDrawable="@android:drawable/ic_menu_info_details"
+                    app:startIconTint="#2563EB">
 
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/email_edit_text"
+                        android:id="@+id/bio_edit_text"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="textEmailAddress"
-                        android:textSize="14sp" />
+                        android:inputType="textMultiLine"
+                        android:textSize="14sp"
+                        android:lines="4" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Password Input -->
+                <!-- Rating Input -->
                 <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/password_layout"
+                    android:id="@+id/rating_layout"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:hint="Password"
-                    app:passwordToggleEnabled="true"
-                    app:startIconDrawable="@android:drawable/ic_lock_lock"
-                    app:startIconTint="#10B981">
+                    android:hint="Rating (0-5)"
+                    app:startIconDrawable="@android:drawable/ic_menu_today"
+                    app:startIconTint="#2563EB">
 
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/password_edit_text"
+                        android:id="@+id/rating_edit_text"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="textPassword"
+                        android:inputType="numberDecimal"
                         android:textSize="14sp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Signup Button -->
+                <!-- Update Button -->
                 <Button
-                    android:id="@+id/signup_button"
+                    android:id="@+id/update_button"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
                     android:layout_marginTop="28dp"
-                    android:text="Create Account"
+                    android:text="Update Profile"
                     android:textSize="16sp"
                     android:textStyle="bold"
-                    android:background="#10B981"
+                    android:background="#2563EB"
                     android:textColor="#FFFFFF"
                     android:elevation="8dp" />
 
@@ -157,32 +149,6 @@
                     android:layout_marginTop="12dp"
                     android:layout_gravity="center_horizontal"
                     android:visibility="gone" />
-
-                <!-- Login Redirect -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginBottom="24dp">
-                    
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Already have an account? "
-                        android:textColor="#6B7280"
-                        android:textSize="13sp" />
-                    
-                    <TextView
-                        android:id="@+id/login_redirect"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Login"
-                        android:textColor="#10B981"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.medibook.R;
 import com.example.medibook.activities.admin.AdminLoginActivity;
 import com.example.medibook.activities.auth.LoginActivity;
+import com.example.medibook.activities.auth.DoctorLoginActivity;
 
 public class PortalSelectionActivity extends AppCompatActivity {
 
@@ -28,11 +29,9 @@ public class PortalSelectionActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        // Doctor Portal -> Login Activity (Or Doctor Login if you create one)
+        // Doctor Portal -> Doctor Login Activity
         btnDoctor.setOnClickListener(v -> {
-            Toast.makeText(this, "Doctor Portal Access Granted", Toast.LENGTH_SHORT).show();
-            // For now, route to same login or implement specific Doctor Login
-            Intent intent = new Intent(PortalSelectionActivity.this, LoginActivity.class);
+            Intent intent = new Intent(PortalSelectionActivity.this, DoctorLoginActivity.class);
             startActivity(intent);
         });
 

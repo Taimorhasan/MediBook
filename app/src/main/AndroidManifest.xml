@@ -33,12 +33,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.common.OnboardingActivity" />
         <activity android:name=".activities.common.PortalSelectionActivity" />
 
-        <!-- Auth Activities -->
+        <!-- Auth Activities - Patient -->
         <activity android:name=".activities.auth.LoginActivity" />
         <activity android:name=".activities.auth.SignupActivity" />
+
+        <!-- Auth Activities - Doctor -->
+        <activity android:name=".activities.auth.DoctorLoginActivity" />
+        <activity android:name=".activities.auth.DoctorSignupActivity" />
 
         <!-- User Activities -->
         <activity android:name=".activities.user.UserHomeActivity" />
@@ -55,6 +58,10 @@
         <activity android:name=".activities.admin.ManageDoctorsActivity" />
         <activity android:name=".activities.admin.ManageAppointmentsActivity" />
         <activity android:name=".activities.admin.PatientRecordsActivity" />
+
+        <!-- Doctor Activities -->
+        <activity android:name=".activities.doctor.DoctorDashboardActivity" />
+        <activity android:name=".activities.doctor.EditDoctorProfileActivity" />
 
         <activity
             android:name=".MainActivity"

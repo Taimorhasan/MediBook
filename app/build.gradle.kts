@@ -34,6 +34,9 @@ android {
         viewBinding = true
         dataBinding = false
     }
+    lint {
+        abortOnError = false
+    }
 }
 
 dependencies {

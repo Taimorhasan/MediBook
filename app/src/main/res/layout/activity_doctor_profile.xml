@@ -17,28 +17,42 @@
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
             app:titleEnabled="false">
 
-            <ImageView
-                android:id="@+id/doctor_profile_image"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:scaleType="centerCrop"
-                android:src="@android:drawable/ic_menu_myplaces"
-                app:layout_collapseMode="parallax" />
+                android:background="#10B981"
+                android:gravity="center"
+                android:orientation="vertical"
+                app:layout_collapseMode="parallax">
+
+                <ImageView
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:src="@drawable/ic_medical_kit"
+                    android:tint="#FFFFFF" />
+
+                <TextView
+                    android:id="@+id/doctor_name_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="Doctor Name"
+                    android:textColor="@color/white"
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
             <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                app:layout_collapseMode="pin"
-                app:navigationIcon="@android:drawable/ic_menu_revert" />
-
+                app:layout_collapseMode="pin" />
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/bg_rounded_top"
-        android:layout_marginTop="-30dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
@@ -47,97 +61,90 @@
             android:orientation="vertical"
             android:padding="24dp">
 
+            <!-- Specialty -->
             <TextView
-                android:id="@+id/profile_doctor_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Dr. Sarah Wilson"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                android:textColor="@color/black" />
+                android:text="Specialty"
+                android:textColor="@color/text_gray"
+                android:textSize="12sp" />
 
             <TextView
-                android:id="@+id/profile_doctor_specialty"
+                android:id="@+id/doctor_specialty_tv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Cardiologist"
+                android:layout_marginTop="4dp"
+                android:text="Cardiology"
+                android:textColor="@color/text_dark"
                 android:textSize="16sp"
-                android:textColor="#7D8A99"
-                android:layout_marginTop="4dp" />
+                android:textStyle="bold" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="16dp">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Experience"
-                        android:textSize="12sp"
-                        android:textColor="#7D8A99" />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="10 Years"
-                        android:textStyle="bold"
-                        android:textColor="@color/black" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Rating"
-                        android:textSize="12sp"
-                        android:textColor="#7D8A99" />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="4.8"
-                        android:textStyle="bold"
-                        android:textColor="@color/black" />
-                </LinearLayout>
-            </LinearLayout>
-
+            <!-- Experience -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="About Doctor"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@color/black"
-                android:layout_marginTop="24dp" />
+                android:layout_marginTop="20dp"
+                android:text="Experience"
+                android:textColor="@color/text_gray"
+                android:textSize="12sp" />
 
             <TextView
-                android:layout_width="match_parent"
+                android:id="@+id/doctor_experience_tv"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Dr. Sarah Wilson is a highly experienced cardiologist specializing in heart diseases. She has been practicing for over 10 years and has helped thousands of patients recover from various cardiac issues."
-                android:textSize="14sp"
-                android:textColor="#7D8A99"
+                android:layout_marginTop="4dp"
+                android:text="10 years"
+                android:textColor="@color/text_dark"
+                android:textSize="16sp" />
+
+            <!-- Rating -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="Rating"
+                android:textColor="@color/text_gray"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/doctor_rating_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="4.8 ⭐"
+                android:textColor="@color/text_dark"
+                android:textSize="16sp" />
+
+            <!-- Bio -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="About"
+                android:textColor="@color/text_gray"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/doctor_bio_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                android:text="Experienced doctor with specialization in cardiology"
+                android:textColor="@color/text_medium"
+                android:textSize="14sp"
                 android:lineSpacingExtra="4dp" />
 
+            <!-- Book Appointment Button -->
             <Button
                 android:id="@+id/profile_book_button"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="56dp"
                 android:layout_marginTop="32dp"
-                android:padding="12dp"
                 android:text="Book Appointment"
-                android:backgroundTint="@color/purple_500" />
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:background="#10B981"
+                android:elevation="4dp" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

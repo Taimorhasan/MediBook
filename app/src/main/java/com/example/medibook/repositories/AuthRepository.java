@@ -29,7 +29,7 @@ public class AuthRepository {
         void onFailure(String error);
     }
 
-    public void signUp(String name, String email, String phone, String password, AuthCallback callback) {
+    public void signUp(String name, String email, String phone, String password, String role, AuthCallback callback) {
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
@@ -39,12 +39,12 @@ public class AuthRepository {
                             if (firebaseUser != null) {
                                 // Create user document in Firestore
                                 User user = new User(firebaseUser.getUid(), name, email, phone,
-                                        Arrays.asList("patient")); // Default role
+                                        Arrays.asList(role)); // Role specified by caller
 
                                 db.collection("users").document(firebaseUser.getUid())
                                         .set(user)
                                         .addOnSuccessListener(aVoid -> {
-                                            Log.d(TAG, "User document created");
+                                            Log.d(TAG, "User document created with role: " + role);
                                             callback.onSuccess(firebaseUser);
                                         })
                                         .addOnFailureListener(e -> {
@@ -57,6 +57,11 @@ public class AuthRepository {
                         }
                     }
                 });
+    }
+
+    // Overload for backward compatibility
+    public void signUp(String name, String email, String phone, String password, AuthCallback callback) {
+        signUp(name, email, phone, password, "patient", callback);
     }
 
     public void signIn(String email, String password, AuthCallback callback) {

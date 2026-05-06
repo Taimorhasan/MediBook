@@ -70,6 +70,16 @@
         android:backgroundTint="@color/purple_500"
         app:layout_constraintTop_toBottomOf="@id/password_layout" />
 
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/login_button"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <TextView
         android:id="@+id/signup_redirect"
         android:layout_width="wrap_content"
@@ -77,7 +87,7 @@
         android:layout_marginTop="24dp"
         android:text="Don't have an account? Sign Up"
         android:textColor="@color/black"
-        app:layout_constraintTop_toBottomOf="@id/login_button"
+        app:layout_constraintTop_toBottomOf="@id/progress_bar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 

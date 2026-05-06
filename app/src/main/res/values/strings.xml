@@ -1,3 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- General App Info -->
     <string name="app_name">MediBook</string>
+    <string name="tagline">EMPATHETIC PRECISION</string>
+
+    <!-- Splash Screen Strings -->
+    <string name="initializing_session">Initializing Secure Session...</string>
+    <string name="loading_resources">Loading Resources...</string>
+    <string name="verifying_security">Verifying Security...</string>
+    <string name="finalizing_setup">Finalizing Setup...</string>
+    <!-- Note: Using the longer version here to cover both screens -->
+    <string name="hipaa_compliant">HIPAA COMPLIANT &amp; SECURE</string>
+
+    <!-- Portal Selection Strings -->
+    <string name="portal_title">Choose Your Portal</string>
+    <string name="portal_subtitle">Select your role to continue to the appropriate workspace.</string>
+
+    <!-- Patient Portal -->
+    <string name="patient_title">Patient Portal</string>
+    <string name="patient_desc">Access your medical records, book appointments, and message your providers with seamless precision.</string>
+    <string name="btn_patient">ENTER DASHBOARD</string>
+
+    <!-- Doctor Portal -->
+    <string name="doctor_title">Doctor Portal</string>
+    <string name="doctor_desc">Access your clinical workspace, manage patient consultations, and update medical records with ease.</string>
+    <string name="btn_doctor">DOCTOR ACCESS</string>
+
+    <!-- Admin Portal -->
+    <string name="admin_title">Admin Portal</string>
+    <string name="admin_desc">Manage clinic operations, oversee staff schedules, and view system analytics to optimize care delivery.</string>
+    <string name="btn_admin">SYSTEM ACCESS</string>
+
+    <!-- Footer Strings -->
+    <string name="new_to_medibook">New to MediBook?</string>
+    <string name="contact_support">Contact Support</string>
+    <string name="encryption_256">256-BIT ENCRYPTION</string>
 </resources>

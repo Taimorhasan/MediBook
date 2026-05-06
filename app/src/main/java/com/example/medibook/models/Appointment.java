@@ -4,6 +4,7 @@ public class Appointment {
     private String appointmentId;
     private String patientId;
     private String doctorId;
+    private String doctorName;
     private String scheduleId;
     private String date; // YYYY-MM-DD
     private String time; // HH:mm
@@ -37,6 +38,9 @@ public class Appointment {
 
     public String getDoctorId() { return doctorId; }
     public void setDoctorId(String doctorId) { this.doctorId = doctorId; }
+
+    public String getDoctorName() { return doctorName; }
+    public void setDoctorName(String doctorName) { this.doctorName = doctorName; }
 
     public String getScheduleId() { return scheduleId; }
     public void setScheduleId(String scheduleId) { this.scheduleId = scheduleId; }

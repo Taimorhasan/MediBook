@@ -41,6 +41,6 @@ public class Notification {
     public boolean isRead() { return isRead; }
     public void setRead(boolean read) { isRead = read; }
 
-    public long getCreatedAt() { return createdAt; }
-    public void setCreatedAt(long createdAt) { this.createdAt = createdAt; }
+    public long getTimestamp() { return createdAt; }
+    public void setTimestamp(long timestamp) { this.createdAt = timestamp; }
 }

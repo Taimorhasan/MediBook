@@ -40,30 +40,23 @@ android {
 }
 
 dependencies {
-    implementation("com.google.android.material:material:1.11.0")
-    implementation("androidx.cardview:cardview:1.0.0")
-    implementation(platform("com.google.firebase:firebase-bom:34.12.0"))
-
-    // Firebase Auth
-    implementation("com.google.firebase:firebase-auth")
-
-    // Firebase Firestore
-    implementation("com.google.firebase:firebase-firestore")
-
-    // Firebase Cloud Messaging
-    implementation("com.google.firebase:firebase-messaging")
-
-    // AndroidX
+    // Android Core
+    implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation("androidx.core:core-ktx:1.12.0")
-    implementation("androidx.lifecycle:lifecycle-runtime:2.7.0")
-    implementation("androidx.activity:activity:1.8.2")
-    implementation("androidx.fragment:fragment:1.6.2")
-    implementation("androidx.recyclerview:recyclerview:1.3.2")
-    implementation("androidx.cardview:cardview:1.0.0")
-
+    
+    // Firebase
+    implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
+    
+    // ✅ ADD THIS - Firebase Cloud Messaging
+    implementation("com.google.firebase:firebase-messaging:23.4.1")
+    
+    // Google Sign-In
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
+    
     // Testing
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

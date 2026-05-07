@@ -72,6 +72,7 @@
                     android:layout_marginBottom="8dp" />
 
                 <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/nameLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="20dp"
@@ -107,6 +108,7 @@
                     android:layout_marginBottom="8dp" />
 
                 <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/emailLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="20dp"
@@ -142,6 +144,7 @@
                     android:layout_marginBottom="8dp" />
 
                 <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/phoneLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="20dp"
@@ -159,8 +162,9 @@
                         android:id="@+id/phoneEditText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="+1 (555) 000-0000"
+                        android:hint="03XXXXXXXXX"
                         android:inputType="phone"
+                        android:maxLength="11"
                         android:textSize="14sp"
                         android:paddingTop="16dp"
                         android:paddingBottom="16dp" />
@@ -177,6 +181,7 @@
                     android:layout_marginBottom="8dp" />
 
                 <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/passwordLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="24dp"
@@ -248,51 +253,24 @@
                         android:background="#E5E7EB" />
                 </LinearLayout>
 
-                <!-- Google & Apple Buttons -->
-                <LinearLayout
+                <!-- Google Sign In Button ONLY (Apple Removed) -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnGoogleSignIn"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginBottom="8dp">
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnGoogleSignIn"
-                        android:layout_width="0dp"
-                        android:layout_height="52dp"
-                        android:layout_weight="1"
-                        android:layout_marginEnd="8dp"
-                        android:text="Google"
-                        android:textColor="#1A1A1A"
-                        android:textSize="14sp"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                        app:cornerRadius="12dp"
-                        app:strokeColor="#E5E7EB"
-                        app:strokeWidth="1dp"
-                        app:icon="@drawable/ic_google"
-                        app:iconTint="@null"
-                        app:iconSize="18dp"
-                        app:iconPadding="6dp"
-                        app:iconGravity="textStart" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnAppleSignIn"
-                        android:layout_width="0dp"
-                        android:layout_height="52dp"
-                        android:layout_weight="1"
-                        android:layout_marginStart="8dp"
-                        android:text="Apple"
-                        android:textColor="#1A1A1A"
-                        android:textSize="14sp"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                        app:cornerRadius="12dp"
-                        app:strokeColor="#E5E7EB"
-                        app:strokeWidth="1dp"
-                        app:icon="@drawable/ic_apple"
-                        app:iconTint="@null"
-                        app:iconSize="18dp"
-                        app:iconPadding="6dp"
-                        app:iconGravity="textStart" />
-                </LinearLayout>
+                    android:layout_height="52dp"
+                    android:layout_marginBottom="8dp"
+                    android:text="Continue with Google"
+                    android:textColor="#1A1A1A"
+                    android:textSize="14sp"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    app:cornerRadius="12dp"
+                    app:strokeColor="#E5E7EB"
+                    app:strokeWidth="1dp"
+                    app:icon="@drawable/ic_google"
+                    app:iconTint="@null"
+                    app:iconSize="18dp"
+                    app:iconPadding="6dp"
+                    app:iconGravity="textStart" />
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>

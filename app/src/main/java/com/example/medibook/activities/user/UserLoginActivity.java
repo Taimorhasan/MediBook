@@ -2,111 +2,248 @@ package com.example.medibook.activities.user;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Patterns;
 import android.view.View;
-import android.widget.ProgressBar;
-import android.widget.TextView;
+import android.widget.ProgressBar;  // ✅ Added
+import android.widget.TextView;      // ✅ Added
 import android.widget.Toast;
-
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.example.medibook.R;
 import com.example.medibook.activities.auth.SignupActivity;
+import com.example.medibook.repositories.AuthRepository;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.auth.FirebaseUser;
 
 public class UserLoginActivity extends AppCompatActivity {
 
+    private static final int RC_SIGN_IN = 9001;
+    
     private TextInputEditText etEmail, etPassword;
-    private MaterialButton btnSignIn, btnGoogleSignIn, btnAppleSignIn;
-    private TextView tvForgotPassword, tvCreateAccount;
-    private ProgressBar progressBar;
+    private MaterialButton btnSignIn, btnGoogleSignIn;
+    private TextView tvCreateAccount;  // ✅ Now recognized
+    private ProgressBar progressBar;   // ✅ Now recognized
+    
+    private AuthRepository authRepository;
+    private GoogleSignInClient googleSignInClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_login);
-
+        
         initializeViews();
+        setupGoogleSignIn();
         setupClickListeners();
     }
 
     private void initializeViews() {
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
-
         btnSignIn = findViewById(R.id.btnSignIn);
         btnGoogleSignIn = findViewById(R.id.btnGoogleSignIn);
-        btnAppleSignIn = findViewById(R.id.btnAppleSignIn);
-
-        tvForgotPassword = findViewById(R.id.tvForgotPassword);
         tvCreateAccount = findViewById(R.id.tvCreateAccount);
-
         progressBar = findViewById(R.id.progressBar);
+        
+        authRepository = new AuthRepository();
+    }
+
+    private void setupGoogleSignIn() {
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+        googleSignInClient = GoogleSignIn.getClient(this, gso);
     }
 
     private void setupClickListeners() {
-        btnSignIn.setOnClickListener(v -> attemptLogin());
-
-        tvForgotPassword.setOnClickListener(v -> {
-            // TODO: Navigate to Forgot Password Activity
-            Toast.makeText(this, "Forgot Password clicked", Toast.LENGTH_SHORT).show();
+        // ✅ Sign In Button
+        btnSignIn.setOnClickListener(v -> {
+            if (validateInputs()) {
+                performEmailLogin();
+            }
         });
 
-        btnGoogleSignIn.setOnClickListener(v -> {
-            // TODO: Implement Google Sign In
-            Toast.makeText(this, "Google Sign In clicked", Toast.LENGTH_SHORT).show();
-        });
+        // ✅ Google Sign In Button
+        btnGoogleSignIn.setOnClickListener(v -> signInWithGoogle());
 
-        btnAppleSignIn.setOnClickListener(v -> {
-            // TODO: Implement Apple Sign In
-            Toast.makeText(this, "Apple Sign In clicked", Toast.LENGTH_SHORT).show();
-        });
-
+        // ✅ Create Account
         tvCreateAccount.setOnClickListener(v -> {
-            // ✅ FIX: was UserSignupActivity.class — that class does not exist.
-            //         Replaced with SignupActivity.class (exists in activities/auth/).
             Intent intent = new Intent(UserLoginActivity.this, SignupActivity.class);
             startActivity(intent);
         });
     }
 
-    private void attemptLogin() {
+    // 🔹 Validate Email & Password
+    private boolean validateInputs() {
+        String email = etEmail.getText().toString().trim();
+        String password = etPassword.getText().toString().trim();
+        boolean isValid = true;
+
+        etEmail.setError(null);
+        etPassword.setError(null);
+
+        if (TextUtils.isEmpty(email)) {
+            etEmail.setError("Email is required");
+            etEmail.requestFocus();
+            isValid = false;
+        } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            etEmail.setError("Please enter a valid email address");
+            etEmail.requestFocus();
+            isValid = false;
+        }
+
+        if (TextUtils.isEmpty(password)) {
+            etPassword.setError("Password is required");
+            etPassword.requestFocus();
+            isValid = false;
+        } else if (password.length() < 8) {
+            etPassword.setError("Password must be at least 8 characters");
+            etPassword.requestFocus();
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    // 🔹 Email/Password Login
+    private void performEmailLogin() {
         String email = etEmail.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
 
-        if (email.isEmpty()) {
-            etEmail.setError("Email is required");
-            return;
-        }
-        if (password.isEmpty()) {
-            etPassword.setError("Password is required");
-            return;
-        }
-
-        // Show progress bar
         progressBar.setVisibility(View.VISIBLE);
         btnSignIn.setEnabled(false);
 
-        // Simulate login process (Replace with your Firebase/Auth logic)
-        new android.os.Handler().postDelayed(() -> {
-            progressBar.setVisibility(View.GONE);
-            btnSignIn.setEnabled(true);
-
-            // TODO: Verify credentials with your backend/Firebase
-            boolean loginSuccess = true; // Replace with actual auth result
-
-            if (loginSuccess) {
-                Toast.makeText(this, "Login Successful", Toast.LENGTH_SHORT).show();
-                navigateToHome();
-            } else {
-                Toast.makeText(this, "Invalid Email or Password", Toast.LENGTH_SHORT).show();
+        authRepository.signIn(email, password, new AuthRepository.AuthCallback() {
+            @Override
+            public void onSuccess(FirebaseUser user) {
+                progressBar.setVisibility(View.GONE);
+                btnSignIn.setEnabled(true);
+                
+                // Check role
+                authRepository.getUserRole(user.getUid(), role -> {
+                    if ("patient".equals(role)) {
+                        Toast.makeText(UserLoginActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
+                        navigateToDashboard();
+                    } else {
+                        authRepository.signOut();
+                        Toast.makeText(UserLoginActivity.this, "This account is not registered as a patient", Toast.LENGTH_LONG).show();
+                    }
+                });
             }
-        }, 2000); // 2 seconds delay for simulation
+
+            @Override
+            public void onFailure(String error) {
+                progressBar.setVisibility(View.GONE);
+                btnSignIn.setEnabled(true);
+                
+                if (error.contains("user not found") || error.contains("no user record")) {
+                    Toast.makeText(UserLoginActivity.this, "User not found. Please create an account.", Toast.LENGTH_LONG).show();
+                } else if (error.contains("wrong password")) {
+                    Toast.makeText(UserLoginActivity.this, "Incorrect password. Please try again.", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(UserLoginActivity.this, "Login failed: " + error, Toast.LENGTH_LONG).show();
+                }
+            }
+        });
     }
 
-    private void navigateToHome() {
+    // 🔹 Google Sign-In
+    private void signInWithGoogle() {
+        Intent signInIntent = googleSignInClient.getSignInIntent();
+        startActivityForResult(signInIntent, RC_SIGN_IN);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        
+        if (requestCode == RC_SIGN_IN) {
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            handleGoogleSignInResult(task);
+        }
+    }
+
+    private void handleGoogleSignInResult(Task<GoogleSignInAccount> completedTask) {
+        try {
+            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
+            if (account != null) {
+                firebaseAuthWithGoogle(account.getIdToken());
+            }
+        } catch (ApiException e) {
+            Toast.makeText(this, "Google Sign-In failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void firebaseAuthWithGoogle(String idToken) {
+        progressBar.setVisibility(View.VISIBLE);
+        btnGoogleSignIn.setEnabled(false);
+        
+        AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
+        
+        authRepository.signInWithCredential(credential, new AuthRepository.AuthCallback() {
+            @Override
+            public void onSuccess(FirebaseUser user) {
+                authRepository.checkUserExists(user.getUid(), exists -> {
+                    progressBar.setVisibility(View.GONE);
+                    btnGoogleSignIn.setEnabled(true);
+                    
+                    if (exists) {
+                        authRepository.getUserRole(user.getUid(), role -> {
+                            if ("patient".equals(role)) {
+                                Toast.makeText(UserLoginActivity.this, "Welcome back!", Toast.LENGTH_SHORT).show();
+                                navigateToDashboard();
+                            } else {
+                                authRepository.signOut();
+                                Toast.makeText(UserLoginActivity.this, "This Google account is not registered as a patient", Toast.LENGTH_LONG).show();
+                            }
+                        });
+                    } else {
+                        // Auto-create patient profile for new Google users
+                        authRepository.createPatientProfile(
+                            user.getUid(),
+                            user.getDisplayName() != null ? user.getDisplayName() : "Patient",
+                            user.getEmail(),
+                            "",
+                            new AuthRepository.VoidCallback() {
+                                @Override
+                                public void onSuccess() {
+                                    Toast.makeText(UserLoginActivity.this, "Account created with Google!", Toast.LENGTH_SHORT).show();
+                                    navigateToDashboard();
+                                }
+                                @Override
+                                public void onFailure(String error) {
+                                    Toast.makeText(UserLoginActivity.this, "Profile setup failed: " + error, Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        );
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(String error) {
+                progressBar.setVisibility(View.GONE);
+                btnGoogleSignIn.setEnabled(true);
+                Toast.makeText(UserLoginActivity.this, "Authentication failed: " + error, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void navigateToDashboard() {
         Intent intent = new Intent(UserLoginActivity.this, UserHomeActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
-        finish(); // Close login activity so user can't go back to it
+        finish();
     }
 }

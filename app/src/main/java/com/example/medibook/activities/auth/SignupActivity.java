@@ -2,8 +2,9 @@ package com.example.medibook.activities.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Patterns;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -13,12 +14,14 @@ import com.example.medibook.activities.user.UserLoginActivity;
 import com.example.medibook.repositories.AuthRepository;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseUser;
 
 public class SignupActivity extends AppCompatActivity {
 
     private TextInputEditText nameEditText, emailEditText, phoneEditText, passwordEditText;
-    private MaterialButton signupButton, btnGoogleSignIn, btnAppleSignIn;
+    private TextInputLayout nameLayout, emailLayout, phoneLayout, passwordLayout;
+    private MaterialButton signupButton, btnGoogleSignIn;
     private TextView loginRedirect;
     private ProgressBar progressBar;
     private AuthRepository authRepository;
@@ -37,81 +40,132 @@ public class SignupActivity extends AppCompatActivity {
         emailEditText = findViewById(R.id.emailEditText);
         phoneEditText = findViewById(R.id.phoneEditText);
         passwordEditText = findViewById(R.id.passwordEditText);
+        
+        nameLayout = findViewById(R.id.nameLayout);
+        emailLayout = findViewById(R.id.emailLayout);
+        phoneLayout = findViewById(R.id.phoneLayout);
+        passwordLayout = findViewById(R.id.passwordLayout);
+        
         signupButton = findViewById(R.id.signupButton);
         btnGoogleSignIn = findViewById(R.id.btnGoogleSignIn);
-        btnAppleSignIn = findViewById(R.id.btnAppleSignIn);
         loginRedirect = findViewById(R.id.loginRedirect);
         progressBar = findViewById(R.id.progressBar);
+        
         authRepository = new AuthRepository();
     }
 
     private void setupClickListeners() {
-        // Sign Up Button Click
+        // ✅ Sign Up Button - WITH VALIDATIONS
         signupButton.setOnClickListener(v -> {
-            performSignup();
+            if (validateInputs()) {
+                performSignup();
+            }
         });
 
-        // Login Redirect Click (Already have account)
-        loginRedirect.setOnClickListener(v -> {
+        // ✅ Google Sign Up - Redirect to Login for Google flow
+        btnGoogleSignIn.setOnClickListener(v -> {
             Intent intent = new Intent(SignupActivity.this, UserLoginActivity.class);
             startActivity(intent);
             finish();
         });
 
-        // Google Sign In Click
-        btnGoogleSignIn.setOnClickListener(v -> {
-            Toast.makeText(this, "Google Sign In clicked", Toast.LENGTH_SHORT).show();
-            // TODO: Implement Google Sign In
-        });
-
-        // Apple Sign In Click
-        btnAppleSignIn.setOnClickListener(v -> {
-            Toast.makeText(this, "Apple Sign In clicked", Toast.LENGTH_SHORT).show();
-            // TODO: Implement Apple Sign In
+        // ✅ Already have account? Go to Login
+        loginRedirect.setOnClickListener(v -> {
+            Intent intent = new Intent(SignupActivity.this, UserLoginActivity.class);
+            startActivity(intent);
+            finish();
         });
     }
 
+    // ✅✅✅ COMPREHENSIVE VALIDATIONS ✅✅✅
+    private boolean validateInputs() {
+        String name = nameEditText.getText().toString().trim();
+        String email = emailEditText.getText().toString().trim();
+        String phone = phoneEditText.getText().toString().trim();
+        String password = passwordEditText.getText().toString().trim();
+        
+        boolean isValid = true;
+
+        // Clear previous errors
+        nameLayout.setError(null);
+        emailLayout.setError(null);
+        phoneLayout.setError(null);
+        passwordLayout.setError(null);
+
+        // 🔹 NAME: Not empty, no numbers, min 3 chars
+        if (TextUtils.isEmpty(name)) {
+            nameLayout.setError("Name is required");
+            nameEditText.requestFocus();
+            isValid = false;
+        } else if (name.matches(".*\\d.*")) {
+            nameLayout.setError("Name cannot contain numbers");
+            nameEditText.requestFocus();
+            isValid = false;
+        } else if (name.length() < 3) {
+            nameLayout.setError("Name must be at least 3 characters");
+            nameEditText.requestFocus();
+            isValid = false;
+        }
+
+        // 🔹 EMAIL: Not empty, valid format
+        if (TextUtils.isEmpty(email)) {
+            emailLayout.setError("Email is required");
+            emailEditText.requestFocus();
+            isValid = false;
+        } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            emailLayout.setError("Please enter a valid email address");
+            emailEditText.requestFocus();
+            isValid = false;
+        }
+
+        // 🔹 PHONE: Not empty, digits only, EXACTLY 11 digits
+        if (TextUtils.isEmpty(phone)) {
+            phoneLayout.setError("Phone number is required");
+            phoneEditText.requestFocus();
+            isValid = false;
+        } else if (!phone.matches("^[0-9]+$")) {
+            phoneLayout.setError("Phone number must contain only digits");
+            phoneEditText.requestFocus();
+            isValid = false;
+        } else if (phone.length() != 11) {
+            phoneLayout.setError("Phone number must be exactly 11 digits");
+            phoneEditText.requestFocus();
+            isValid = false;
+        }
+
+        // 🔹 PASSWORD: Not empty, min 8 chars
+        if (TextUtils.isEmpty(password)) {
+            passwordLayout.setError("Password is required");
+            passwordEditText.requestFocus();
+            isValid = false;
+        } else if (password.length() < 8) {
+            passwordLayout.setError("Password must be at least 8 characters");
+            passwordEditText.requestFocus();
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    // ✅ SIGNUP: Save to Firebase Auth + Firestore
     private void performSignup() {
         String name = nameEditText.getText().toString().trim();
         String email = emailEditText.getText().toString().trim();
         String phone = phoneEditText.getText().toString().trim();
         String password = passwordEditText.getText().toString().trim();
 
-        // Check if fields are empty
-        if (name.isEmpty()) {
-            nameEditText.setError("Name is required");
-            nameEditText.requestFocus();
-            return;
-        }
-        if (email.isEmpty()) {
-            emailEditText.setError("Email is required");
-            emailEditText.requestFocus();
-            return;
-        }
-        if (phone.isEmpty()) {
-            phoneEditText.setError("Phone number is required");
-            phoneEditText.requestFocus();
-            return;
-        }
-        if (password.isEmpty()) {
-            passwordEditText.setError("Password is required");
-            passwordEditText.requestFocus();
-            return;
-        }
-
-        // Show progress, disable button
         progressBar.setVisibility(View.VISIBLE);
         signupButton.setEnabled(false);
 
-        // Sign up with Firebase
+        // 🔹 Create user in Firebase Auth + Firestore
         authRepository.signUp(name, email, phone, password, "patient", new AuthRepository.AuthCallback() {
             @Override
             public void onSuccess(FirebaseUser user) {
                 progressBar.setVisibility(View.GONE);
-                signupButton.setEnabled(true);
+                
                 Toast.makeText(SignupActivity.this, "Account created successfully!", Toast.LENGTH_SHORT).show();
                 
-                // Navigate to login
+                // 🔹 Redirect to Login to complete the flow
                 Intent intent = new Intent(SignupActivity.this, UserLoginActivity.class);
                 startActivity(intent);
                 finish();
@@ -121,7 +175,14 @@ public class SignupActivity extends AppCompatActivity {
             public void onFailure(String error) {
                 progressBar.setVisibility(View.GONE);
                 signupButton.setEnabled(true);
-                Toast.makeText(SignupActivity.this, "Signup failed: " + error, Toast.LENGTH_SHORT).show();
+                
+                // 🔹 Handle specific Firebase errors
+                if (error.contains("email already in use")) {
+                    emailLayout.setError("This email is already registered");
+                    emailEditText.requestFocus();
+                } else {
+                    Toast.makeText(SignupActivity.this, "Signup failed: " + error, Toast.LENGTH_LONG).show();
+                }
             }
         });
     }

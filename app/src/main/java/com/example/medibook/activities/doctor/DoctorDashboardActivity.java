@@ -63,11 +63,7 @@ public class DoctorDashboardActivity extends AppCompatActivity implements Appoin
         loadAppointments();
 
         // Logout button
-        logoutButton.setOnClickListener(v -> {
-            authRepository.signOut();
-            startActivity(new Intent(this, PortalSelectionActivity.class));
-            finish();
-        });
+        logoutButton.setOnClickListener(v -> performLogout());
 
         // Edit profile button
         editProfileButton.setOnClickListener(v -> {
@@ -103,6 +99,24 @@ public class DoctorDashboardActivity extends AppCompatActivity implements Appoin
             @Override
             public void onFailure(String error) {
                 Toast.makeText(DoctorDashboardActivity.this, "Failed to load appointments", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void performLogout() {
+        authRepository.signOutWithTokenCleanup(currentDoctorId, new AuthRepository.VoidCallback() {
+            @Override
+            public void onSuccess() {
+                Toast.makeText(DoctorDashboardActivity.this, "Logged out successfully", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(DoctorDashboardActivity.this, PortalSelectionActivity.class));
+                finish();
+            }
+
+            @Override
+            public void onFailure(String error) {
+                // Still navigate even if cleanup failed
+                startActivity(new Intent(DoctorDashboardActivity.this, PortalSelectionActivity.class));
+                finish();
             }
         });
     }

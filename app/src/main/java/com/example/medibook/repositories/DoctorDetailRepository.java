@@ -69,6 +69,22 @@ public class DoctorDetailRepository {
     }
 
     /**
+     * Update specific doctor profile fields without overwriting others
+     */
+    public void updateDoctorProfile(String doctorId, java.util.Map<String, Object> updates, VoidCallback callback) {
+        db.collection("doctors").document(doctorId)
+                .update(updates)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "Doctor profile updated");
+                    callback.onSuccess();
+                })
+                .addOnFailureListener(e -> {
+                    Log.w(TAG, "Error updating doctor profile", e);
+                    callback.onFailure(e.getMessage());
+                });
+    }
+
+    /**
      * Update doctor availability
      */
     public void updateAvailability(String doctorId, java.util.List<String> availableDays, VoidCallback callback) {

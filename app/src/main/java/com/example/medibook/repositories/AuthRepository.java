@@ -119,6 +119,7 @@ public class AuthRepository {
         user.put("roleIds", Arrays.asList(role));
         user.put("createdAt", System.currentTimeMillis());
         user.put("updatedAt", System.currentTimeMillis());
+        user.put("fcmToken", "");
 
         db.collection("users").document(uid)
             .set(user)
@@ -157,6 +158,23 @@ public class AuthRepository {
     // 🔹 Sign out
     public void signOut() {
         mAuth.signOut();
+    }
+
+    // 🔹 Sign out with token cleanup (for notification purposes)
+    public void signOutWithTokenCleanup(String userId, VoidCallback callback) {
+        // First remove FCM token from Firestore
+        db.collection("users").document(userId)
+                .update("fcmToken", "")
+                .addOnCompleteListener(task -> {
+                    // Then sign out from Firebase
+                    mAuth.signOut();
+                    callback.onSuccess();
+                })
+                .addOnFailureListener(e -> {
+                    // Still sign out even if token removal fails
+                    mAuth.signOut();
+                    callback.onFailure(e.getMessage());
+                });
     }
 
     // 🔹 Get current user

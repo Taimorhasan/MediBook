@@ -9,6 +9,14 @@ public class User {
     private String phone;
     private List<String> roleIds;
     private long createdAt;
+    
+    // Medical fields
+    private String age;
+    private String gender;
+    private String bloodGroup;
+    private String bio;
+    private String profileImage;
+    private String fcmToken;
 
     public User() {} // Firestore constructor
 
@@ -39,4 +47,23 @@ public class User {
 
     public long getCreatedAt() { return createdAt; }
     public void setCreatedAt(long createdAt) { this.createdAt = createdAt; }
+
+    // Medical fields getters and setters
+    public String getAge() { return age; }
+    public void setAge(String age) { this.age = age; }
+
+    public String getGender() { return gender; }
+    public void setGender(String gender) { this.gender = gender; }
+
+    public String getBloodGroup() { return bloodGroup; }
+    public void setBloodGroup(String bloodGroup) { this.bloodGroup = bloodGroup; }
+
+    public String getBio() { return bio; }
+    public void setBio(String bio) { this.bio = bio; }
+
+    public String getProfileImage() { return profileImage; }
+    public void setProfileImage(String profileImage) { this.profileImage = profileImage; }
+
+    public String getFcmToken() { return fcmToken; }
+    public void setFcmToken(String fcmToken) { this.fcmToken = fcmToken; }
 }

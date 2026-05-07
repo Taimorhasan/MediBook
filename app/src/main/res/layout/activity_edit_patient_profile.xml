@@ -15,7 +15,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Edit Doctor Profile"
+            android:text="Edit Profile"
             android:textSize="28sp"
             android:textStyle="bold"
             android:textColor="#1F2937"
@@ -44,7 +44,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Upload Photo"
-                android:backgroundTint="#2563EB"
+                android:backgroundTint="#10B981"
                 android:textColor="#FFFFFF" />
         </LinearLayout>
 
@@ -56,47 +56,13 @@
             android:hint="Full Name"
             android:layout_marginBottom="16dp"
             app:startIconDrawable="@android:drawable/ic_menu_myplaces"
-            app:startIconTint="#2563EB">
+            app:startIconTint="#10B981">
 
-            <EditText
+            <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/name_edit_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Specialty -->
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Specialty"
-            android:layout_marginBottom="16dp"
-            app:startIconDrawable="@android:drawable/ic_menu_info_details"
-            app:startIconTint="#2563EB">
-
-            <EditText
-                android:id="@+id/specialty_edit_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="text" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Experience -->
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Years of Experience"
-            android:layout_marginBottom="16dp"
-            app:startIconDrawable="@android:drawable/ic_menu_today"
-            app:startIconTint="#2563EB">
-
-            <EditText
-                android:id="@+id/experience_edit_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="number" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Phone -->
@@ -107,47 +73,13 @@
             android:hint="Phone Number"
             android:layout_marginBottom="16dp"
             app:startIconDrawable="@android:drawable/ic_dialog_dialer"
-            app:startIconTint="#2563EB">
+            app:startIconTint="#10B981">
 
-            <EditText
+            <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/phone_edit_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="phone" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Degree -->
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Degree (e.g., MD, MBBS)"
-            android:layout_marginBottom="16dp"
-            app:startIconDrawable="@android:drawable/ic_menu_info_details"
-            app:startIconTint="#2563EB">
-
-            <EditText
-                android:id="@+id/degree_edit_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="text" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- License Number -->
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Medical License Number"
-            android:layout_marginBottom="16dp"
-            app:startIconDrawable="@android:drawable/ic_menu_info_details"
-            app:startIconTint="#2563EB">
-
-            <EditText
-                android:id="@+id/license_edit_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="text" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Age -->
@@ -158,43 +90,58 @@
             android:hint="Age"
             android:layout_marginBottom="16dp"
             app:startIconDrawable="@android:drawable/ic_dialog_info"
-            app:startIconTint="#2563EB">
+            app:startIconTint="#10B981">
 
-            <EditText
+            <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/age_edit_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="number" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Consultation Fee -->
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        <!-- Gender -->
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Consultation Fee ($)"
-            android:layout_marginBottom="16dp"
-            app:startIconDrawable="@android:drawable/ic_menu_info_details"
-            app:startIconTint="#2563EB">
+            android:text="Gender"
+            android:textColor="#6B7280"
+            android:textSize="12sp"
+            android:layout_marginBottom="8dp" />
 
-            <EditText
-                android:id="@+id/fee_edit_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="numberDecimal" />
-        </com.google.android.material.textfield.TextInputLayout>
+        <Spinner
+            android:id="@+id/gender_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:entries="@array/gender_array"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Blood Group -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Blood Group"
+            android:textColor="#6B7280"
+            android:textSize="12sp"
+            android:layout_marginBottom="8dp" />
+
+        <Spinner
+            android:id="@+id/blood_group_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:entries="@array/blood_group_array"
+            android:layout_marginBottom="16dp" />
 
         <!-- Bio -->
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Professional Bio"
+            android:hint="Bio"
             android:layout_marginBottom="24dp"
             app:startIconDrawable="@android:drawable/ic_menu_edit"
-            app:startIconTint="#2563EB">
+            app:startIconTint="#10B981">
 
-            <EditText
+            <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/bio_edit_text"
                 android:layout_width="match_parent"
                 android:layout_height="120dp"
@@ -211,15 +158,15 @@
             android:layout_marginBottom="16dp"
             android:visibility="gone" />
 
-        <!-- Update Button -->
+        <!-- Save Button -->
         <Button
-            android:id="@+id/update_button"
+            android:id="@+id/save_button"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:text="Update Profile"
+            android:text="Save Profile"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:background="#2563EB"
+            android:background="#10B981"
             android:textColor="#FFFFFF"
             android:elevation="8dp" />
 

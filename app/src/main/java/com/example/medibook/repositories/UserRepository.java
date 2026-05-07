@@ -74,4 +74,17 @@ public class UserRepository {
                 .addOnSuccessListener(aVoid -> callback.onSuccess(user))
                 .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
     }
+
+    /**
+     * Update specific user fields without overwriting others
+     */
+    public void updateUserFields(String userId, java.util.Map<String, Object> updates, UserCallback callback) {
+        db.collection("users").document(userId)
+                .update(updates)
+                .addOnSuccessListener(aVoid -> {
+                    // Fetch updated user to return
+                    getUser(userId, callback);
+                })
+                .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
+    }
 }

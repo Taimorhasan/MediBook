@@ -121,9 +121,7 @@ public class UserHomeActivity extends AppCompatActivity implements DoctorAdapter
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menu_logout) {
-            authRepository.signOut();
-            startActivity(new Intent(this, com.example.medibook.activities.common.PortalSelectionActivity.class));
-            finish();
+            performLogout();
             return true;
         } else if (item.getItemId() == R.id.menu_appointments) {
             startActivity(new Intent(this, AppointmentsActivity.class));
@@ -133,5 +131,24 @@ public class UserHomeActivity extends AppCompatActivity implements DoctorAdapter
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void performLogout() {
+        String userId = authRepository.getCurrentUser().getUid();
+        authRepository.signOutWithTokenCleanup(userId, new AuthRepository.VoidCallback() {
+            @Override
+            public void onSuccess() {
+                Toast.makeText(UserHomeActivity.this, "Logged out successfully", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(UserHomeActivity.this, com.example.medibook.activities.common.PortalSelectionActivity.class));
+                finish();
+            }
+
+            @Override
+            public void onFailure(String error) {
+                // Still navigate even if cleanup failed
+                startActivity(new Intent(UserHomeActivity.this, com.example.medibook.activities.common.PortalSelectionActivity.class));
+                finish();
+            }
+        });
     }
 }

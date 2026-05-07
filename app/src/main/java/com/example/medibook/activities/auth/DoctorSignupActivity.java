@@ -14,6 +14,9 @@ import com.example.medibook.repositories.DoctorDetailRepository;
 import com.example.medibook.models.Doctor;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DoctorSignupActivity extends AppCompatActivity {
 
@@ -24,6 +27,7 @@ public class DoctorSignupActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private AuthRepository authRepository;
     private DoctorDetailRepository doctorRepository;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +37,7 @@ public class DoctorSignupActivity extends AppCompatActivity {
         // Initialize repositories
         authRepository = new AuthRepository();
         doctorRepository = new DoctorDetailRepository();
+        db = FirebaseFirestore.getInstance();
 
         // Initialize views
         nameEditText = findViewById(R.id.name_edit_text);
@@ -100,17 +105,12 @@ public class DoctorSignupActivity extends AppCompatActivity {
                 Doctor doctor = new Doctor(user.getUid(), name, specialty, "", phone, email, 
                         experience, "0", "");
 
+                // Save to both doctors and update users collection with doctor details
                 doctorRepository.saveDoctorProfile(user.getUid(), doctor, new DoctorDetailRepository.VoidCallback() {
                     @Override
                     public void onSuccess() {
-                        progressBar.setVisibility(View.GONE);
-                        signupButton.setEnabled(true);
-                        Toast.makeText(DoctorSignupActivity.this, "Doctor Account Created Successfully!", Toast.LENGTH_LONG).show();
-                        
-                        // Navigate to doctor login or dashboard
-                        Intent intent = new Intent(DoctorSignupActivity.this, DoctorLoginActivity.class);
-                        startActivity(intent);
-                        finish();
+                        // Also update the users document with complete doctor info
+                        updateUserWithDoctorDetails(user.getUid(), name, email, phone, specialty, experience);
                     }
 
                     @Override
@@ -129,5 +129,35 @@ public class DoctorSignupActivity extends AppCompatActivity {
                 Toast.makeText(DoctorSignupActivity.this, "Signup failed: " + error, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void updateUserWithDoctorDetails(String uid, String name, String email, String phone, 
+                                             String specialty, String experience) {
+        Map<String, Object> doctorDetails = new HashMap<>();
+        doctorDetails.put("specialty", specialty);
+        doctorDetails.put("experience", experience);
+
+        db.collection("users").document(uid)
+            .update(doctorDetails)
+            .addOnSuccessListener(aVoid -> {
+                progressBar.setVisibility(View.GONE);
+                signupButton.setEnabled(true);
+                Toast.makeText(DoctorSignupActivity.this, "Doctor Account Created Successfully!", Toast.LENGTH_LONG).show();
+                
+                // Navigate to doctor login
+                Intent intent = new Intent(DoctorSignupActivity.this, DoctorLoginActivity.class);
+                startActivity(intent);
+                finish();
+            })
+            .addOnFailureListener(e -> {
+                progressBar.setVisibility(View.GONE);
+                signupButton.setEnabled(true);
+                Toast.makeText(DoctorSignupActivity.this, "Signup partially successful but profile update failed", Toast.LENGTH_SHORT).show();
+                
+                // Still navigate to login
+                Intent intent = new Intent(DoctorSignupActivity.this, DoctorLoginActivity.class);
+                startActivity(intent);
+                finish();
+            });
     }
 }

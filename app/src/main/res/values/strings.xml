@@ -36,4 +36,25 @@
     <string name="contact_support">Contact Support</string>
     <string name="encryption_256">256-BIT ENCRYPTION</string>
     <string name="default_web_client_id">665861535550-16tsn95ro0lhmqva5as9ji08k51hgbed.apps.googleusercontent.com</string>
+
+    <!-- Gender Array -->
+    <string-array name="gender_array">
+        <item>Not Specified</item>
+        <item>Male</item>
+        <item>Female</item>
+        <item>Other</item>
+    </string-array>
+
+    <!-- Blood Group Array -->
+    <string-array name="blood_group_array">
+        <item>Not Specified</item>
+        <item>O+</item>
+        <item>O-</item>
+        <item>A+</item>
+        <item>A-</item>
+        <item>B+</item>
+        <item>B-</item>
+        <item>AB+</item>
+        <item>AB-</item>
+    </string-array>
 </resources>

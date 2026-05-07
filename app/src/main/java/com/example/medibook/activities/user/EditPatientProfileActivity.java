@@ -1,4 +1,4 @@
-package com.example.medibook.activities.doctor;
+package com.example.medibook.activities.user;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -8,29 +8,29 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.bumptech.glide.Glide;
 import com.example.medibook.R;
-import com.example.medibook.models.Doctor;
-import com.example.medibook.repositories.DoctorDetailRepository;
+import com.example.medibook.repositories.UserRepository;
 import com.example.medibook.services.CloudinaryService;
 import com.google.firebase.auth.FirebaseAuth;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-public class EditDoctorProfileActivity extends AppCompatActivity {
+public class EditPatientProfileActivity extends AppCompatActivity {
 
     private ImageView profileImageView;
-    private EditText nameEditText, specialtyEditText, experienceEditText, phoneEditText;
-    private EditText degreeEditText, licenseEditText, ageEditText, feeEditText, bioEditText;
-    private Button uploadPhotoButton, updateButton;
+    private EditText nameEditText, phoneEditText, ageEditText, bioEditText;
+    private Spinner genderSpinner, bloodGroupSpinner;
+    private Button uploadPhotoButton, saveButton;
     private ProgressBar progressBar;
     
-    private DoctorDetailRepository doctorRepository;
+    private UserRepository userRepository;
     private CloudinaryService cloudinaryService;
-    private String doctorId;
+    private String currentUserId;
     private Uri selectedImageUri;
     private String profileImageUrl = "";
 
@@ -39,38 +39,35 @@ public class EditDoctorProfileActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_edit_doctor_profile);
+        setContentView(R.layout.activity_edit_patient_profile);
 
-        doctorRepository = new DoctorDetailRepository();
+        userRepository = new UserRepository();
         cloudinaryService = new CloudinaryService();
-        doctorId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         // Initialize views
         profileImageView = findViewById(R.id.profile_image);
         nameEditText = findViewById(R.id.name_edit_text);
-        specialtyEditText = findViewById(R.id.specialty_edit_text);
-        experienceEditText = findViewById(R.id.experience_edit_text);
         phoneEditText = findViewById(R.id.phone_edit_text);
-        degreeEditText = findViewById(R.id.degree_edit_text);
-        licenseEditText = findViewById(R.id.license_edit_text);
         ageEditText = findViewById(R.id.age_edit_text);
-        feeEditText = findViewById(R.id.fee_edit_text);
         bioEditText = findViewById(R.id.bio_edit_text);
+        genderSpinner = findViewById(R.id.gender_spinner);
+        bloodGroupSpinner = findViewById(R.id.blood_group_spinner);
         uploadPhotoButton = findViewById(R.id.upload_photo_button);
-        updateButton = findViewById(R.id.update_button);
+        saveButton = findViewById(R.id.save_button);
         progressBar = findViewById(R.id.progress_bar);
 
-        // Load doctor profile
-        loadDoctorProfile();
+        // Load current profile data
+        loadProfileData();
 
         // Upload photo button
         uploadPhotoButton.setOnClickListener(v -> pickImage());
 
+        // Save button
+        saveButton.setOnClickListener(v -> saveProfile());
+
         // Profile image click to enlarge
         profileImageView.setOnClickListener(v -> pickImage());
-
-        // Update button
-        updateButton.setOnClickListener(v -> updateProfile());
     }
 
     private void pickImage() {
@@ -107,21 +104,21 @@ public class EditDoctorProfileActivity extends AppCompatActivity {
         if (imagePath != null) {
             File imageFile = new File(imagePath);
             
-            cloudinaryService.uploadImage(imageFile, "doctor_profiles/" + doctorId, 
+            cloudinaryService.uploadImage(imageFile, "patient_profiles/" + currentUserId, 
                 new CloudinaryService.ImageUploadCallback() {
                     @Override
                     public void onSuccess(String imageUrl) {
                         profileImageUrl = imageUrl;
                         progressBar.setVisibility(View.GONE);
                         uploadPhotoButton.setEnabled(true);
-                        Toast.makeText(EditDoctorProfileActivity.this, "Photo uploaded successfully", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(EditPatientProfileActivity.this, "Photo uploaded successfully", Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
                     public void onFailure(String error) {
                         progressBar.setVisibility(View.GONE);
                         uploadPhotoButton.setEnabled(true);
-                        Toast.makeText(EditDoctorProfileActivity.this, "Failed to upload photo: " + error, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(EditPatientProfileActivity.this, "Failed to upload photo: " + error, Toast.LENGTH_SHORT).show();
                     }
                 });
         }
@@ -139,89 +136,92 @@ public class EditDoctorProfileActivity extends AppCompatActivity {
         }
     }
 
-    private void loadDoctorProfile() {
-        progressBar.setVisibility(View.VISIBLE);
-        
-        doctorRepository.getDoctorProfile(doctorId, new DoctorDetailRepository.DoctorCallback() {
+    private void loadProfileData() {
+        userRepository.getUser(currentUserId, new UserRepository.UserCallback() {
             @Override
-            public void onSuccess(Doctor doctor) {
-                progressBar.setVisibility(View.GONE);
-                
-                nameEditText.setText(doctor.getName() != null ? doctor.getName() : "");
-                specialtyEditText.setText(doctor.getSpecialty() != null ? doctor.getSpecialty() : "");
-                experienceEditText.setText(doctor.getExperience() != null ? doctor.getExperience() : "");
-                phoneEditText.setText(doctor.getPhone() != null ? doctor.getPhone() : "");
-                degreeEditText.setText(doctor.getDegree() != null ? doctor.getDegree() : "");
-                licenseEditText.setText(doctor.getLicenseNumber() != null ? doctor.getLicenseNumber() : "");
-                ageEditText.setText(doctor.getAge() != null ? doctor.getAge() : "");
-                feeEditText.setText(doctor.getConsultationFee() != null ? doctor.getConsultationFee() : "");
-                bioEditText.setText(doctor.getBio() != null ? doctor.getBio() : "");
+            public void onSuccess(com.example.medibook.models.User user) {
+                if (user != null) {
+                    nameEditText.setText(user.getName() != null ? user.getName() : "");
+                    phoneEditText.setText(user.getPhone() != null ? user.getPhone() : "");
+                    ageEditText.setText(user.getAge() != null ? user.getAge() : "");
+                    bioEditText.setText(user.getBio() != null ? user.getBio() : "");
+                    
+                    if (user.getProfileImage() != null && !user.getProfileImage().isEmpty()) {
+                        profileImageUrl = user.getProfileImage();
+                        Glide.with(EditPatientProfileActivity.this)
+                            .load(profileImageUrl)
+                            .circleCrop()
+                            .into(profileImageView);
+                    }
 
-                if (doctor.getProfileImage() != null && !doctor.getProfileImage().isEmpty()) {
-                    profileImageUrl = doctor.getProfileImage();
-                    Glide.with(EditDoctorProfileActivity.this)
-                        .load(profileImageUrl)
-                        .circleCrop()
-                        .into(profileImageView);
+                    // Set spinners if data exists
+                    if (user.getGender() != null) {
+                        setSpinnerSelection(genderSpinner, user.getGender());
+                    }
+                    if (user.getBloodGroup() != null) {
+                        setSpinnerSelection(bloodGroupSpinner, user.getBloodGroup());
+                    }
                 }
             }
 
             @Override
             public void onFailure(String error) {
-                progressBar.setVisibility(View.GONE);
-                Toast.makeText(EditDoctorProfileActivity.this, "Failed to load profile: " + error, Toast.LENGTH_SHORT).show();
+                Toast.makeText(EditPatientProfileActivity.this, "Failed to load profile: " + error, Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    private void updateProfile() {
-        String name = nameEditText.getText().toString().trim();
-        String specialty = specialtyEditText.getText().toString().trim();
-        String experience = experienceEditText.getText().toString().trim();
-        String phone = phoneEditText.getText().toString().trim();
-        String degree = degreeEditText.getText().toString().trim();
-        String license = licenseEditText.getText().toString().trim();
-        String age = ageEditText.getText().toString().trim();
-        String fee = feeEditText.getText().toString().trim();
-        String bio = bioEditText.getText().toString().trim();
+    private void setSpinnerSelection(Spinner spinner, String value) {
+        for (int i = 0; i < spinner.getCount(); i++) {
+            if (spinner.getItemAtPosition(i).toString().equals(value)) {
+                spinner.setSelection(i);
+                break;
+            }
+        }
+    }
 
-        if (name.isEmpty() || specialty.isEmpty()) {
-            Toast.makeText(this, "Please fill required fields", Toast.LENGTH_SHORT).show();
+    private void saveProfile() {
+        String name = nameEditText.getText().toString().trim();
+        String phone = phoneEditText.getText().toString().trim();
+        String age = ageEditText.getText().toString().trim();
+        String bio = bioEditText.getText().toString().trim();
+        String gender = genderSpinner.getSelectedItem().toString();
+        String bloodGroup = bloodGroupSpinner.getSelectedItem().toString();
+
+        if (name.isEmpty()) {
+            Toast.makeText(this, "Name is required", Toast.LENGTH_SHORT).show();
             return;
         }
 
         progressBar.setVisibility(View.VISIBLE);
-        updateButton.setEnabled(false);
+        saveButton.setEnabled(false);
 
-        // Create a map with only the fields to update
+        // Create update map
         Map<String, Object> updates = new HashMap<>();
         updates.put("name", name);
-        updates.put("specialty", specialty);
-        updates.put("experience", experience);
         updates.put("phone", phone);
-        updates.put("degree", degree);
-        updates.put("licenseNumber", license);
         updates.put("age", age);
-        updates.put("consultationFee", fee);
         updates.put("bio", bio);
+        updates.put("gender", gender);
+        updates.put("bloodGroup", bloodGroup);
         if (!profileImageUrl.isEmpty()) {
             updates.put("profileImage", profileImageUrl);
         }
-        
-        doctorRepository.updateDoctorProfile(doctorId, updates, new DoctorDetailRepository.VoidCallback() {
+
+        userRepository.updateUserFields(currentUserId, updates, new UserRepository.UserCallback() {
             @Override
-            public void onSuccess() {
+            public void onSuccess(com.example.medibook.models.User user) {
                 progressBar.setVisibility(View.GONE);
-                updateButton.setEnabled(true);
-                Toast.makeText(EditDoctorProfileActivity.this, "Profile updated successfully!", Toast.LENGTH_SHORT).show();
+                saveButton.setEnabled(true);
+                Toast.makeText(EditPatientProfileActivity.this, "Profile updated successfully!", Toast.LENGTH_SHORT).show();
                 finish();
             }
 
             @Override
             public void onFailure(String error) {
                 progressBar.setVisibility(View.GONE);
-                updateButton.setEnabled(true);
-                Toast.makeText(EditDoctorProfileActivity.this, "Failed to update profile: " + error, Toast.LENGTH_SHORT).show();
+                saveButton.setEnabled(true);
+                Toast.makeText(EditPatientProfileActivity.this, "Failed to update profile: " + error, Toast.LENGTH_SHORT).show();
             }
         });
     }

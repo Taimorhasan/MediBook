@@ -1,42 +1,64 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Users can read/write their own user documents
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-
-    // Admins can read/write all user documents
-    match /users/{userId} {
-      allow read, write: if request.auth != null &&
-        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+    
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roleIds.hasAny(['admin']);
     }
+    
+    // Helper function to check if user is doctor
+    function isDoctor() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roleIds.hasAny(['doctor']);
+    }
+    
+    // Users collection
+    // Users can read/write their own user documents
+    match /users/{userId} {
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow write: if request.auth != null && (request.auth.uid == userId || isAdmin());
+    }
 
-    // Doctors: doctor can write their own, admins can write all
+    // Doctors collection
+    // Doctors can read all, write their own, admins can write all
     match /doctors/{doctorId} {
       allow read: if request.auth != null;
       allow write: if request.auth != null && (
         request.auth.uid == doctorId
         ||
-        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roleIds.hasAny(['admin']))
+        isAdmin()
       );
     }
 
-    // Appointments (as before)
+    // Appointments
     match /appointments/{appointmentId} {
       allow read: if request.auth != null &&
         (request.auth.uid == resource.data.patientId ||
          request.auth.uid == resource.data.doctorId ||
-         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roleIds.hasAny(['admin'])));
+         isAdmin());
       allow write: if request.auth != null &&
         (request.auth.uid == resource.data.patientId ||
          request.auth.uid == resource.data.doctorId ||
-         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roleIds.hasAny(['admin'])));
+         isAdmin());
       allow create: if request.auth != null;
+    }
+    
+    // Notifications
+    match /notifications/{notificationId} {
+      allow read: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow write: if request.auth != null && (
+        request.auth.uid == resource.data.userId ||
+        isAdmin()
+      );
+    }
+    
+    // Allow admins to read all collections for management
+    match /{document=**} {
+      allow read: if request.auth != null && isAdmin();
+      allow write: if request.auth != null && isAdmin();
     }
   }
 }
+

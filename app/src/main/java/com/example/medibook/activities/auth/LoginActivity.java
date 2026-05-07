@@ -16,16 +16,25 @@ import com.example.medibook.models.User;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.ApiException;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.GoogleAuthProvider;
 
 public class LoginActivity extends AppCompatActivity {
 
     private TextInputEditText emailEditText, passwordEditText;
     private Button loginButton;
+    private Button googleLoginButton;
     private TextView signupRedirect;
     private ProgressBar progressBar;
     private AuthRepository authRepository;
     private UserRepository userRepository;
     private NotificationRepository notificationRepository;
+    private GoogleSignInClient googleSignInClient;
+    private static final int GOOGLE_SIGN_IN_CODE = 123;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,10 +46,14 @@ public class LoginActivity extends AppCompatActivity {
         userRepository = new UserRepository();
         notificationRepository = new NotificationRepository();
 
+        // Initialize Google Sign-In
+        setupGoogleSignIn();
+
         // Initialize views
         emailEditText = findViewById(R.id.email_edit_text);
         passwordEditText = findViewById(R.id.password_edit_text);
         loginButton = findViewById(R.id.login_button);
+        googleLoginButton = findViewById(R.id.google_login_button);
         signupRedirect = findViewById(R.id.signup_redirect);
         progressBar = findViewById(R.id.progress_bar);
 
@@ -64,6 +77,13 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+        googleLoginButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                performGoogleSignIn();
+            }
+        });
+
         signupRedirect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -73,9 +93,128 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
+    private void setupGoogleSignIn() {
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+        
+        googleSignInClient = GoogleSignIn.getClient(this, gso);
+    }
+
+    private void performGoogleSignIn() {
+        progressBar.setVisibility(View.VISIBLE);
+        googleLoginButton.setEnabled(false);
+        loginButton.setEnabled(false);
+
+        Intent signInIntent = googleSignInClient.getSignInIntent();
+        startActivityForResult(signInIntent, GOOGLE_SIGN_IN_CODE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == GOOGLE_SIGN_IN_CODE) {
+            try {
+                com.google.android.gms.auth.api.signin.GoogleSignInAccount account = GoogleSignIn.getSignedInAccountFromIntent(data).getResult(ApiException.class);
+                
+                if (account != null && account.getIdToken() != null) {
+                    AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
+                    authenticateWithGoogle(credential, account);
+                } else {
+                    progressBar.setVisibility(View.GONE);
+                    googleLoginButton.setEnabled(true);
+                    loginButton.setEnabled(true);
+                    Toast.makeText(this, "Google Sign-In failed: Account error", Toast.LENGTH_SHORT).show();
+                }
+            } catch (ApiException e) {
+                progressBar.setVisibility(View.GONE);
+                googleLoginButton.setEnabled(true);
+                loginButton.setEnabled(true);
+                Toast.makeText(this, "Google Sign-In error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void authenticateWithGoogle(AuthCredential credential, com.google.android.gms.auth.api.signin.GoogleSignInAccount account) {
+        authRepository.signInWithCredential(credential, new AuthRepository.AuthCallback() {
+            @Override
+            public void onSuccess(FirebaseUser firebaseUser) {
+                // Check if user profile exists, if not create one
+                authRepository.checkUserExists(firebaseUser.getUid(), new AuthRepository.UserExistsCallback() {
+                    @Override
+                    public void onResult(boolean exists) {
+                        if (!exists) {
+                            // Create patient profile for first-time Google sign-in users
+                            String email = account.getEmail() != null ? account.getEmail() : firebaseUser.getEmail();
+                            String name = account.getDisplayName() != null ? account.getDisplayName() : "Patient";
+                            String phone = firebaseUser.getPhoneNumber() != null ? firebaseUser.getPhoneNumber() : "";
+                            
+                            authRepository.createPatientProfile(firebaseUser.getUid(), name, email, phone, new AuthRepository.VoidCallback() {
+                                @Override
+                                public void onSuccess() {
+                                    handleGoogleLoginSuccess(firebaseUser);
+                                }
+
+                                @Override
+                                public void onFailure(String error) {
+                                    handleGoogleLoginSuccess(firebaseUser);
+                                }
+                            });
+                        } else {
+                            handleGoogleLoginSuccess(firebaseUser);
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(String error) {
+                progressBar.setVisibility(View.GONE);
+                googleLoginButton.setEnabled(true);
+                loginButton.setEnabled(true);
+                Toast.makeText(LoginActivity.this, "Authentication failed: " + error, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void handleGoogleLoginSuccess(FirebaseUser firebaseUser) {
+        // Get FCM token and update user profile
+        FirebaseMessaging.getInstance().getToken()
+            .addOnCompleteListener(task -> {
+                if (task.isSuccessful() && task.getResult() != null) {
+                    String fcmToken = task.getResult();
+                    notificationRepository.updateFCMToken(firebaseUser.getUid(), fcmToken);
+                }
+
+                // Get user data from Firestore to determine role
+                userRepository.getUser(firebaseUser.getUid(), new UserRepository.UserCallback() {
+                    @Override
+                    public void onSuccess(User user) {
+                        progressBar.setVisibility(View.GONE);
+                        googleLoginButton.setEnabled(true);
+                        loginButton.setEnabled(true);
+
+                        // Navigate based on role
+                        navigateBasedOnRole(user);
+                    }
+
+                    @Override
+                    public void onFailure(String error) {
+                        progressBar.setVisibility(View.GONE);
+                        googleLoginButton.setEnabled(true);
+                        loginButton.setEnabled(true);
+                        Toast.makeText(LoginActivity.this, "Failed to load user profile: " + error, Toast.LENGTH_SHORT).show();
+                    }
+                });
+            });
+    }
+
     private void performLogin(String email, String password) {
         progressBar.setVisibility(View.VISIBLE);
         loginButton.setEnabled(false);
+        googleLoginButton.setEnabled(false);
 
         authRepository.signIn(email, password, new AuthRepository.AuthCallback() {
             @Override
@@ -94,6 +233,7 @@ public class LoginActivity extends AppCompatActivity {
                             public void onSuccess(User user) {
                                 progressBar.setVisibility(View.GONE);
                                 loginButton.setEnabled(true);
+                                googleLoginButton.setEnabled(true);
 
                                 // Navigate based on role
                                 navigateBasedOnRole(user);
@@ -103,6 +243,7 @@ public class LoginActivity extends AppCompatActivity {
                             public void onFailure(String error) {
                                 progressBar.setVisibility(View.GONE);
                                 loginButton.setEnabled(true);
+                                googleLoginButton.setEnabled(true);
                                 Toast.makeText(LoginActivity.this, "Failed to load user profile: " + error, Toast.LENGTH_SHORT).show();
                             }
                         });
@@ -113,6 +254,7 @@ public class LoginActivity extends AppCompatActivity {
             public void onFailure(String error) {
                 progressBar.setVisibility(View.GONE);
                 loginButton.setEnabled(true);
+                googleLoginButton.setEnabled(true);
                 Toast.makeText(LoginActivity.this, "Login failed: " + error, Toast.LENGTH_SHORT).show();
             }
         });
@@ -121,9 +263,8 @@ public class LoginActivity extends AppCompatActivity {
     private void navigateBasedOnRole(User user) {
         if (user.getRoleIds().contains("admin")) {
             startActivity(new Intent(this, com.example.medibook.activities.admin.AdminDashboardActivity.class));
-        } else if (user.getRoleIds().contains("manager")) {
-            // Navigate to manager dashboard (to be implemented)
-            startActivity(new Intent(this, com.example.medibook.activities.user.UserHomeActivity.class));
+        } else if (user.getRoleIds().contains("doctor")) {
+            startActivity(new Intent(this, com.example.medibook.activities.doctor.DoctorDashboardActivity.class));
         } else {
             // Default to patient dashboard
             startActivity(new Intent(this, com.example.medibook.activities.user.UserHomeActivity.class));

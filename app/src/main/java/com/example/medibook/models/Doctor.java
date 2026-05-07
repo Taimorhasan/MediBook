@@ -14,6 +14,13 @@ public class Doctor {
     private int imageResId;
     private List<String> availableDays;
     private String bio;
+    
+    // Additional fields
+    private String profileImage;
+    private String degree;
+    private String licenseNumber;
+    private String age;
+    private String consultationFee;
 
     public Doctor() {} // Firestore constructor
 
@@ -71,4 +78,19 @@ public class Doctor {
 
     public String getBio() { return bio; }
     public void setBio(String bio) { this.bio = bio; }
+
+    public String getProfileImage() { return profileImage; }
+    public void setProfileImage(String profileImage) { this.profileImage = profileImage; }
+
+    public String getDegree() { return degree; }
+    public void setDegree(String degree) { this.degree = degree; }
+
+    public String getLicenseNumber() { return licenseNumber; }
+    public void setLicenseNumber(String licenseNumber) { this.licenseNumber = licenseNumber; }
+
+    public String getAge() { return age; }
+    public void setAge(String age) { this.age = age; }
+
+    public String getConsultationFee() { return consultationFee; }
+    public void setConsultationFee(String consultationFee) { this.consultationFee = consultationFee; }
 }

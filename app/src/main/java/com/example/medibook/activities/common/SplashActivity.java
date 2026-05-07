@@ -11,10 +11,17 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.medibook.R;
 import com.example.medibook.activities.auth.LoginActivity;
+import com.example.medibook.activities.user.UserHomeActivity;
+import com.example.medibook.activities.doctor.DoctorDashboardActivity;
+import com.example.medibook.activities.admin.AdminDashboardActivity;
+import com.example.medibook.repositories.AuthRepository;
+import com.example.medibook.repositories.UserRepository;
+import com.example.medibook.models.User;
+import com.google.firebase.auth.FirebaseUser;
 
 public class SplashActivity extends AppCompatActivity {
 
-    private static final int SPLASH_DELAY = 3000; // 3 seconds
+    private static final int SPLASH_DELAY = 2000; // 2 seconds
     private static final int PROGRESS_MAX = 100;
     
     private ProgressBar progressBar;
@@ -22,11 +29,17 @@ public class SplashActivity extends AppCompatActivity {
     private Handler handler;
     private Runnable progressRunnable;
     private int progress = 0;
+    private AuthRepository authRepository;
+    private UserRepository userRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
+        
+        // Initialize repositories
+        authRepository = new AuthRepository();
+        userRepository = new UserRepository();
         
         // Initialize views
         progressBar = findViewById(R.id.progressBar);
@@ -38,9 +51,9 @@ public class SplashActivity extends AppCompatActivity {
         // Start progress animation
         startProgressAnimation();
         
-        // Navigate to next screen after delay
+        // Check for auto-login and navigate
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            navigateToNextScreen();
+            checkAutoLogin();
         }, SPLASH_DELAY);
     }
     
@@ -71,10 +84,54 @@ public class SplashActivity extends AppCompatActivity {
         handler.post(progressRunnable);
     }
     
-    private void navigateToNextScreen() {
+    private void checkAutoLogin() {
         // Remove callbacks to prevent memory leaks
         handler.removeCallbacks(progressRunnable);
         
+        // Check if user is already logged in
+        FirebaseUser currentUser = authRepository.getCurrentUser();
+        
+        if (currentUser != null) {
+            // User is already logged in, get their role and redirect
+            userRepository.getUser(currentUser.getUid(), new UserRepository.UserCallback() {
+                @Override
+                public void onSuccess(User user) {
+                    navigateBasedOnRole(user);
+                }
+                
+                @Override
+                public void onFailure(String error) {
+                    // If we can't fetch user data, go to portal selection
+                    navigateToPortalSelection();
+                }
+            });
+        } else {
+            // No user logged in, go to portal selection
+            navigateToPortalSelection();
+        }
+    }
+    
+    private void navigateBasedOnRole(User user) {
+        Intent intent;
+        
+        if (user.getRoleIds() != null) {
+            if (user.getRoleIds().contains("admin")) {
+                intent = new Intent(SplashActivity.this, AdminDashboardActivity.class);
+            } else if (user.getRoleIds().contains("doctor")) {
+                intent = new Intent(SplashActivity.this, DoctorDashboardActivity.class);
+            } else {
+                intent = new Intent(SplashActivity.this, UserHomeActivity.class);
+            }
+        } else {
+            intent = new Intent(SplashActivity.this, UserHomeActivity.class);
+        }
+        
+        startActivity(intent);
+        finish();
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+    }
+    
+    private void navigateToPortalSelection() {
         Intent intent = new Intent(SplashActivity.this, PortalSelectionActivity.class);
         startActivity(intent);
         finish();

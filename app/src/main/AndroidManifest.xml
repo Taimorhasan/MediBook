@@ -38,6 +38,7 @@
         <!-- Auth Activities - Patient -->
         <activity android:name=".activities.auth.LoginActivity" />
         <activity android:name=".activities.auth.SignupActivity" />
+        <activity android:name=".activities.user.UserLoginActivity" />
 
         <!-- Auth Activities - Doctor -->
         <activity android:name=".activities.auth.DoctorLoginActivity" />

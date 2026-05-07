@@ -4,12 +4,12 @@
     <color name="primary_blue">#0066CC</color>
     <color name="primary_dark">#004C99</color>
     <color name="primary_light">#3399FF</color>
-    
+
     <!-- Background & Surface -->
     <color name="background_light">#F8F9FA</color>
     <color name="background_white">#FFFFFF</color>
     <color name="surface">#FFFFFF</color>
-    
+
     <!-- Text Colors -->
     <color name="text_dark">#1A1A1A</color>
     <color name="text_medium">#424242</color>
@@ -17,26 +17,29 @@
     <color name="text_light">#BDBDBD</color>
     <color name="text_white">#FFFFFF</color>
     
-    <!-- Utility Colors (Required by default themes) -->
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-    
+    <!-- ✅ ADD THIS MISSING COLOR -->
+    <color name="text_secondary">#6C757D</color>
+
     <!-- Status & Feedback -->
     <color name="success">#4CAF50</color>
     <color name="warning">#FF9800</color>
     <color name="error">#F44336</color>
     <color name="info">#2196F3</color>
-    
+
     <!-- Borders & Dividers -->
     <color name="divider">#E0E0E0</color>
     <color name="border">#CCCCCC</color>
-    
+
     <!-- Progress -->
     <color name="progress_background">#E0E0E0</color>
     <color name="progress_primary">#0066CC</color>
+
+    <!-- Basic Colors -->
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
 </resources>

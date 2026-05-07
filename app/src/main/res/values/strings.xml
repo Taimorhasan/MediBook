@@ -19,7 +19,7 @@
     <!-- Patient Portal -->
     <string name="patient_title">Patient Portal</string>
     <string name="patient_desc">Access your medical records, book appointments, and message your providers with seamless precision.</string>
-    <string name="btn_patient">ENTER DASHBOARD</string>
+    <string name="btn_patient">PATIENT ACCESS</string>
 
     <!-- Doctor Portal -->
     <string name="doctor_title">Doctor Portal</string>

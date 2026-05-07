@@ -8,7 +8,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.medibook.R;
 import com.example.medibook.activities.admin.AdminLoginActivity;
-import com.example.medibook.activities.auth.LoginActivity;
+import com.example.medibook.activities.user.UserLoginActivity;
 import com.example.medibook.activities.auth.DoctorLoginActivity;
 
 public class PortalSelectionActivity extends AppCompatActivity {
@@ -23,11 +23,11 @@ public class PortalSelectionActivity extends AppCompatActivity {
         Button btnDoctor = findViewById(R.id.btnDoctor);
         Button btnAdmin = findViewById(R.id.btnAdmin);
 
-        // Patient Portal -> Login Activity
-        btnPatient.setOnClickListener(v -> {
-            Intent intent = new Intent(PortalSelectionActivity.this, LoginActivity.class);
-            startActivity(intent);
-        });
+        // Patient Portal -> User Login Activity (NEW DESIGN)
+btnPatient.setOnClickListener(v -> {
+    Intent intent = new Intent(PortalSelectionActivity.this, UserLoginActivity.class);
+    startActivity(intent);
+}); 
 
         // Doctor Portal -> Doctor Login Activity
         btnDoctor.setOnClickListener(v -> {

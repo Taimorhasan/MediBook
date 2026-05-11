@@ -44,16 +44,17 @@
         <activity android:name=".activities.auth.DoctorLoginActivity" />
         <activity android:name=".activities.auth.DoctorSignupActivity" />
 
-        <!-- User Activities -->
-        <activity android:name=".activities.user.UserHomeActivity" />
-        <activity android:name=".activities.user.DoctorListActivity" />
-        <activity android:name=".activities.user.DoctorProfileActivity" />
-        <activity android:name=".activities.user.BookAppointmentActivity" />
-        <activity android:name=".activities.user.AppointmentsActivity" />
-        <activity android:name=".activities.user.NotificationsActivity" />
-        <activity android:name=".activities.user.ProfileActivity" />
-        <activity android:name=".activities.user.EditPatientProfileActivity" />
-        <activity android:name=".activities.user.PatientProfileViewActivity" />
+         <!-- User Activities -->
+         <activity android:name=".activities.user.UserHomeActivity" />
+         <activity android:name=".activities.user.DoctorListActivity" />
+         <activity android:name=".activities.user.DoctorProfileActivity" />
+         <activity android:name=".activities.user.BookAppointmentActivity" />
+         <activity android:name=".activities.user.AppointmentsActivity" />
+         <activity android:name=".activities.user.BookingsListActivity" />
+         <activity android:name=".activities.user.NotificationsActivity" />
+         <activity android:name=".activities.user.ProfileActivity" />
+         <activity android:name=".activities.user.EditPatientProfileActivity" />
+         <activity android:name=".activities.user.PatientProfileViewActivity" />
 
         <!-- Admin Activities -->
         <activity android:name=".activities.admin.AdminLoginActivity" />

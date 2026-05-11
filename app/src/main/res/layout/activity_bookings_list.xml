@@ -45,502 +45,57 @@
             android:background="@drawable/profile_image_bg" />
     </RelativeLayout>
 
-    <ScrollView
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:fillViewport="true">
+        android:paddingHorizontal="20dp"
+        android:paddingBottom="16dp">
 
-        <LinearLayout
+        <!-- RecyclerView for displaying bookings -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/bookings_recycler_view"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:visibility="visible" />
+
+        <!-- Empty state layout -->
+        <LinearLayout
+            android:id="@+id/empty_state_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:orientation="vertical"
-            android:paddingHorizontal="20dp"
-            android:paddingBottom="16dp">
+            android:gravity="center"
+            android:padding="32dp"
+            android:visibility="gone">
 
-            <!-- Search Bar -->
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
+            <ImageView
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:src="@drawable/ic_medical_kit"
+                android:scaleType="centerInside"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:boxBackgroundMode="filled"
-                app:boxCornerRadiusTopStart="12dp"
-                app:boxCornerRadiusTopEnd="12dp"
-                app:boxCornerRadiusBottomStart="12dp"
-                app:boxCornerRadiusBottomEnd="12dp"
-                app:boxBackgroundColor="#F3F4F6"
-                app:startIconDrawable="@android:drawable/ic_menu_search">
+                android:text="No bookings yet"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#111827"
+                android:layout_marginBottom="8dp" />
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Search by doctor name or specialty..."
-                    android:textColor="#6B7280" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- Filter Chips -->
-            <HorizontalScrollView
-                android:layout_width="match_parent"
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:scrollbars="none"
-                android:layout_marginBottom="20dp">
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <Button style="?attr/materialButtonOutlinedStyle"
-                        android:layout_width="wrap_content" android:layout_height="40dp"
-                        android:text="Specialty" android:backgroundTint="#2563EB"
-                        android:textColor="#FFFFFF" app:cornerRadius="20dp" android:layout_marginEnd="12dp"/>
-                    
-                    <Button style="?attr/materialButtonOutlinedStyle"
-                        android:layout_width="wrap_content" android:layout_height="40dp"
-                        android:text="Top Rated" android:backgroundTint="#FFFFFF"
-                        android:textColor="#6B7280" app:cornerRadius="20dp" android:layout_marginEnd="12dp"/>
-
-                    <Button style="?attr/materialButtonOutlinedStyle"
-                        android:layout_width="wrap_content" android:layout_height="40dp"
-                        android:text="Available" android:backgroundTint="#FFFFFF"
-                        android:textColor="#6B7280" app:cornerRadius="20dp"/>
-                </LinearLayout>
-            </HorizontalScrollView>
-
-            <!-- Doctor List -->
-            <!-- Card 1: Dr. Sarah Miller -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
-                app:cardBackgroundColor="#FFFFFF"
-                android:layout_marginBottom="16dp">
-                
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:padding="16dp">
-
-                    <ImageView
-                        android:layout_width="80dp"
-                        android:layout_height="80dp"
-                        android:scaleType="centerCrop"
-                        android:background="#34D399"
-                        android:layout_marginEnd="16dp"/>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <RelativeLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="4dp">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Dr. Sarah Miller"
-                                android:textSize="16sp"
-                                android:textStyle="bold"
-                                android:textColor="#111827"/>
-                            <LinearLayout
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_alignParentEnd="true"
-                                android:orientation="horizontal"
-                                android:background="#E0F2FE"
-                                android:padding="6dp"
-                                android:gravity="center_vertical">
-                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="★" android:textColor="#2563EB" android:textSize="12sp"/>
-                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text=" 4.9" android:textColor="#2563EB" android:textSize="12sp" android:textStyle="bold"/>
-                            </LinearLayout>
-                        </RelativeLayout>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Cardiologist"
-                            android:textColor="#0D9488"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="4dp"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="800M AWAY • ST. MARY'S HOSPITAL"
-                            android:textSize="12sp"
-                            android:textColor="#6B7280"
-                            android:layout_marginBottom="12dp"/>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical">
-                            
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:orientation="vertical">
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Next available:"
-                                    android:textSize="12sp"
-                                    android:textColor="#2563EB"
-                                    android:textStyle="bold"/>
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Today, 2:30 PM"
-                                    android:textSize="12sp"
-                                    android:textColor="#111827"/>
-                            </LinearLayout>
-
-                            <Button
-                                android:layout_width="wrap_content"
-                                android:layout_height="36dp"
-                                android:text="Book"
-                                android:textSize="14sp"
-                                android:textColor="#FFFFFF"
-                                android:backgroundTint="#2563EB"
-                                app:cornerRadius="16dp"/>
-                        </LinearLayout>
-
-                    </LinearLayout>
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <!-- Card 2: Dr. Marcus Chen -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
-                app:cardBackgroundColor="#FFFFFF"
-                android:layout_marginBottom="16dp">
-                
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:padding="16dp">
-
-                    <ImageView
-                        android:layout_width="80dp"
-                        android:layout_height="80dp"
-                        android:scaleType="centerCrop"
-                        android:background="#9CA3AF"
-                        android:layout_marginEnd="16dp"/>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <RelativeLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="4dp">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Dr. Marcus Chen"
-                                android:textSize="16sp"
-                                android:textStyle="bold"
-                                android:textColor="#111827"/>
-                            <LinearLayout
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_alignParentEnd="true"
-                                android:orientation="horizontal"
-                                android:background="#E0F2FE"
-                                android:padding="6dp"
-                                android:gravity="center_vertical">
-                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="★" android:textColor="#2563EB" android:textSize="12sp"/>
-                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text=" 4.8" android:textColor="#2563EB" android:textSize="12sp" android:textStyle="bold"/>
-                            </LinearLayout>
-                        </RelativeLayout>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Pediatrician"
-                            android:textColor="#0D9488"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="4dp"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="1.2KM AWAY • CITY HEALTH CENTER"
-                            android:textSize="12sp"
-                            android:textColor="#6B7280"
-                            android:layout_marginBottom="12dp"/>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical">
-                            
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:orientation="vertical">
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Next available:"
-                                    android:textSize="12sp"
-                                    android:textColor="#2563EB"
-                                    android:textStyle="bold"/>
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Tomorrow, 9:00 AM"
-                                    android:textSize="12sp"
-                                    android:textColor="#111827"/>
-                            </LinearLayout>
-
-                            <Button
-                                android:layout_width="wrap_content"
-                                android:layout_height="36dp"
-                                android:text="Book"
-                                android:textSize="14sp"
-                                android:textColor="#FFFFFF"
-                                android:backgroundTint="#2563EB"
-                                app:cornerRadius="16dp"/>
-                        </LinearLayout>
-
-                    </LinearLayout>
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <!-- Card 3: Dr. Elena Rodriguez -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
-                app:cardBackgroundColor="#FFFFFF"
-                android:layout_marginBottom="16dp">
-                
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:padding="16dp">
-
-                    <ImageView
-                        android:layout_width="80dp"
-                        android:layout_height="80dp"
-                        android:scaleType="centerCrop"
-                        android:background="#F59E0B"
-                        android:layout_marginEnd="16dp"/>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <RelativeLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="4dp">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Dr. Elena Rodriguez"
-                                android:textSize="16sp"
-                                android:textStyle="bold"
-                                android:textColor="#111827"/>
-                            <LinearLayout
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_alignParentEnd="true"
-                                android:orientation="horizontal"
-                                android:background="#E0F2FE"
-                                android:padding="6dp"
-                                android:gravity="center_vertical">
-                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="★" android:textColor="#2563EB" android:textSize="12sp"/>
-                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text=" 5.0" android:textColor="#2563EB" android:textSize="12sp" android:textStyle="bold"/>
-                            </LinearLayout>
-                        </RelativeLayout>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Dermatologist"
-                            android:textColor="#0D9488"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="4dp"/>
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="2.5KM AWAY • SKIN &amp; LASER INSTITUTE"
-                                android:textSize="12sp"
-                                android:textColor="#6B7280"
-                                android:layout_marginBottom="12dp"/>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical">
-                            
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:orientation="vertical">
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Next available:"
-                                    android:textSize="12sp"
-                                    android:textColor="#2563EB"
-                                    android:textStyle="bold"/>
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Mon, Oct 23"
-                                    android:textSize="12sp"
-                                    android:textColor="#111827"/>
-                            </LinearLayout>
-
-                            <Button
-                                android:layout_width="wrap_content"
-                                android:layout_height="36dp"
-                                android:text="Book"
-                                android:textSize="14sp"
-                                android:textColor="#FFFFFF"
-                                android:backgroundTint="#2563EB"
-                                app:cornerRadius="16dp"/>
-                        </LinearLayout>
-
-                    </LinearLayout>
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <!-- Card 4: Dr. James Wilson -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
-                app:cardBackgroundColor="#FFFFFF"
-                android:layout_marginBottom="16dp">
-                
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:padding="16dp">
-
-                    <ImageView
-                        android:layout_width="80dp"
-                        android:layout_height="80dp"
-                        android:scaleType="centerCrop"
-                        android:background="#EF4444"
-                        android:layout_marginEnd="16dp"/>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <RelativeLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="4dp">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Dr. James Wilson"
-                                android:textSize="16sp"
-                                android:textStyle="bold"
-                                android:textColor="#111827"/>
-                            <LinearLayout
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_alignParentEnd="true"
-                                android:orientation="horizontal"
-                                android:background="#E0F2FE"
-                                android:padding="6dp"
-                                android:gravity="center_vertical">
-                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="★" android:textColor="#2563EB" android:textSize="12sp"/>
-                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text=" 4.7" android:textColor="#2563EB" android:textSize="12sp" android:textStyle="bold"/>
-                            </LinearLayout>
-                        </RelativeLayout>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Neurologist"
-                            android:textColor="#0D9488"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="4dp"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="3.1KM AWAY • GENERAL HOSPITAL"
-                            android:textSize="12sp"
-                            android:textColor="#6B7280"
-                            android:layout_marginBottom="12dp"/>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical">
-                            
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:orientation="vertical">
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Next available:"
-                                    android:textSize="12sp"
-                                    android:textColor="#2563EB"
-                                    android:textStyle="bold"/>
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Today, 5:15 PM"
-                                    android:textSize="12sp"
-                                    android:textColor="#111827"/>
-                            </LinearLayout>
-
-                            <Button
-                                android:layout_width="wrap_content"
-                                android:layout_height="36dp"
-                                android:text="Book"
-                                android:textSize="14sp"
-                                android:textColor="#FFFFFF"
-                                android:backgroundTint="#2563EB"
-                                app:cornerRadius="16dp"/>
-                        </LinearLayout>
-
-                    </LinearLayout>
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
+                android:text="You haven't made any appointments yet. Start by booking an appointment with a doctor."
+                android:textAlignment="center"
+                android:textSize="14sp"
+                android:textColor="#6B7280" />
 
         </LinearLayout>
-    </ScrollView>
+
+    </FrameLayout>
 
     <!-- Bottom Navigation Bar -->
     <LinearLayout

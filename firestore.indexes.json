@@ -1,4 +1,33 @@
 {
-  "indexes": [],
+  "indexes": [
+    {
+      "collectionGroup": "appointments",
+      "queryScope": "Collection",
+      "fields": [
+        {
+          "fieldPath": "patientId",
+          "order": "Ascending"
+        },
+        {
+          "fieldPath": "date",
+          "order": "Descending"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "appointments",
+      "queryScope": "Collection",
+      "fields": [
+        {
+          "fieldPath": "doctorId",
+          "order": "Ascending"
+        },
+        {
+          "fieldPath": "date",
+          "order": "Descending"
+        }
+      ]
+    }
+  ],
   "fieldOverrides": []
 }

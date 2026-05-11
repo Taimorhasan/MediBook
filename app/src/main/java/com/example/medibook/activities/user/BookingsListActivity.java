@@ -62,6 +62,8 @@ public class BookingsListActivity extends AppCompatActivity implements Appointme
             navHome.setOnClickListener(v -> {
                 Intent intent = new Intent(BookingsListActivity.this, UserHomeActivity.class);
                 startActivity(intent);
+                // Add smooth slide animation: new screen slides in from left, current slides out to right
+                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
                 finish(); // Close this screen so back button doesn't loop
             });
         }

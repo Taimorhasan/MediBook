@@ -35,6 +35,8 @@ public class UserHomeActivity extends AppCompatActivity {
                     // Navigate to Appointments Activity
                     Intent intent = new Intent(UserHomeActivity.this, BookingsListActivity.class);
                     startActivity(intent);
+                    // Add smooth slide animation: new screen slides in from right, current slides out to left
+                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
                 }
             });
         }

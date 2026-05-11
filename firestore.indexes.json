@@ -2,29 +2,29 @@
   "indexes": [
     {
       "collectionGroup": "appointments",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "patientId",
-          "order": "Ascending"
+          "order": "ASCENDING"
         },
         {
           "fieldPath": "date",
-          "order": "Descending"
+          "order": "DESCENDING"
         }
       ]
     },
     {
       "collectionGroup": "appointments",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "doctorId",
-          "order": "Ascending"
+          "order": "ASCENDING"
         },
         {
           "fieldPath": "date",
-          "order": "Descending"
+          "order": "DESCENDING"
         }
       ]
     }

@@ -51,6 +51,13 @@
          <activity android:name=".activities.user.BookAppointmentActivity" />
          <activity android:name=".activities.user.AppointmentsActivity" />
          <activity android:name=".activities.user.BookingsListActivity" />
+         
+         <!-- ADDED ALERTS ACTIVITY HERE -->
+         <activity 
+            android:name=".activities.user.AlertsActivity" 
+            android:exported="false" 
+            android:theme="@style/Theme.MediBook.NoActionBar" />
+            
          <activity android:name=".activities.user.NotificationsActivity" />
          <activity android:name=".activities.user.ProfileActivity" />
          <activity android:name=".activities.user.EditPatientProfileActivity" />

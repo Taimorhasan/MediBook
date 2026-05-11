@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="@color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp">
+
+        <!-- Left accent line for important alerts -->
+        <View
+            android:id="@+id/accentLine"
+            android:layout_width="4dp"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="12dp"
+            android:visibility="gone"
+            android:background="#0D7377" />
+
+        <!-- Icon Container -->
+        <FrameLayout
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="12dp">
+
+            <View
+                android:id="@+id/iconBackground"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_alert_icon" />
+
+            <ImageView
+                android:id="@+id/alertIcon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:contentDescription="Alert icon"
+                app:tint="#2563EB" />
+
+        </FrameLayout>
+
+        <!-- Content -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <!-- Title with badge -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/alertTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textColor="#111827"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:maxLines="2"
+                    android:ellipsize="end" />
+
+                <TextView
+                    android:id="@+id/badgeNew"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="2dp"
+                    android:text="NEW"
+                    android:textSize="10sp"
+                    android:textColor="#6B7280"
+                    android:background="@drawable/bg_alert_badge"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+            <!-- Description -->
+            <TextView
+                android:id="@+id/alertDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="#6B7280"
+                android:textSize="14sp"
+                android:maxLines="3"
+                android:ellipsize="end" />
+
+            <!-- Timestamp -->
+            <TextView
+                android:id="@+id/alertTimestamp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textColor="#9CA3AF"
+                android:textSize="12sp" />
+
+            <!-- Action Button (e.g., Check-in) -->
+            <Button
+                android:id="@+id/alertActionButton"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:layout_marginTop="12dp"
+                android:text="Check-in"
+                android:textSize="12sp"
+                android:paddingHorizontal="16dp"
+                android:backgroundTint="#2563EB"
+                android:textColor="@color/white"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

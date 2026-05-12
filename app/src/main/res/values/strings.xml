@@ -57,4 +57,12 @@
         <item>AB+</item>
         <item>AB-</item>
     </string-array>
+    <!-- Doctor Status Filters -->
+    <string-array name="doctor_status_filters">
+        <item>All Doctors</item>
+        <item>Pending Verification</item>
+        <item>Verified Only</item>
+        <item>Active Doctors</item>
+        <item>Inactive Doctors</item>
+    </string-array>
 </resources>

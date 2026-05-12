@@ -92,6 +92,15 @@ public class AdminDashboardActivity extends BaseActivity {
             }
         });
 
+        MaterialCardView manageRolesCard = findViewById(R.id.manage_roles_card);
+        manageRolesCard.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(AdminDashboardActivity.this, ManageRolesActivity.class);
+                startActivity(intent);
+            }
+        });
+
         logoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

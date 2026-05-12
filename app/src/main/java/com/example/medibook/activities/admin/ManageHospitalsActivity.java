@@ -26,7 +26,7 @@ public class ManageHospitalsActivity extends BaseActivity implements HospitalAda
     private HospitalAdapter adapter;
     private HospitalRepository hospitalRepository;
     private ProgressBar progressBar;
-    private FloatingActionButton addFab;
+    private View emptyView;
     private List<Hospital> hospitalList = new ArrayList<>();
 
     @Override
@@ -57,6 +57,7 @@ public class ManageHospitalsActivity extends BaseActivity implements HospitalAda
         recyclerView = findViewById(R.id.hospitals_recycler_view);
         progressBar = findViewById(R.id.loading_progress);
         addFab = findViewById(R.id.add_hospital_fab);
+        emptyView = findViewById(R.id.empty_view);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new HospitalAdapter(hospitalList, this, this);
@@ -73,6 +74,7 @@ public class ManageHospitalsActivity extends BaseActivity implements HospitalAda
                 progressBar.setVisibility(View.GONE);
                 hospitalList = hospitals;
                 adapter.updateList(hospitalList);
+                emptyView.setVisibility(hospitalList.isEmpty() ? View.VISIBLE : View.GONE);
             }
 
             @Override

@@ -11,6 +11,11 @@ public class RoleRepository {
         db = FirebaseFirestore.getInstance();
     }
 
+    public interface RoleCallback {
+        void onSuccess(Role role);
+        void onFailure(String error);
+    }
+
     public interface RolesCallback {
         void onSuccess(List<Role> roles);
         void onFailure(String error);
@@ -25,7 +30,24 @@ public class RoleRepository {
                 .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
     }
 
-    public void addRole(Role role) {
-        db.collection("roles").document(role.getRoleId()).set(role);
+    public void addRole(Role role, RoleCallback callback) {
+        db.collection("roles").document(role.getRoleId())
+                .set(role)
+                .addOnSuccessListener(aVoid -> callback.onSuccess(role))
+                .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
+    }
+
+    public void updateRole(Role role, AuthRepository.VoidCallback callback) {
+        db.collection("roles").document(role.getRoleId())
+                .set(role)
+                .addOnSuccessListener(aVoid -> callback.onSuccess())
+                .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
+    }
+
+    public void deleteRole(String roleId, AuthRepository.VoidCallback callback) {
+        db.collection("roles").document(roleId)
+                .delete()
+                .addOnSuccessListener(aVoid -> callback.onSuccess())
+                .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
     }
 }

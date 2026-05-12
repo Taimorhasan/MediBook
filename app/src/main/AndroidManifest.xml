@@ -71,6 +71,7 @@
         <activity android:name=".activities.admin.ManageUsersActivity" />
         <activity android:name=".activities.admin.ManageHospitalsActivity" />
         <activity android:name=".activities.admin.PatientRecordsActivity" />
+        <activity android:name=".activities.admin.ManageRolesActivity" />
 
         <!-- Doctor Activities -->
         <activity android:name=".activities.doctor.DoctorDashboardActivity" />

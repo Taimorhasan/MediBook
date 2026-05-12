@@ -2,11 +2,16 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Helper function to check if user has a specific role
+    // Helper function to check if user has a specific role (Case Insensitive)
     function hasRole(roleName) {
+      let userDoc = get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+      let roleLower = roleName.lower();
       return request.auth != null && 
              exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roleIds.hasAny([roleName]);
+             (
+               (userDoc.get('role', '').lower() == roleLower) ||
+               (userDoc.get('roleIds', []).hasAny([roleName, roleLower, roleName.upper()]))
+             );
     }
 
     // Helper function to check if user is an admin

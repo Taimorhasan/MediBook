@@ -14,7 +14,9 @@ public class Doctor {
     private int imageResId;
     private List<String> availableDays;
     private String bio;
+    @com.google.firebase.firestore.PropertyName("isActive")
     private boolean isActive;
+    @com.google.firebase.firestore.PropertyName("isVerified")
     private boolean isVerified;
     private String hospitalName;
 
@@ -79,9 +81,13 @@ public class Doctor {
     public void setAvailableDays(List<String> availableDays) { this.availableDays = availableDays; }
     public String getBio() { return bio; }
     public void setBio(String bio) { this.bio = bio; }
+    @com.google.firebase.firestore.PropertyName("isActive")
     public boolean isActive() { return isActive; }
+    @com.google.firebase.firestore.PropertyName("isActive")
     public void setActive(boolean active) { isActive = active; }
+    @com.google.firebase.firestore.PropertyName("isVerified")
     public boolean isVerified() { return isVerified; }
+    @com.google.firebase.firestore.PropertyName("isVerified")
     public void setVerified(boolean verified) { isVerified = verified; }
     public String getProfileImage() { return profileImage; }
     public void setProfileImage(String profileImage) { this.profileImage = profileImage; }

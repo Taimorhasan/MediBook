@@ -21,8 +21,9 @@ public class ManageUsersActivity extends BaseActivity implements UserAdapter.OnU
     private RecyclerView recyclerView;
     private UserAdapter adapter;
     private UserRepository userRepository;
-    private ProgressBar progressBar;
+    private View emptyView;
     private List<User> userList = new ArrayList<>();
+    private com.example.medibook.repositories.RoleRepository roleRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +38,7 @@ public class ManageUsersActivity extends BaseActivity implements UserAdapter.OnU
 
         initViews();
         userRepository = new UserRepository();
+        roleRepository = new com.example.medibook.repositories.RoleRepository();
         loadUsers();
     }
 
@@ -53,6 +55,7 @@ public class ManageUsersActivity extends BaseActivity implements UserAdapter.OnU
 
         recyclerView = findViewById(R.id.users_recycler_view);
         progressBar = findViewById(R.id.loading_progress);
+        emptyView = findViewById(R.id.empty_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new UserAdapter(userList, this, this);
         recyclerView.setAdapter(adapter);
@@ -66,6 +69,7 @@ public class ManageUsersActivity extends BaseActivity implements UserAdapter.OnU
                 progressBar.setVisibility(View.GONE);
                 userList = users;
                 adapter.updateList(userList);
+                emptyView.setVisibility(userList.isEmpty() ? View.VISIBLE : View.GONE);
             }
 
             @Override
@@ -78,11 +82,38 @@ public class ManageUsersActivity extends BaseActivity implements UserAdapter.OnU
 
     @Override
     public void onChangeRole(User user) {
-        String[] roles = {"PATIENT", "DOCTOR", "ADMIN"};
+        progressBar.setVisibility(View.VISIBLE);
+        roleRepository.getAllRoles(new com.example.medibook.repositories.RoleRepository.RolesCallback() {
+            @Override
+            public void onSuccess(List<com.example.medibook.models.Role> roles) {
+                progressBar.setVisibility(View.GONE);
+                if (roles.isEmpty()) {
+                    // Fallback to defaults if no custom roles exist
+                    showRoleSelectionDialog(user, new String[]{"PATIENT", "DOCTOR", "ADMIN"});
+                } else {
+                    String[] roleNames = new String[roles.size()];
+                    for (int i = 0; i < roles.size(); i++) {
+                        roleNames[i] = roles.get(i).getName().toUpperCase();
+                    }
+                    showRoleSelectionDialog(user, roleNames);
+                }
+            }
+
+            @Override
+            public void onFailure(String error) {
+                progressBar.setVisibility(View.GONE);
+                Toast.makeText(ManageUsersActivity.this, "Error fetching roles: " + error, Toast.LENGTH_SHORT).show();
+                // Fallback
+                showRoleSelectionDialog(user, new String[]{"PATIENT", "DOCTOR", "ADMIN"});
+            }
+        });
+    }
+
+    private void showRoleSelectionDialog(User user, String[] roles) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Select Role for " + user.getName());
         builder.setItems(roles, (dialog, which) -> {
-            String selectedRole = roles[which];
+            String selectedRole = roles[which].toLowerCase();
             updateUserRole(user, selectedRole);
         });
         builder.show();

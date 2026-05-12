@@ -21,6 +21,8 @@ public class DoctorVerificationAdapter extends RecyclerView.Adapter<DoctorVerifi
 
     public interface OnDoctorActionListener {
         void onVerifyDoctor(Doctor doctor, boolean verify);
+        void onEditDoctor(Doctor doctor);
+        void onToggleStatus(Doctor doctor, boolean active);
     }
 
     public DoctorVerificationAdapter(List<Doctor> doctorList, Context context, OnDoctorActionListener listener) {
@@ -48,15 +50,28 @@ public class DoctorVerificationAdapter extends RecyclerView.Adapter<DoctorVerifi
         holder.specialtyText.setText(specialty);
         holder.hospitalText.setText(hospital);
         
+        // Verification Status
         boolean isVerified = doctor.isVerified();
         holder.statusChip.setText(isVerified ? "VERIFIED" : "PENDING");
-        holder.statusChip.setChipBackgroundColorResource(isVerified ? android.R.color.holo_green_light : android.R.color.holo_orange_light);
+        holder.statusChip.setChipBackgroundColorResource(isVerified ? android.R.color.holo_green_dark : android.R.color.holo_orange_dark);
 
+        // Active Status
+        boolean isActive = doctor.isActive();
+        holder.activeStatusChip.setText(isActive ? "ACTIVE" : "INACTIVE");
+        holder.activeStatusChip.setChipBackgroundColorResource(isActive ? android.R.color.holo_blue_dark : android.R.color.darker_gray);
+
+        // Buttons visibility and listeners
         holder.verifyBtn.setVisibility(isVerified ? View.GONE : View.VISIBLE);
         holder.verifyBtn.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onVerifyDoctor(doctor, true);
-            }
+            if (listener != null) listener.onVerifyDoctor(doctor, true);
+        });
+
+        holder.editBtn.setOnClickListener(v -> {
+            if (listener != null) listener.onEditDoctor(doctor);
+        });
+
+        holder.activeStatusChip.setOnClickListener(v -> {
+            if (listener != null) listener.onToggleStatus(doctor, !doctor.isActive());
         });
     }
 
@@ -72,8 +87,8 @@ public class DoctorVerificationAdapter extends RecyclerView.Adapter<DoctorVerifi
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView nameText, specialtyText, hospitalText;
-        Chip statusChip;
-        Button verifyBtn;
+        Chip statusChip, activeStatusChip;
+        Button verifyBtn, editBtn;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -81,7 +96,9 @@ public class DoctorVerificationAdapter extends RecyclerView.Adapter<DoctorVerifi
             specialtyText = itemView.findViewById(R.id.doctor_specialty);
             hospitalText = itemView.findViewById(R.id.doctor_hospital);
             statusChip = itemView.findViewById(R.id.verification_status_chip);
+            activeStatusChip = itemView.findViewById(R.id.active_status_chip);
             verifyBtn = itemView.findViewById(R.id.verify_button);
+            editBtn = itemView.findViewById(R.id.edit_button);
         }
     }
 }

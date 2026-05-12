@@ -138,13 +138,24 @@ public class AuthRepository {
 
     // 🔹 Get user role from Firestore
     public void getUserRole(String userId, RoleCallback callback) {
+        if (userId == null) {
+            callback.onResult("patient");
+            return;
+        }
         db.collection("users").document(userId).get()
             .addOnSuccessListener(documentSnapshot -> {
                 if (documentSnapshot.exists()) {
                     String role = documentSnapshot.getString("role");
+                    if (role == null) {
+                        // Try roleIds array
+                        java.util.List<String> roleIds = (java.util.List<String>) documentSnapshot.get("roleIds");
+                        if (roleIds != null && !roleIds.isEmpty()) {
+                            role = roleIds.get(0);
+                        }
+                    }
                     callback.onResult(role != null ? role : "patient");
                 } else {
-                    callback.onResult("patient"); // Default role
+                    callback.onResult("patient");
                 }
             })
             .addOnFailureListener(e -> callback.onResult("patient"));
@@ -162,6 +173,11 @@ public class AuthRepository {
 
     // 🔹 Sign out with token cleanup (for notification purposes)
     public void signOutWithTokenCleanup(String userId, VoidCallback callback) {
+        if (userId == null || userId.isEmpty()) {
+            mAuth.signOut();
+            callback.onSuccess();
+            return;
+        }
         // First remove FCM token from Firestore
         db.collection("users").document(userId)
                 .update("fcmToken", "")

@@ -34,6 +34,7 @@ public class SignupActivity extends AppCompatActivity {
     private TextView loginRedirect;
     private ProgressBar progressBar;
     private AuthRepository authRepository;
+    private com.example.medibook.utils.SessionManager sessionManager;
     private GoogleSignInClient mGoogleSignInClient;
     private static final int RC_SIGN_IN = 9001;
 
@@ -64,6 +65,7 @@ public class SignupActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBar);
         
         authRepository = new AuthRepository();
+        sessionManager = new com.example.medibook.utils.SessionManager(this);
     }
 
     private void setupGoogleSignIn() {
@@ -252,6 +254,12 @@ public class SignupActivity extends AppCompatActivity {
                 // If user exists, redirect based on their role
                 authRepository.getUserRole(user.getUid(), role -> {
                     progressBar.setVisibility(View.GONE);
+                    
+                    // Save Session
+                    String finalRole = role != null ? role : "patient";
+                    boolean saved = sessionManager.saveUserSession(user.getUid(), finalRole);
+                    android.util.Log.d("Signup", "Session saved: " + saved + " for existing user role: " + finalRole);
+
                     if ("admin".equals(role)) {
                         Toast.makeText(SignupActivity.this, "Welcome back, Admin!", Toast.LENGTH_SHORT).show();
                         startActivity(new Intent(SignupActivity.this, AdminDashboardActivity.class));
@@ -272,6 +280,10 @@ public class SignupActivity extends AppCompatActivity {
                         @Override
                         public void onSuccess() {
                             progressBar.setVisibility(View.GONE);
+                            // Save Session
+                            boolean saved = sessionManager.saveUserSession(user.getUid(), "patient");
+                            android.util.Log.d("Signup", "Session saved: " + saved + " for new user role: patient");
+                            
                             Toast.makeText(SignupActivity.this, "Registration successful!", Toast.LENGTH_SHORT).show();
                             startActivity(new Intent(SignupActivity.this, UserHomeActivity.class));
                             finish();

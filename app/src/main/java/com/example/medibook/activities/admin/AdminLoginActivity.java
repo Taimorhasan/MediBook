@@ -24,6 +24,7 @@ public class AdminLoginActivity extends AppCompatActivity {
     private AuthRepository authRepository;
     private UserRepository userRepository;
     private NotificationRepository notificationRepository;
+    private com.example.medibook.utils.SessionManager sessionManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +35,7 @@ public class AdminLoginActivity extends AppCompatActivity {
         authRepository = new AuthRepository();
         userRepository = new UserRepository();
         notificationRepository = new NotificationRepository();
+        sessionManager = new com.example.medibook.utils.SessionManager(this);
 
         // Initialize views
         emailEditText = findViewById(R.id.email_edit_text);
@@ -81,7 +83,18 @@ public class AdminLoginActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(User user) {
                         // Verify user is an admin
-                        if (user.getRoleIds().contains("admin")) {
+                        boolean isAdmin = false;
+                        
+                        // Check roleIds array (Modern check)
+                        if (user.getRoleIds() != null && user.getRoleIds().contains("admin")) {
+                            isAdmin = true;
+                        } 
+                        // Fallback to single 'role' field
+                        else if ("admin".equalsIgnoreCase(user.getRole())) {
+                            isAdmin = true;
+                        }
+
+                        if (isAdmin) {
                             // Get FCM token and update user profile
                             FirebaseMessaging.getInstance().getToken()
                                 .addOnCompleteListener(task -> {
@@ -92,6 +105,10 @@ public class AdminLoginActivity extends AppCompatActivity {
 
                                     progressBar.setVisibility(View.GONE);
                                     loginButton.setEnabled(true);
+
+                                    // SAVE SESSION BEFORE NAVIGATING - Using commit for immediate effect
+                                    boolean saved = sessionManager.saveUserSession(firebaseUser.getUid(), "admin");
+                                    android.util.Log.d("AdminLogin", "Session saved: " + saved + " for role: admin");
 
                                     Intent intent = new Intent(AdminLoginActivity.this, AdminDashboardActivity.class);
                                     startActivity(intent);

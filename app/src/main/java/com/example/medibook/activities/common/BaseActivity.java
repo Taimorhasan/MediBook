@@ -20,7 +20,10 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     protected void checkRoleAndRedirect(String requiredRole) {
         String currentRole = sessionManager.getUserRole();
+        android.util.Log.d("BaseActivity", "Checking role: required=" + requiredRole + ", current=" + currentRole);
+        
         if (currentRole == null || !currentRole.equalsIgnoreCase(requiredRole)) {
+            android.util.Log.w("BaseActivity", "Access Denied: Current role '" + currentRole + "' does not match required role '" + requiredRole + "'");
             Toast.makeText(this, "Access Denied: Unauthorized Role", Toast.LENGTH_SHORT).show();
             navigateToPortal();
         }

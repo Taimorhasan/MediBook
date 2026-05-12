@@ -33,6 +33,7 @@ public class LoginActivity extends AppCompatActivity {
     private AuthRepository authRepository;
     private UserRepository userRepository;
     private NotificationRepository notificationRepository;
+    private com.example.medibook.utils.SessionManager sessionManager;
     private GoogleSignInClient googleSignInClient;
     private static final int GOOGLE_SIGN_IN_CODE = 123;
 
@@ -45,6 +46,7 @@ public class LoginActivity extends AppCompatActivity {
         authRepository = new AuthRepository();
         userRepository = new UserRepository();
         notificationRepository = new NotificationRepository();
+        sessionManager = new com.example.medibook.utils.SessionManager(this);
 
         // Initialize Google Sign-In
         setupGoogleSignIn();
@@ -195,6 +197,11 @@ public class LoginActivity extends AppCompatActivity {
                         progressBar.setVisibility(View.GONE);
                         googleLoginButton.setEnabled(true);
                         loginButton.setEnabled(true);
+                        
+                        // Save Session
+                        String role = (user.getRoleIds() != null && user.getRoleIds().contains("admin")) ? "admin" : 
+                                     (user.getRoleIds() != null && user.getRoleIds().contains("doctor")) ? "doctor" : "patient";
+                        sessionManager.saveUserSession(firebaseUser.getUid(), role);
 
                         // Navigate based on role
                         navigateBasedOnRole(user);
@@ -234,6 +241,12 @@ public class LoginActivity extends AppCompatActivity {
                                 progressBar.setVisibility(View.GONE);
                                 loginButton.setEnabled(true);
                                 googleLoginButton.setEnabled(true);
+                                
+                                // Save Session
+                                String role = (user.getRoleIds() != null && user.getRoleIds().contains("admin")) ? "admin" : 
+                                             (user.getRoleIds() != null && user.getRoleIds().contains("doctor")) ? "doctor" : "patient";
+                                boolean saved = sessionManager.saveUserSession(firebaseUser.getUid(), role);
+                                android.util.Log.d("Login", "Session saved: " + saved + " for role: " + role);
 
                                 // Navigate based on role
                                 navigateBasedOnRole(user);

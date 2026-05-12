@@ -33,6 +33,7 @@ public class UserLoginActivity extends AppCompatActivity {
     private MaterialButton btnSignIn, btnGoogleSignIn;
     private TextView tvCreateAccount;  // ✅ Now recognized
     private ProgressBar progressBar;   // ✅ Now recognized
+    private com.example.medibook.utils.SessionManager sessionManager;
     
     private AuthRepository authRepository;
     private GoogleSignInClient googleSignInClient;
@@ -56,6 +57,7 @@ public class UserLoginActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBar);
         
         authRepository = new AuthRepository();
+        sessionManager = new com.example.medibook.utils.SessionManager(this);
     }
 
     private void setupGoogleSignIn() {
@@ -132,6 +134,9 @@ public class UserLoginActivity extends AppCompatActivity {
                 
                 // Check role and navigate accordingly
                 authRepository.getUserRole(user.getUid(), role -> {
+                    // Update Session
+                    sessionManager.saveUserSession(user.getUid(), role != null ? role : "patient");
+
                     if ("admin".equals(role)) {
                         Toast.makeText(UserLoginActivity.this, "Admin access granted", Toast.LENGTH_SHORT).show();
                         startActivity(new Intent(UserLoginActivity.this, com.example.medibook.activities.admin.AdminDashboardActivity.class));
@@ -212,6 +217,9 @@ public class UserLoginActivity extends AppCompatActivity {
                     
                     if (exists) {
                         authRepository.getUserRole(user.getUid(), role -> {
+                            // Update Session
+                            sessionManager.saveUserSession(user.getUid(), role != null ? role : "patient");
+
                             if ("admin".equals(role)) {
                                 Toast.makeText(UserLoginActivity.this, "Admin access granted", Toast.LENGTH_SHORT).show();
                                 startActivity(new Intent(UserLoginActivity.this, com.example.medibook.activities.admin.AdminDashboardActivity.class));

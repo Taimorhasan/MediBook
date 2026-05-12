@@ -17,6 +17,7 @@ public class User {
     private String bio;
     private String profileImage;
     private String fcmToken;
+    private String role;
 
     public User() {} // Firestore constructor
 
@@ -66,4 +67,7 @@ public class User {
 
     public String getFcmToken() { return fcmToken; }
     public void setFcmToken(String fcmToken) { this.fcmToken = fcmToken; }
+
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
 }

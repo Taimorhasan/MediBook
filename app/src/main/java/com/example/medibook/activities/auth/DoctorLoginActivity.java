@@ -34,6 +34,7 @@ public class DoctorLoginActivity extends AppCompatActivity {
     private AuthRepository authRepository;
     private UserRepository userRepository;
     private NotificationRepository notificationRepository;
+    private com.example.medibook.utils.SessionManager sessionManager;
     private GoogleSignInClient googleSignInClient;
     private static final int GOOGLE_SIGN_IN_CODE = 123;
 
@@ -46,6 +47,7 @@ public class DoctorLoginActivity extends AppCompatActivity {
         authRepository = new AuthRepository();
         userRepository = new UserRepository();
         notificationRepository = new NotificationRepository();
+        sessionManager = new com.example.medibook.utils.SessionManager(this);
 
         // Initialize Google Sign-In
         setupGoogleSignIn();
@@ -203,7 +205,8 @@ public class DoctorLoginActivity extends AppCompatActivity {
                         loginButton.setEnabled(true);
 
                         // Verify user is a doctor
-                        if (user.getRoleIds().contains("doctor")) {
+                        if (user.getRoleIds() != null && user.getRoleIds().contains("doctor")) {
+                            sessionManager.saveUserSession(firebaseUser.getUid(), "doctor");
                             startActivity(new Intent(DoctorLoginActivity.this, DoctorDashboardActivity.class));
                             finish();
                         } else {
@@ -247,7 +250,9 @@ public class DoctorLoginActivity extends AppCompatActivity {
                                 googleLoginButton.setEnabled(true);
 
                                 // Verify user is a doctor
-                                if (user.getRoleIds().contains("doctor")) {
+                                if (user.getRoleIds() != null && user.getRoleIds().contains("doctor")) {
+                                    boolean saved = sessionManager.saveUserSession(firebaseUser.getUid(), "doctor");
+                                    android.util.Log.d("DoctorLogin", "Session saved: " + saved + " for role: doctor");
                                     startActivity(new Intent(DoctorLoginActivity.this, DoctorDashboardActivity.class));
                                     finish();
                                 } else {

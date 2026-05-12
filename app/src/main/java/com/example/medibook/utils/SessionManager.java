@@ -18,10 +18,10 @@ public class SessionManager {
         editor = pref.edit();
     }
 
-    public void saveUserSession(String userId, String role) {
+    public boolean saveUserSession(String userId, String role) {
         editor.putString(KEY_USER_ID, userId);
         editor.putString(KEY_ROLE, role);
-        editor.apply();
+        return editor.commit(); // ✅ Return success/failure
     }
 
     public String getUserRole() {
@@ -32,8 +32,8 @@ public class SessionManager {
         return pref.getString(KEY_USER_ID, "");
     }
 
-    public void clearSession() {
+    public boolean clearSession() {
         editor.clear();
-        editor.apply();
+        return editor.commit(); // ✅ Return success/failure
     }
 }

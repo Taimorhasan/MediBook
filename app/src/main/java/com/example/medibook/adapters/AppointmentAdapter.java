@@ -26,6 +26,11 @@ public class AppointmentAdapter extends RecyclerView.Adapter<AppointmentAdapter.
         this.listener = listener;
     }
 
+    public void updateList(List<Appointment> newList) {
+        this.appointmentList = newList;
+        notifyDataSetChanged();
+    }
+
     @NonNull
     @Override
     public AppointmentViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

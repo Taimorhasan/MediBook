@@ -103,7 +103,7 @@ public class DoctorSignupActivity extends AppCompatActivity {
             public void onSuccess(FirebaseUser user) {
                 // Now save doctor-specific details
                 Doctor doctor = new Doctor(user.getUid(), name, specialty, "", phone, email, 
-                        experience, "0", "");
+                        experience, "0", "", true);
 
                 // Save to both doctors and update users collection with doctor details
                 doctorRepository.saveDoctorProfile(user.getUid(), doctor, new DoctorDetailRepository.VoidCallback() {

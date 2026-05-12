@@ -5,14 +5,14 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
-import androidx.appcompat.app.AppCompatActivity;
 import com.example.medibook.R;
+import com.example.medibook.activities.common.BaseActivity;
 import com.example.medibook.activities.common.PortalSelectionActivity;
 import com.example.medibook.repositories.AuthRepository;
 import com.google.android.material.card.MaterialCardView;
 import com.google.firebase.auth.FirebaseAuth;
 
-public class AdminDashboardActivity extends AppCompatActivity {
+public class AdminDashboardActivity extends BaseActivity {
 
     private AuthRepository authRepository;
     private String currentAdminId;
@@ -21,6 +21,9 @@ public class AdminDashboardActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_dashboard);
+        
+        // Check if the user has the admin role
+        checkRoleAndRedirect("admin");
 
         // Initialize repositories
         authRepository = new AuthRepository();
@@ -28,19 +31,39 @@ public class AdminDashboardActivity extends AppCompatActivity {
 
         MaterialCardView manageDoctorsCard = findViewById(R.id.manage_doctors_card);
         MaterialCardView manageAppointmentsCard = findViewById(R.id.manage_appointments_card);
+        MaterialCardView manageUsersCard = findViewById(R.id.manage_users_card);
+        MaterialCardView manageHospitalsCard = findViewById(R.id.manage_hospitals_card);
         Button logoutButton = findViewById(R.id.logout_button);
 
         manageDoctorsCard.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // To be implemented: Intent to ManageDoctorsActivity
+                Intent intent = new Intent(AdminDashboardActivity.this, ManageDoctorsActivity.class);
+                startActivity(intent);
             }
         });
 
         manageAppointmentsCard.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // To be implemented: Intent to ManageAppointmentsActivity
+                Intent intent = new Intent(AdminDashboardActivity.this, ManageAppointmentsActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        manageUsersCard.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(AdminDashboardActivity.this, ManageUsersActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        manageHospitalsCard.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(AdminDashboardActivity.this, ManageHospitalsActivity.class);
+                startActivity(intent);
             }
         });
 

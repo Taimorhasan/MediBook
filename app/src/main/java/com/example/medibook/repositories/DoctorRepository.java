@@ -128,4 +128,11 @@ public class DoctorRepository {
                 .addOnSuccessListener(aVoid -> callback.onSuccess(doctor))
                 .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
     }
+
+    public void verifyDoctor(String doctorId, boolean isVerified, AuthRepository.VoidCallback callback) {
+        db.collection("doctors").document(doctorId)
+                .update("isVerified", isVerified)
+                .addOnSuccessListener(aVoid -> callback.onSuccess())
+                .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
+    }
 }

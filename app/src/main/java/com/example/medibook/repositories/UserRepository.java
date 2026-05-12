@@ -1,16 +1,11 @@
 package com.example.medibook.repositories;
 
-import android.util.Log;
-import androidx.annotation.NonNull;
 import com.example.medibook.models.User;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
+import java.util.List;
+import java.util.ArrayList;
 
 public class UserRepository {
-    private static final String TAG = "UserRepository";
     private FirebaseFirestore db;
 
     public UserRepository() {
@@ -23,68 +18,43 @@ public class UserRepository {
     }
 
     public interface UsersCallback {
-        void onSuccess(java.util.List<User> users);
+        void onSuccess(List<User> users);
         void onFailure(String error);
-    }
-
-    public void getUser(String userId, UserCallback callback) {
-        db.collection("users").document(userId).get()
-                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if (task.isSuccessful()) {
-                            DocumentSnapshot document = task.getResult();
-                            if (document.exists()) {
-                                User user = document.toObject(User.class);
-                                callback.onSuccess(user);
-                            } else {
-                                callback.onFailure("User not found");
-                            }
-                        } else {
-                            callback.onFailure(task.getException().getMessage());
-                        }
-                    }
-                });
     }
 
     public void getAllUsers(UsersCallback callback) {
         db.collection("users").get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            java.util.List<User> users = new java.util.ArrayList<>();
-                            for (DocumentSnapshot document : task.getResult()) {
-                                User user = document.toObject(User.class);
-                                if (user != null) {
-                                    users.add(user);
-                                }
-                            }
-                            callback.onSuccess(users);
-                        } else {
-                            callback.onFailure(task.getException().getMessage());
-                        }
-                    }
-                });
-    }
-
-    public void updateUser(User user, UserCallback callback) {
-        db.collection("users").document(user.getUserId())
-                .set(user)
-                .addOnSuccessListener(aVoid -> callback.onSuccess(user))
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<User> users = queryDocumentSnapshots.toObjects(User.class);
+                    callback.onSuccess(users);
+                })
                 .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
     }
 
-    /**
-     * Update specific user fields without overwriting others
-     */
+    public void updateUserRole(String userId, String role, AuthRepository.VoidCallback callback) {
+        db.collection("users").document(userId)
+                .update("role", role, "roleIds", java.util.Arrays.asList(role))
+                .addOnSuccessListener(aVoid -> callback.onSuccess())
+                .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
+    }
+
+    public void getUser(String userId, UserCallback callback) {
+        db.collection("users").document(userId).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    User user = documentSnapshot.toObject(User.class);
+                    if (user != null) {
+                        callback.onSuccess(user);
+                    } else {
+                        callback.onFailure("User not found");
+                    }
+                })
+                .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
+    }
+
     public void updateUserFields(String userId, java.util.Map<String, Object> updates, UserCallback callback) {
         db.collection("users").document(userId)
                 .update(updates)
-                .addOnSuccessListener(aVoid -> {
-                    // Fetch updated user to return
-                    getUser(userId, callback);
-                })
+                .addOnSuccessListener(aVoid -> getUser(userId, callback))
                 .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
     }
 }

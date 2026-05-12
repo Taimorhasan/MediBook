@@ -57,19 +57,39 @@ public class ScheduleRepository {
                 .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
     }
 
-    public void updateSlotStatus(String scheduleId, String slotTime, boolean isBooked, String userId) {
-        db.collection("schedules").document(scheduleId).get().addOnSuccessListener(documentSnapshot -> {
-            Schedule schedule = documentSnapshot.toObject(Schedule.class);
+    public void updateSlotStatus(String scheduleId, String slotTime, boolean isBooked, String userId, AuthRepository.VoidCallback callback) {
+        com.google.firebase.firestore.DocumentReference scheduleRef = db.collection("schedules").document(scheduleId);
+        
+        db.runTransaction(transaction -> {
+            com.google.firebase.firestore.DocumentSnapshot snapshot = transaction.get(scheduleRef);
+            Schedule schedule = snapshot.toObject(Schedule.class);
+            
             if (schedule != null) {
+                boolean slotFound = false;
                 for (Schedule.Slot slot : schedule.getSlots()) {
                     if (slot.getTime().equals(slotTime)) {
+                        // Professional check: don't book if already booked by someone else
+                        if (isBooked && slot.isBooked()) {
+                            throw new com.google.firebase.firestore.FirebaseFirestoreException(
+                                "Slot already booked", 
+                                com.google.firebase.firestore.FirebaseFirestoreException.Code.ABORTED
+                            );
+                        }
                         slot.setBooked(isBooked);
-                        slot.setBookedBy(userId);
+                        slot.setBookedBy(isBooked ? userId : "");
+                        slotFound = true;
                         break;
                     }
                 }
-                db.collection("schedules").document(scheduleId).set(schedule);
+                if (slotFound) {
+                    transaction.set(scheduleRef, schedule);
+                }
             }
+            return null;
+        }).addOnSuccessListener(result -> {
+            if (callback != null) callback.onSuccess();
+        }).addOnFailureListener(e -> {
+            if (callback != null) callback.onFailure(e.getMessage());
         });
     }
 }

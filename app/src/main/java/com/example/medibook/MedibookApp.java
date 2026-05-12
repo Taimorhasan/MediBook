@@ -8,6 +8,9 @@ public class MedibookApp extends Application {
     public void onCreate() {
         super.onCreate();
         // Initialize Firebase
-        FirebaseApp.initializeApp(this);
+        com.google.firebase.FirebaseApp.initializeApp(this);
+        
+        // Seed initial roles for RBAC
+        com.example.medibook.utils.BackendInitializer.initializeRoles();
     }
 }

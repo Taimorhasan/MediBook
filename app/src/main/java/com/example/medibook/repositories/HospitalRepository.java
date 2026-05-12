@@ -36,4 +36,18 @@ public class HospitalRepository {
                 .addOnSuccessListener(aVoid -> callback.onSuccess(hospital))
                 .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
     }
+
+    public void updateHospital(Hospital hospital, AuthRepository.VoidCallback callback) {
+        db.collection("hospitals").document(hospital.getHospitalId())
+                .set(hospital)
+                .addOnSuccessListener(aVoid -> callback.onSuccess())
+                .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
+    }
+
+    public void deleteHospital(String hospitalId, AuthRepository.VoidCallback callback) {
+        db.collection("hospitals").document(hospitalId)
+                .delete()
+                .addOnSuccessListener(aVoid -> callback.onSuccess())
+                .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
+    }
 }

@@ -20,7 +20,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DoctorDashboardActivity extends AppCompatActivity implements AppointmentAdapter.OnAppointmentClickListener {
+public class DoctorDashboardActivity extends com.example.medibook.activities.common.BaseActivity implements AppointmentAdapter.OnAppointmentClickListener {
 
     private TextView welcomeTextView, doctorNameTextView, specialtyTextView;
     private Button logoutButton, editProfileButton;
@@ -36,6 +36,9 @@ public class DoctorDashboardActivity extends AppCompatActivity implements Appoin
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_doctor_dashboard);
+
+        // Ensure only doctors can access
+        checkRoleAndRedirect("doctor");
 
         // Initialize repositories
         doctorRepository = new DoctorDetailRepository();

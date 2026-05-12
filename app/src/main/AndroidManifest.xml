@@ -68,6 +68,8 @@
         <activity android:name=".activities.admin.AdminDashboardActivity" />
         <activity android:name=".activities.admin.ManageDoctorsActivity" />
         <activity android:name=".activities.admin.ManageAppointmentsActivity" />
+        <activity android:name=".activities.admin.ManageUsersActivity" />
+        <activity android:name=".activities.admin.ManageHospitalsActivity" />
         <activity android:name=".activities.admin.PatientRecordsActivity" />
 
         <!-- Doctor Activities -->

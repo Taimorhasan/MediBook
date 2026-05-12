@@ -15,6 +15,8 @@ public class Doctor {
     private List<String> availableDays;
     private String bio;
     private boolean isActive;
+    private boolean isVerified;
+    private String hospitalName;
 
     // Additional fields
     private String profileImage;
@@ -58,8 +60,11 @@ public class Doctor {
     public void setName(String name) { this.name = name; }
     public String getSpecialty() { return specialty; }
     public void setSpecialty(String specialty) { this.specialty = specialty; }
+    public String getSpecialization() { return specialty; }
     public String getHospitalId() { return hospitalId; }
     public void setHospitalId(String hospitalId) { this.hospitalId = hospitalId; }
+    public String getHospitalName() { return hospitalName; }
+    public void setHospitalName(String hospitalName) { this.hospitalName = hospitalName; }
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
     public String getEmail() { return email; }
@@ -76,6 +81,8 @@ public class Doctor {
     public void setBio(String bio) { this.bio = bio; }
     public boolean isActive() { return isActive; }
     public void setActive(boolean active) { isActive = active; }
+    public boolean isVerified() { return isVerified; }
+    public void setVerified(boolean verified) { isVerified = verified; }
     public String getProfileImage() { return profileImage; }
     public void setProfileImage(String profileImage) { this.profileImage = profileImage; }
     public String getDegree() { return degree; }

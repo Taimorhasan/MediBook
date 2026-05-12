@@ -49,6 +49,8 @@ public class Appointment {
     public void setScheduleId(String scheduleId) { this.scheduleId = scheduleId; }
     public String getSlotTime() { return slotTime; }
     public void setSlotTime(String slotTime) { this.slotTime = slotTime; }
+    public String getTime() { return slotTime; }
+    public void setTime(String time) { this.slotTime = time; }
     public String getDate() { return date; }
     public void setDate(String date) { this.date = date; }
     public String getStatus() { return status; }

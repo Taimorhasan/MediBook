@@ -130,14 +130,20 @@ public class UserLoginActivity extends AppCompatActivity {
                 progressBar.setVisibility(View.GONE);
                 btnSignIn.setEnabled(true);
                 
-                // Check role
+                // Check role and navigate accordingly
                 authRepository.getUserRole(user.getUid(), role -> {
-                    if ("patient".equals(role)) {
+                    if ("admin".equals(role)) {
+                        Toast.makeText(UserLoginActivity.this, "Admin access granted", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(UserLoginActivity.this, com.example.medibook.activities.admin.AdminDashboardActivity.class));
+                        finish();
+                    } else if ("doctor".equals(role)) {
+                        Toast.makeText(UserLoginActivity.this, "Doctor access granted", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(UserLoginActivity.this, com.example.medibook.activities.doctor.DoctorDashboardActivity.class));
+                        finish();
+                    } else {
+                        // Default to patient
                         Toast.makeText(UserLoginActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
                         navigateToDashboard();
-                    } else {
-                        authRepository.signOut();
-                        Toast.makeText(UserLoginActivity.this, "This account is not registered as a patient", Toast.LENGTH_LONG).show();
                     }
                 });
             }
@@ -181,7 +187,13 @@ public class UserLoginActivity extends AppCompatActivity {
                 firebaseAuthWithGoogle(account.getIdToken());
             }
         } catch (ApiException e) {
-            Toast.makeText(this, "Google Sign-In failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            String errorMsg = "Google Sign-In failed (Code: " + e.getStatusCode() + ")";
+            if (e.getStatusCode() == 10) {
+                errorMsg += ": Developer Error. Check SHA-1 in Firebase Console.";
+            } else if (e.getStatusCode() == 12500) {
+                errorMsg += ": Sign-In Failed. Check Google Play Services.";
+            }
+            Toast.makeText(this, errorMsg, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -200,12 +212,17 @@ public class UserLoginActivity extends AppCompatActivity {
                     
                     if (exists) {
                         authRepository.getUserRole(user.getUid(), role -> {
-                            if ("patient".equals(role)) {
+                            if ("admin".equals(role)) {
+                                Toast.makeText(UserLoginActivity.this, "Admin access granted", Toast.LENGTH_SHORT).show();
+                                startActivity(new Intent(UserLoginActivity.this, com.example.medibook.activities.admin.AdminDashboardActivity.class));
+                                finish();
+                            } else if ("doctor".equals(role)) {
+                                Toast.makeText(UserLoginActivity.this, "Doctor access granted", Toast.LENGTH_SHORT).show();
+                                startActivity(new Intent(UserLoginActivity.this, com.example.medibook.activities.doctor.DoctorDashboardActivity.class));
+                                finish();
+                            } else {
                                 Toast.makeText(UserLoginActivity.this, "Welcome back!", Toast.LENGTH_SHORT).show();
                                 navigateToDashboard();
-                            } else {
-                                authRepository.signOut();
-                                Toast.makeText(UserLoginActivity.this, "This Google account is not registered as a patient", Toast.LENGTH_LONG).show();
                             }
                         });
                     } else {

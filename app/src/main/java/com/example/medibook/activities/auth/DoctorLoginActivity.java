@@ -133,7 +133,11 @@ public class DoctorLoginActivity extends AppCompatActivity {
                 progressBar.setVisibility(View.GONE);
                 googleLoginButton.setEnabled(true);
                 loginButton.setEnabled(true);
-                Toast.makeText(this, "Google Sign-In error: " + e.getStatusCode(), Toast.LENGTH_SHORT).show();
+                String errorMsg = "Google Sign-In failed (Code: " + e.getStatusCode() + ")";
+                if (e.getStatusCode() == 10) {
+                    errorMsg += ": Developer Error. Check SHA-1 in Firebase Console.";
+                }
+                Toast.makeText(this, errorMsg, Toast.LENGTH_LONG).show();
             }
         }
     }

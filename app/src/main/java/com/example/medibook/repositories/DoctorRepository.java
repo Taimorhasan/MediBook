@@ -48,6 +48,29 @@ public class DoctorRepository {
     }
 
     public void getAllDoctors(DoctorsCallback callback) {
+        db.collection("doctors")
+                .whereEqualTo("isActive", true)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            java.util.List<Doctor> doctors = new java.util.ArrayList<>();
+                            for (DocumentSnapshot document : task.getResult()) {
+                                Doctor doctor = document.toObject(Doctor.class);
+                                if (doctor != null) {
+                                    doctors.add(doctor);
+                                }
+                            }
+                            callback.onSuccess(doctors);
+                        } else {
+                            callback.onFailure(task.getException().getMessage());
+                        }
+                    }
+                });
+    }
+
+    public void getAllDoctorsAdmin(DoctorsCallback callback) {
         db.collection("doctors").get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -67,6 +90,7 @@ public class DoctorRepository {
                     }
                 });
     }
+
 
     public void getDoctorsBySpecialty(String specialty, DoctorsCallback callback) {
         db.collection("doctors")

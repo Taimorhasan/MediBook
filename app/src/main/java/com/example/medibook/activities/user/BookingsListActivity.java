@@ -76,17 +76,22 @@ public class BookingsListActivity extends AppCompatActivity implements Appointme
             });
         }
 
-        // 3. Alerts Placeholder
+        // 3. Alerts Navigation
         if (navAlerts != null) {
             navAlerts.setOnClickListener(v -> {
-                Toast.makeText(this, "Alerts page coming soon", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(BookingsListActivity.this, AlertsActivity.class);
+                startActivity(intent);
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+                finish();
             });
         }
 
-        // 4. Profile Placeholder
+        // 4. Profile Navigation
         if (navProfile != null) {
             navProfile.setOnClickListener(v -> {
-                Toast.makeText(this, "Profile page coming soon", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(BookingsListActivity.this, PatientProfileViewActivity.class);
+                startActivity(intent);
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             });
         }
     }

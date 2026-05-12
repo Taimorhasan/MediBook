@@ -13,7 +13,10 @@ public class UserHomeActivity extends AppCompatActivity {
 
     private Button btnViewDetails;
     private Button btnBookVisit;
+    private LinearLayout navHome;
     private LinearLayout navBookings;
+    private LinearLayout navAlerts;
+    private LinearLayout navProfile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,10 +27,20 @@ public class UserHomeActivity extends AppCompatActivity {
         btnViewDetails = findViewById(R.id.btn_view_details);
         btnBookVisit = findViewById(R.id.btn_book_visit);
         
-        // Initialize Bottom Nav Item
+        // Initialize Bottom Nav Items
+        navHome = findViewById(R.id.nav_home_layout);
         navBookings = findViewById(R.id.nav_bookings_layout);
+        navAlerts = findViewById(R.id.nav_alerts_layout);
+        navProfile = findViewById(R.id.nav_profile_layout);
 
-        // 1. Setup Bottom Navigation Click Listener
+        // 1. Home is current page - maybe refresh
+        if (navHome != null) {
+            navHome.setOnClickListener(v -> {
+                Toast.makeText(this, "Refreshed home", Toast.LENGTH_SHORT).show();
+            });
+        }
+
+        // 2. Setup Bookings Navigation
         if (navBookings != null) {
             navBookings.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -38,6 +51,24 @@ public class UserHomeActivity extends AppCompatActivity {
                     // Add smooth slide animation: new screen slides in from right, current slides out to left
                     overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
                 }
+            });
+        }
+
+        // 3. Setup Alerts Navigation
+        if (navAlerts != null) {
+            navAlerts.setOnClickListener(v -> {
+                Intent intent = new Intent(UserHomeActivity.this, AlertsActivity.class);
+                startActivity(intent);
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+            });
+        }
+
+        // 4. Setup Profile Navigation
+        if (navProfile != null) {
+            navProfile.setOnClickListener(v -> {
+                Intent intent = new Intent(UserHomeActivity.this, PatientProfileViewActivity.class);
+                startActivity(intent);
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             });
         }
 

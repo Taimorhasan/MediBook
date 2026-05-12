@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="12dp"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp"
     app:cardCornerRadius="12dp"
     app:cardElevation="2dp">
 
@@ -20,7 +21,7 @@
             android:text="Doctor: Dr. Sarah Wilson"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="@color/black" />
+            android:textColor="@color/text_dark" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -47,22 +48,32 @@
                 android:textColor="#7D8A99" />
         </LinearLayout>
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#EEEEEE"
+            android:layout_marginVertical="12dp" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="8dp"
             android:gravity="center_vertical">
 
-            <TextView
+            <com.google.android.material.chip.Chip
                 android:id="@+id/appointment_status"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Status: Confirmed"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:textColor="@color/purple_500" />
+                android:text="CONFIRMED"
+                app:chipBackgroundColor="#E8EAF6"
+                app:chipStrokeWidth="0dp"
+                android:textColor="@color/primary_blue"
+                android:textSize="12sp" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
 
             <Button
                 android:id="@+id/cancel_appointment_button"
@@ -70,7 +81,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Cancel"
-                android:textColor="@color/black" />
+                android:textColor="@color/error"
+                android:textAllCaps="false" />
         </LinearLayout>
 
     </LinearLayout>

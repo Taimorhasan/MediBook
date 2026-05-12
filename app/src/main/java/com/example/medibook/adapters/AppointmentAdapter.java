@@ -5,6 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import com.google.android.material.chip.Chip;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.medibook.R;
@@ -44,7 +45,7 @@ public class AppointmentAdapter extends RecyclerView.Adapter<AppointmentAdapter.
         holder.doctorNameTextView.setText("Doctor: " + appointment.getDoctorId()); // TODO: Get doctor name
         holder.dateTextView.setText("Date: " + appointment.getDate());
         holder.timeTextView.setText("Time: " + appointment.getTime());
-        holder.statusTextView.setText("Status: " + appointment.getStatus());
+        holder.statusTextView.setText(appointment.getStatus().toUpperCase());
 
         // Show cancel button only for pending/confirmed appointments
         if ("pending".equals(appointment.getStatus()) || "confirmed".equals(appointment.getStatus())) {
@@ -60,7 +61,8 @@ public class AppointmentAdapter extends RecyclerView.Adapter<AppointmentAdapter.
     }
 
     public static class AppointmentViewHolder extends RecyclerView.ViewHolder {
-        TextView doctorNameTextView, dateTextView, timeTextView, statusTextView;
+        TextView doctorNameTextView, dateTextView, timeTextView;
+        Chip statusTextView;
         Button cancelButton;
 
         public AppointmentViewHolder(@NonNull View itemView, OnAppointmentClickListener listener, List<Appointment> appointments) {

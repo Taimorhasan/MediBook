@@ -30,8 +30,19 @@ public class ManageDoctorsActivity extends BaseActivity implements DoctorVerific
         checkRoleAndRedirect("ADMIN");
 
         initViews();
+        setupToolbar();
         doctorRepository = new DoctorRepository();
         loadDoctors();
+    }
+
+    private void setupToolbar() {
+        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle("Doctor Verification");
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
     }
 
     private void initViews() {

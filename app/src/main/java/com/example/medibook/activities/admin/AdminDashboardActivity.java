@@ -9,13 +9,22 @@ import com.example.medibook.R;
 import com.example.medibook.activities.common.BaseActivity;
 import com.example.medibook.activities.common.PortalSelectionActivity;
 import com.example.medibook.repositories.AuthRepository;
+import com.example.medibook.repositories.DoctorRepository;
+import com.example.medibook.repositories.AppointmentRepository;
+import com.example.medibook.models.Doctor;
+import com.example.medibook.models.Appointment;
+import android.widget.TextView;
 import com.google.android.material.card.MaterialCardView;
 import com.google.firebase.auth.FirebaseAuth;
+import java.util.List;
 
 public class AdminDashboardActivity extends BaseActivity {
 
     private AuthRepository authRepository;
+    private DoctorRepository doctorRepository;
+    private AppointmentRepository appointmentRepository;
     private String currentAdminId;
+    private TextView doctorsCountText, appointmentsCountText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,13 +36,20 @@ public class AdminDashboardActivity extends BaseActivity {
 
         // Initialize repositories
         authRepository = new AuthRepository();
+        doctorRepository = new DoctorRepository();
+        appointmentRepository = new AppointmentRepository();
         currentAdminId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        doctorsCountText = findViewById(R.id.total_doctors_count);
+        appointmentsCountText = findViewById(R.id.total_appointments_count);
 
         MaterialCardView manageDoctorsCard = findViewById(R.id.manage_doctors_card);
         MaterialCardView manageAppointmentsCard = findViewById(R.id.manage_appointments_card);
         MaterialCardView manageUsersCard = findViewById(R.id.manage_users_card);
         MaterialCardView manageHospitalsCard = findViewById(R.id.manage_hospitals_card);
-        Button logoutButton = findViewById(R.id.logout_button);
+        View logoutButton = findViewById(R.id.logout_button);
+
+        fetchStats();
 
         manageDoctorsCard.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -71,6 +87,36 @@ public class AdminDashboardActivity extends BaseActivity {
             @Override
             public void onClick(View v) {
                 performLogout();
+            }
+        });
+    }
+
+    private void fetchStats() {
+        doctorRepository.getAllDoctorsAdmin(new DoctorRepository.DoctorsCallback() {
+            @Override
+            public void onSuccess(List<Doctor> doctors) {
+                if (doctorsCountText != null) {
+                    doctorsCountText.setText(String.valueOf(doctors.size()));
+                }
+            }
+
+            @Override
+            public void onFailure(String error) {
+                // Ignore silently or log
+            }
+        });
+
+        appointmentRepository.getAllAppointments(new AppointmentRepository.AppointmentsCallback() {
+            @Override
+            public void onSuccess(List<Appointment> appointments) {
+                if (appointmentsCountText != null) {
+                    appointmentsCountText.setText(String.valueOf(appointments.size()));
+                }
+            }
+
+            @Override
+            public void onFailure(String error) {
+                // Ignore silently or log
             }
         });
     }

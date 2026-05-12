@@ -36,8 +36,19 @@ public class ManageHospitalsActivity extends BaseActivity implements HospitalAda
         checkRoleAndRedirect("ADMIN");
 
         initViews();
+        setupToolbar();
         hospitalRepository = new HospitalRepository();
         loadHospitals();
+    }
+
+    private void setupToolbar() {
+        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle("Hospitals");
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
     }
 
     private void initViews() {

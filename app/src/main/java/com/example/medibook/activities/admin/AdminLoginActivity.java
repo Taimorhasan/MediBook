@@ -15,24 +15,15 @@ import com.example.medibook.models.User;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.api.ApiException;
-import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.GoogleAuthProvider;
 
 public class AdminLoginActivity extends AppCompatActivity {
 
     private TextInputEditText emailEditText, passwordEditText;
     private Button loginButton;
-    private Button googleLoginButton;
     private ProgressBar progressBar;
     private AuthRepository authRepository;
     private UserRepository userRepository;
     private NotificationRepository notificationRepository;
-    private GoogleSignInClient googleSignInClient;
-    private static final int GOOGLE_SIGN_IN_CODE = 123;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,14 +35,10 @@ public class AdminLoginActivity extends AppCompatActivity {
         userRepository = new UserRepository();
         notificationRepository = new NotificationRepository();
 
-        // Initialize Google Sign-In
-        setupGoogleSignIn();
-
         // Initialize views
         emailEditText = findViewById(R.id.email_edit_text);
         passwordEditText = findViewById(R.id.password_edit_text);
         loginButton = findViewById(R.id.login_button);
-        googleLoginButton = findViewById(R.id.google_login_button);
         progressBar = findViewById(R.id.progress_bar);
 
         loginButton.setOnClickListener(new View.OnClickListener() {
@@ -74,120 +61,17 @@ public class AdminLoginActivity extends AppCompatActivity {
             }
         });
 
-        googleLoginButton.setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.back_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                performGoogleSignIn();
+                onBackPressed();
             }
         });
-    }
-
-    private void setupGoogleSignIn() {
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build();
-        
-        googleSignInClient = GoogleSignIn.getClient(this, gso);
-    }
-
-    private void performGoogleSignIn() {
-        progressBar.setVisibility(View.VISIBLE);
-        googleLoginButton.setEnabled(false);
-        loginButton.setEnabled(false);
-
-        Intent signInIntent = googleSignInClient.getSignInIntent();
-        startActivityForResult(signInIntent, GOOGLE_SIGN_IN_CODE);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == GOOGLE_SIGN_IN_CODE) {
-            try {
-                com.google.android.gms.auth.api.signin.GoogleSignInAccount account = GoogleSignIn.getSignedInAccountFromIntent(data).getResult(ApiException.class);
-                
-                if (account != null && account.getIdToken() != null) {
-                    AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
-                    authenticateWithGoogle(credential, account);
-                } else {
-                    progressBar.setVisibility(View.GONE);
-                    googleLoginButton.setEnabled(true);
-                    loginButton.setEnabled(true);
-                    Toast.makeText(this, "Google Sign-In failed: Account error", Toast.LENGTH_SHORT).show();
-                }
-            } catch (ApiException e) {
-                progressBar.setVisibility(View.GONE);
-                googleLoginButton.setEnabled(true);
-                loginButton.setEnabled(true);
-                Toast.makeText(this, "Google Sign-In error: " + e.getStatusCode(), Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    private void authenticateWithGoogle(AuthCredential credential, com.google.android.gms.auth.api.signin.GoogleSignInAccount account) {
-        authRepository.signInWithCredential(credential, new AuthRepository.AuthCallback() {
-            @Override
-            public void onSuccess(FirebaseUser firebaseUser) {
-                // Check if user exists and verify admin role
-                userRepository.getUser(firebaseUser.getUid(), new UserRepository.UserCallback() {
-                    @Override
-                    public void onSuccess(User user) {
-                        if (user != null && user.getRoleIds() != null && user.getRoleIds().contains("admin")) {
-                            handleGoogleLoginSuccess(firebaseUser);
-                        } else {
-                            progressBar.setVisibility(View.GONE);
-                            googleLoginButton.setEnabled(true);
-                            loginButton.setEnabled(true);
-                            Toast.makeText(AdminLoginActivity.this, "This account does not have admin privileges", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(String error) {
-                        progressBar.setVisibility(View.GONE);
-                        googleLoginButton.setEnabled(true);
-                        loginButton.setEnabled(true);
-                        Toast.makeText(AdminLoginActivity.this, "Failed to verify admin status: " + error, Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-
-            @Override
-            public void onFailure(String error) {
-                progressBar.setVisibility(View.GONE);
-                googleLoginButton.setEnabled(true);
-                loginButton.setEnabled(true);
-                Toast.makeText(AdminLoginActivity.this, "Authentication failed: " + error, Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private void handleGoogleLoginSuccess(FirebaseUser firebaseUser) {
-        // Get FCM token and update user profile
-        FirebaseMessaging.getInstance().getToken()
-            .addOnCompleteListener(task -> {
-                if (task.isSuccessful() && task.getResult() != null) {
-                    String fcmToken = task.getResult();
-                    notificationRepository.updateFCMToken(firebaseUser.getUid(), fcmToken);
-                }
-
-                progressBar.setVisibility(View.GONE);
-                googleLoginButton.setEnabled(true);
-                loginButton.setEnabled(true);
-
-                // Navigate to admin dashboard
-                Intent intent = new Intent(AdminLoginActivity.this, AdminDashboardActivity.class);
-                startActivity(intent);
-                finish();
-            });
     }
 
     private void performLogin(String email, String password) {
         progressBar.setVisibility(View.VISIBLE);
         loginButton.setEnabled(false);
-        googleLoginButton.setEnabled(false);
 
         authRepository.signIn(email, password, new AuthRepository.AuthCallback() {
             @Override
@@ -208,7 +92,6 @@ public class AdminLoginActivity extends AppCompatActivity {
 
                                     progressBar.setVisibility(View.GONE);
                                     loginButton.setEnabled(true);
-                                    googleLoginButton.setEnabled(true);
 
                                     Intent intent = new Intent(AdminLoginActivity.this, AdminDashboardActivity.class);
                                     startActivity(intent);
@@ -217,7 +100,6 @@ public class AdminLoginActivity extends AppCompatActivity {
                         } else {
                             progressBar.setVisibility(View.GONE);
                             loginButton.setEnabled(true);
-                            googleLoginButton.setEnabled(true);
                             Toast.makeText(AdminLoginActivity.this, "This account does not have admin privileges", Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -226,7 +108,6 @@ public class AdminLoginActivity extends AppCompatActivity {
                     public void onFailure(String error) {
                         progressBar.setVisibility(View.GONE);
                         loginButton.setEnabled(true);
-                        googleLoginButton.setEnabled(true);
                         Toast.makeText(AdminLoginActivity.this, "Failed to load user profile: " + error, Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -236,7 +117,6 @@ public class AdminLoginActivity extends AppCompatActivity {
             public void onFailure(String error) {
                 progressBar.setVisibility(View.GONE);
                 loginButton.setEnabled(true);
-                googleLoginButton.setEnabled(true);
                 Toast.makeText(AdminLoginActivity.this, "Login failed: " + error, Toast.LENGTH_SHORT).show();
             }
         });

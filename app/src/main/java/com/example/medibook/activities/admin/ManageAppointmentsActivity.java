@@ -29,8 +29,19 @@ public class ManageAppointmentsActivity extends BaseActivity implements Appointm
         checkRoleAndRedirect("ADMIN");
 
         initViews();
+        setupToolbar();
         appointmentRepository = new AppointmentRepository();
         loadAppointments();
+    }
+
+    private void setupToolbar() {
+        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle("Manage Appointments");
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
     }
 
     private void initViews() {

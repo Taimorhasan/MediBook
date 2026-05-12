@@ -21,7 +21,7 @@
             android:text="Hospital Name"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="@color/black" />
+            android:textColor="@color/text_dark" />
 
         <TextView
             android:id="@+id/hospital_address"
@@ -66,7 +66,7 @@
                 android:layout_height="wrap_content"
                 android:text="Edit"
                 android:textAllCaps="false"
-                android:textColor="@color/teal_700" />
+                android:textColor="@color/primary_blue" />
         </LinearLayout>
 
     </LinearLayout>

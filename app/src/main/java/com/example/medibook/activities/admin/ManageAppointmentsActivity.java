@@ -26,7 +26,9 @@ public class ManageAppointmentsActivity extends BaseActivity implements Appointm
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_manage_appointments);
-        checkRoleAndRedirect("ADMIN");
+        if (!checkRoleAndRedirect("admin")) {
+            return;
+        }
 
         initViews();
         setupToolbar();

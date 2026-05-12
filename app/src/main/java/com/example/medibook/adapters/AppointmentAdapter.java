@@ -42,13 +42,24 @@ public class AppointmentAdapter extends RecyclerView.Adapter<AppointmentAdapter.
     @Override
     public void onBindViewHolder(@NonNull AppointmentViewHolder holder, int position) {
         Appointment appointment = appointmentList.get(position);
-        holder.doctorNameTextView.setText("Doctor: " + appointment.getDoctorId()); // TODO: Get doctor name
-        holder.dateTextView.setText("Date: " + appointment.getDate());
-        holder.timeTextView.setText("Time: " + appointment.getTime());
-        holder.statusTextView.setText(appointment.getStatus().toUpperCase());
+        
+        String doctorId = appointment.getDoctorId() != null ? appointment.getDoctorId() : "Unknown";
+        String date = appointment.getDate() != null ? appointment.getDate() : "N/A";
+        String time = appointment.getTime() != null ? appointment.getTime() : "N/A";
+        String status = appointment.getStatus() != null ? appointment.getStatus() : "pending";
+
+        // Display Doctor Name if available, otherwise show ID.
+        String doctorDisplay = (appointment.getDoctorName() != null && !appointment.getDoctorName().isEmpty()) 
+                               ? appointment.getDoctorName() 
+                               : "ID: " + doctorId;
+        
+        holder.doctorNameTextView.setText("Doctor: " + doctorDisplay);
+        holder.dateTextView.setText("Date: " + date);
+        holder.timeTextView.setText("Time: " + time);
+        holder.statusTextView.setText(status.toUpperCase());
 
         // Show cancel button only for pending/confirmed appointments
-        if ("pending".equals(appointment.getStatus()) || "confirmed".equals(appointment.getStatus())) {
+        if ("pending".equalsIgnoreCase(status) || "confirmed".equalsIgnoreCase(status)) {
             holder.cancelButton.setVisibility(View.VISIBLE);
         } else {
             holder.cancelButton.setVisibility(View.GONE);

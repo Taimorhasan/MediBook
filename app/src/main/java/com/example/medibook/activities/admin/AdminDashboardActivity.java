@@ -16,6 +16,7 @@ import com.example.medibook.models.Appointment;
 import android.widget.TextView;
 import com.google.android.material.card.MaterialCardView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import java.util.List;
 
 public class AdminDashboardActivity extends BaseActivity {
@@ -32,13 +33,21 @@ public class AdminDashboardActivity extends BaseActivity {
         setContentView(R.layout.activity_admin_dashboard);
         
         // Check if the user has the admin role
-        checkRoleAndRedirect("admin");
+        if (!checkRoleAndRedirect("admin")) {
+            return;
+        }
 
         // Initialize repositories
         authRepository = new AuthRepository();
         doctorRepository = new DoctorRepository();
         appointmentRepository = new AppointmentRepository();
-        currentAdminId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            android.util.Log.e("AdminDashboard", "Current user is null! Redirecting to portal.");
+            navigateToPortal();
+            return;
+        }
+        currentAdminId = user.getUid();
 
         doctorsCountText = findViewById(R.id.total_doctors_count);
         appointmentsCountText = findViewById(R.id.total_appointments_count);

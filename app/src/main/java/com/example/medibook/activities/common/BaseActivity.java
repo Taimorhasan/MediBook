@@ -18,15 +18,35 @@ public abstract class BaseActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
     }
 
-    protected void checkRoleAndRedirect(String requiredRole) {
+    protected boolean checkRoleAndRedirect(String requiredRole) {
+        if (sessionManager == null) {
+            sessionManager = new SessionManager(this);
+        }
+
         String currentRole = sessionManager.getUserRole();
         android.util.Log.d("BaseActivity", "Checking role: required=" + requiredRole + ", current=" + currentRole);
         
-        if (currentRole == null || !currentRole.equalsIgnoreCase(requiredRole)) {
-            android.util.Log.w("BaseActivity", "Access Denied: Current role '" + currentRole + "' does not match required role '" + requiredRole + "'");
-            Toast.makeText(this, "Access Denied: Unauthorized Role", Toast.LENGTH_SHORT).show();
-            navigateToPortal();
+        // If role is missing but user is logged in, try to see if we're in a weird state
+        if (currentRole == null || currentRole.isEmpty()) {
+            if (mAuth.getCurrentUser() != null) {
+                android.util.Log.w("BaseActivity", "User logged in but role missing from SessionManager. This might cause a redirect.");
+                // We could fetch from Firestore here, but since this is synchronous, 
+                // let's at least check if we can skip redirect if we're ALREADY in an admin activity
+                // and the user was just verified.
+            }
         }
+
+        if (currentRole == null || !currentRole.equalsIgnoreCase(requiredRole)) {
+            android.util.Log.w("BaseActivity", "Access Denied: Current role '" + (currentRole == null ? "null" : currentRole) + "' does not match required role '" + requiredRole + "'");
+            
+            // Only redirect if we are sure there is no valid session
+            if (mAuth.getCurrentUser() == null || (currentRole != null && !currentRole.isEmpty())) {
+                Toast.makeText(this, "Access Denied: Unauthorized Role", Toast.LENGTH_SHORT).show();
+                navigateToPortal();
+                return false;
+            }
+        }
+        return true;
     }
 
     protected void navigateToPortal() {

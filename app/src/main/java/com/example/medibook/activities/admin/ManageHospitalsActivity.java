@@ -33,7 +33,9 @@ public class ManageHospitalsActivity extends BaseActivity implements HospitalAda
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_manage_hospitals);
-        checkRoleAndRedirect("ADMIN");
+        if (!checkRoleAndRedirect("admin")) {
+            return;
+        }
 
         initViews();
         setupToolbar();

@@ -40,14 +40,21 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     @Override
     public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
         User user = userList.get(position);
-        holder.nameText.setText(user.getName());
-        holder.emailText.setText(user.getEmail());
+        
+        String name = user.getName() != null ? user.getName() : "Anonymous User";
+        String email = user.getEmail() != null ? user.getEmail() : "No Email";
+        
+        holder.nameText.setText(name);
+        holder.emailText.setText(email);
         
         String role = "PATIENT";
         if (user.getRoleIds() != null && !user.getRoleIds().isEmpty()) {
             role = user.getRoleIds().get(0);
+        } else if (user.getRole() != null) {
+            role = user.getRole();
         }
-        holder.roleChip.setText(role);
+        
+        holder.roleChip.setText(role.toUpperCase());
 
         holder.changeRoleBtn.setOnClickListener(v -> {
             if (listener != null) {

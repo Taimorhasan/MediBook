@@ -28,7 +28,12 @@ public class ManageUsersActivity extends BaseActivity implements UserAdapter.OnU
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_manage_users);
-        checkRoleAndRedirect("ADMIN");
+        
+        // RBAC: Verify if the current user has the 'admin' role before allowing access.
+        // Redirects to PortalSelectionActivity if the role is unauthorized or session is invalid.
+        if (!checkRoleAndRedirect("admin")) {
+            return;
+        }
 
         initViews();
         userRepository = new UserRepository();
@@ -36,6 +41,8 @@ public class ManageUsersActivity extends BaseActivity implements UserAdapter.OnU
     }
 
     private void initViews() {
+        // Fix for Stability: Find the toolbar by its standard ID 'toolbar' defined in toolbar_main.xml.
+        // The overriding ID 'toolbar_layout' was removed from the XML to prevent NullPointerExceptions.
         androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {

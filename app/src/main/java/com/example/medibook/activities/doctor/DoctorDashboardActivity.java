@@ -38,7 +38,9 @@ public class DoctorDashboardActivity extends com.example.medibook.activities.com
         setContentView(R.layout.activity_doctor_dashboard);
 
         // Ensure only doctors can access
-        checkRoleAndRedirect("doctor");
+        if (!checkRoleAndRedirect("doctor")) {
+            return;
+        }
 
         // Initialize repositories
         doctorRepository = new DoctorDetailRepository();

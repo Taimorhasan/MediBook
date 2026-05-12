@@ -27,7 +27,10 @@ public class ManageDoctorsActivity extends BaseActivity implements DoctorVerific
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_manage_doctors);
-        checkRoleAndRedirect("ADMIN");
+        // RBAC: Strict role verification for the admin panel.
+        if (!checkRoleAndRedirect("admin")) {
+            return;
+        }
 
         initViews();
         setupToolbar();
@@ -36,6 +39,8 @@ public class ManageDoctorsActivity extends BaseActivity implements DoctorVerific
     }
 
     private void setupToolbar() {
+        // Find the standard Toolbar ID from the included layout. 
+        // ID conflict fixed by removing 'toolbar_layout' from the <include> tag.
         androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {

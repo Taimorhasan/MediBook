@@ -39,9 +39,14 @@ public class DoctorVerificationAdapter extends RecyclerView.Adapter<DoctorVerifi
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Doctor doctor = doctorList.get(position);
-        holder.nameText.setText("Dr. " + doctor.getName());
-        holder.specialtyText.setText(doctor.getSpecialization());
-        holder.hospitalText.setText(doctor.getHospitalName());
+        
+        String name = doctor.getName() != null ? doctor.getName() : "Unknown";
+        String specialty = doctor.getSpecialization() != null ? doctor.getSpecialization() : "General";
+        String hospital = doctor.getHospitalName() != null ? doctor.getHospitalName() : "No Hospital";
+
+        holder.nameText.setText("Dr. " + name);
+        holder.specialtyText.setText(specialty);
+        holder.hospitalText.setText(hospital);
         
         boolean isVerified = doctor.isVerified();
         holder.statusChip.setText(isVerified ? "VERIFIED" : "PENDING");

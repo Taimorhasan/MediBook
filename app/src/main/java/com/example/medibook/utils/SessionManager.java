@@ -19,9 +19,10 @@ public class SessionManager {
     }
 
     public boolean saveUserSession(String userId, String role) {
+        SharedPreferences.Editor editor = pref.edit();
         editor.putString(KEY_USER_ID, userId);
         editor.putString(KEY_ROLE, role);
-        return editor.commit(); // ✅ Return success/failure
+        return editor.commit(); // ✅ Synchronous commit for critical session data
     }
 
     public String getUserRole() {
@@ -33,7 +34,8 @@ public class SessionManager {
     }
 
     public boolean clearSession() {
+        SharedPreferences.Editor editor = pref.edit();
         editor.clear();
-        return editor.commit(); // ✅ Return success/failure
+        return editor.commit(); 
     }
 }

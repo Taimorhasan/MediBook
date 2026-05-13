@@ -66,4 +66,24 @@ public class RoleRepository {
             db.collection(COLLECTION_ROLES).add(role);
         }
     }
+
+    public void getRolesByIds(List<String> roleIds, RolesCallback callback) {
+        if (roleIds == null || roleIds.isEmpty()) {
+            callback.onSuccess(new ArrayList<>());
+            return;
+        }
+        db.collection(COLLECTION_ROLES)
+                .whereIn(com.google.firebase.firestore.FieldPath.documentId(), roleIds)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<Role> roles = new ArrayList<>();
+                    queryDocumentSnapshots.forEach(doc -> {
+                        Role role = doc.toObject(Role.class);
+                        role.setRoleId(doc.getId());
+                        roles.add(role);
+                    });
+                    callback.onSuccess(roles);
+                })
+                .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
+    }
 }

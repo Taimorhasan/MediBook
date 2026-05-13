@@ -7,13 +7,13 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import androidx.appcompat.app.AppCompatActivity;
 import com.bumptech.glide.Glide;
 import com.example.medibook.R;
 import com.example.medibook.repositories.UserRepository;
 import com.google.firebase.auth.FirebaseAuth;
+import com.example.medibook.activities.auth.UnifiedLoginActivity;
 
-public class PatientProfileViewActivity extends AppCompatActivity {
+public class PatientProfileViewActivity extends com.example.medibook.activities.common.BaseActivity {
 
     private ImageView profileImageView;
     private TextView nameTextView, emailTextView, phoneTextView, ageTextView;
@@ -86,10 +86,7 @@ public class PatientProfileViewActivity extends AppCompatActivity {
 
     private void logout() {
         FirebaseAuth.getInstance().signOut();
-        Intent intent = new Intent(PatientProfileViewActivity.this, com.example.medibook.activities.common.PortalSelectionActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        finish();
+        navigateToLogin();
     }
 
     @Override

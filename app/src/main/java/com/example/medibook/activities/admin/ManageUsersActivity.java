@@ -65,8 +65,59 @@ public class ManageUsersActivity extends BaseActivity implements UserAdapter.OnU
         adapter = new UserAdapter(filteredList, this, this);
         recyclerView.setAdapter(adapter);
 
+        findViewById(R.id.fab_add_user).setOnClickListener(v -> showAddUserDialog());
+
         setupFilters();
     }
+
+    private void showAddUserDialog() {
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_user, null);
+        android.widget.EditText nameET = dialogView.findViewById(R.id.et_name);
+        android.widget.EditText emailET = dialogView.findViewById(R.id.et_email);
+        android.widget.EditText phoneET = dialogView.findViewById(R.id.et_phone);
+        android.widget.EditText passwordET = dialogView.findViewById(R.id.et_password);
+        android.widget.Spinner roleSpinner = dialogView.findViewById(R.id.role_spinner);
+
+        new AlertDialog.Builder(this)
+            .setTitle("Add New User")
+            .setView(dialogView)
+            .setPositiveButton("Add", (dialog, which) -> {
+                String name = nameET.getText().toString().trim();
+                String email = emailET.getText().toString().trim();
+                String phone = phoneET.getText().toString().trim();
+                String password = passwordET.getText().toString().trim();
+                String role = roleSpinner.getSelectedItem().toString().toLowerCase();
+
+                if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
+                    Toast.makeText(this, "Please fill required fields", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                createNewUser(name, email, phone, password, role);
+            })
+            .setNegativeButton("Cancel", null)
+            .show();
+    }
+
+    private void createNewUser(String name, String email, String phone, String password, String role) {
+        progressBar.setVisibility(View.VISIBLE);
+        AuthRepository authRepository = new AuthRepository();
+        authRepository.createUserByAdmin(this, name, email, phone, password, role, new AuthRepository.VoidCallback() {
+            @Override
+            public void onSuccess() {
+                progressBar.setVisibility(View.GONE);
+                Toast.makeText(ManageUsersActivity.this, "User created successfully", Toast.LENGTH_SHORT).show();
+                loadUsers();
+            }
+
+            @Override
+            public void onFailure(String error) {
+                progressBar.setVisibility(View.GONE);
+                Toast.makeText(ManageUsersActivity.this, "Failed to create user: " + error, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
 
     private void setupFilters() {
         searchEditText.addTextChangedListener(new android.text.TextWatcher() {
@@ -180,7 +231,7 @@ public class ManageUsersActivity extends BaseActivity implements UserAdapter.OnU
         Toast.makeText(this, "Now acting as " + user.getName() + " (" + targetRole + ")", Toast.LENGTH_SHORT).show();
         
         // Redirect to Portal Selection to see the new perspective
-        android.content.Intent intent = new android.content.Intent(this, com.example.medibook.activities.common.PortalSelectionActivity.class);
+        android.content.Intent intent = new android.content.Intent(this, com.example.medibook.activities.common.UnifiedLoginActivity.class);
         intent.setFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK | android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();

@@ -32,6 +32,11 @@ public class AuthRepository {
         void onFailure(String error);
     }
 
+    public interface UnifiedAuthCallback {
+        void onSuccess(FirebaseUser user, String role);
+        void onFailure(String error);
+    }
+
     // 🔹 Callback interfaces for additional operations
     public interface UserExistsCallback {
         void onResult(boolean exists);
@@ -96,6 +101,23 @@ public class AuthRepository {
             });
     }
 
+    // 🔹 Unified sign in with role check
+    public void signInWithRoleCheck(String email, String password, UnifiedAuthCallback callback) {
+        mAuth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    FirebaseUser user = mAuth.getCurrentUser();
+                    if (user != null) {
+                        getUserRole(user.getUid(), role -> callback.onSuccess(user, role));
+                    } else {
+                        callback.onFailure("User is null after successful sign-in");
+                    }
+                } else {
+                    callback.onFailure(task.getException() != null ? task.getException().getMessage() : "Unknown error");
+                }
+            });
+    }
+
     // 🔹 Sign in with Google Credential
     public void signInWithCredential(AuthCredential credential, AuthCallback callback) {
         mAuth.signInWithCredential(credential)
@@ -139,6 +161,19 @@ public class AuthRepository {
                 callback.onResult(documentSnapshot.exists());
             })
             .addOnFailureListener(e -> callback.onResult(false));
+    }
+
+    // 🔹 Update user roles (Admin only)
+    public void updateUserRoles(String userId, String role, VoidCallback callback) {
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("role", role);
+        updates.put("roleIds", Arrays.asList(role));
+        updates.put("updatedAt", System.currentTimeMillis());
+
+        db.collection("users").document(userId)
+            .update(updates)
+            .addOnSuccessListener(aVoid -> callback.onSuccess())
+            .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
     }
 
     // 🔹 Get user role from Firestore
@@ -261,4 +296,48 @@ public class AuthRepository {
     public boolean isUserLoggedIn() {
         return getCurrentUser() != null;
     }
+
+    /**
+     * Creates a new user by an admin without signing out the current admin.
+     * Uses a secondary FirebaseApp instance.
+     */
+    public void createUserByAdmin(android.content.Context context, String name, String email, String phone, String password, String role, VoidCallback callback) {
+        String secondaryAppName = "secondary_app_" + System.currentTimeMillis();
+        com.google.firebase.FirebaseOptions options = com.google.firebase.FirebaseApp.getInstance().getOptions();
+        
+        try {
+            com.google.firebase.FirebaseApp secondaryApp = com.google.firebase.FirebaseApp.initializeApp(context, options, secondaryAppName);
+            FirebaseAuth secondaryAuth = FirebaseAuth.getInstance(secondaryApp);
+            
+            secondaryAuth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser newUser = task.getResult().getUser();
+                        if (newUser != null) {
+                            createUserProfile(newUser.getUid(), name, email, phone, role, new VoidCallback() {
+                                @Override
+                                public void onSuccess() {
+                                    secondaryApp.delete();
+                                    callback.onSuccess();
+                                }
+                                @Override
+                                public void onFailure(String error) {
+                                    secondaryApp.delete();
+                                    callback.onFailure(error);
+                                }
+                            });
+                        } else {
+                            secondaryApp.delete();
+                            callback.onFailure("User is null after creation");
+                        }
+                    } else {
+                        secondaryApp.delete();
+                        callback.onFailure(task.getException() != null ? task.getException().getMessage() : "Auth failure");
+                    }
+                });
+        } catch (Exception e) {
+            callback.onFailure("Failed to initialize secondary app: " + e.getMessage());
+        }
+    }
 }
+

@@ -15,7 +15,7 @@ import com.example.medibook.repositories.UserRepository;
 import com.example.medibook.models.Doctor;
 import com.example.medibook.models.Appointment;
 import com.example.medibook.adapters.AppointmentAdapter;
-import com.example.medibook.activities.common.PortalSelectionActivity;
+import com.example.medibook.activities.auth.UnifiedLoginActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import java.util.ArrayList;
 import java.util.List;
@@ -113,15 +113,13 @@ public class DoctorDashboardActivity extends com.example.medibook.activities.com
             @Override
             public void onSuccess() {
                 Toast.makeText(DoctorDashboardActivity.this, "Logged out successfully", Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(DoctorDashboardActivity.this, PortalSelectionActivity.class));
-                finish();
+                navigateToLogin();
             }
 
             @Override
             public void onFailure(String error) {
                 // Still navigate even if cleanup failed
-                startActivity(new Intent(DoctorDashboardActivity.this, PortalSelectionActivity.class));
-                finish();
+                navigateToLogin();
             }
         });
     }

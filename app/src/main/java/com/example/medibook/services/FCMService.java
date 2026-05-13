@@ -9,7 +9,7 @@ import android.os.Build;
 import android.util.Log;
 import androidx.core.app.NotificationCompat;
 import com.example.medibook.R;
-import com.example.medibook.activities.common.PortalSelectionActivity;
+import com.example.medibook.activities.common.UnifiedLoginActivity;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
@@ -44,7 +44,7 @@ public class FCMService extends FirebaseMessagingService {
         // Use getApplicationContext() for context in Service
         Context context = getApplicationContext();
         
-        Intent intent = new Intent(context, PortalSelectionActivity.class);
+        Intent intent = new Intent(context, UnifiedLoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         
         PendingIntent pendingIntent = PendingIntent.getActivity(

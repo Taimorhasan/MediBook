@@ -7,7 +7,7 @@ import android.widget.Button;
 import android.widget.Toast;
 import com.example.medibook.R;
 import com.example.medibook.activities.common.BaseActivity;
-import com.example.medibook.activities.common.PortalSelectionActivity;
+import com.example.medibook.activities.auth.UnifiedLoginActivity;
 import com.example.medibook.repositories.AuthRepository;
 import com.example.medibook.repositories.DoctorRepository;
 import com.example.medibook.repositories.AppointmentRepository;
@@ -47,7 +47,7 @@ public class AdminDashboardActivity extends BaseActivity {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) {
             android.util.Log.e("AdminDashboard", "Current user is null! Redirecting to portal.");
-            navigateToPortal();
+            navigateToLogin();
             return;
         }
         currentAdminId = user.getUid();
@@ -174,19 +174,13 @@ public class AdminDashboardActivity extends BaseActivity {
             @Override
             public void onSuccess() {
                 Toast.makeText(AdminDashboardActivity.this, "Logged out successfully", Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(AdminDashboardActivity.this, PortalSelectionActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-                finish();
+                navigateToLogin();
             }
 
             @Override
             public void onFailure(String error) {
                 // Still navigate even if cleanup failed
-                Intent intent = new Intent(AdminDashboardActivity.this, PortalSelectionActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-                finish();
+                navigateToLogin();
             }
         });
     }

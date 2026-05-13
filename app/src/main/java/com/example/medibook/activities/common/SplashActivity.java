@@ -10,7 +10,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.medibook.R;
-import com.example.medibook.activities.auth.LoginActivity;
+import com.example.medibook.activities.auth.UnifiedLoginActivity;
 import com.example.medibook.activities.user.UserHomeActivity;
 import com.example.medibook.activities.doctor.DoctorDashboardActivity;
 import com.example.medibook.activities.admin.AdminDashboardActivity;
@@ -101,13 +101,13 @@ public class SplashActivity extends AppCompatActivity {
                 
                 @Override
                 public void onFailure(String error) {
-                    // If we can't fetch user data, go to portal selection
-                    navigateToPortalSelection();
+                    // If we can't fetch user data, go to unified login
+                    navigateToUnifiedLogin();
                 }
             });
         } else {
-            // No user logged in, go to portal selection
-            navigateToPortalSelection();
+            // No user logged in, go to unified login
+            navigateToUnifiedLogin();
         }
     }
     
@@ -131,8 +131,8 @@ public class SplashActivity extends AppCompatActivity {
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
     
-    private void navigateToPortalSelection() {
-        Intent intent = new Intent(SplashActivity.this, PortalSelectionActivity.class);
+    private void navigateToUnifiedLogin() {
+        Intent intent = new Intent(SplashActivity.this, UnifiedLoginActivity.class);
         startActivity(intent);
         finish();
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);

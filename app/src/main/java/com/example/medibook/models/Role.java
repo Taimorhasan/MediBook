@@ -6,10 +6,26 @@ import java.util.List;
 public class Role {
     private String roleId;
     private String roleName;
+    private String dashboardType; // admin, doctor, patient
     private List<String> permissions;
 
     public Role() {
         this.permissions = new ArrayList<>();
+    }
+
+    public Role(String roleId, String roleName, String dashboardType, List<String> permissions) {
+        this.roleId = roleId;
+        this.roleName = roleName;
+        this.dashboardType = dashboardType;
+        this.permissions = permissions;
+    }
+
+    public String getDashboardType() {
+        return dashboardType;
+    }
+
+    public void setDashboardType(String dashboardType) {
+        this.dashboardType = dashboardType;
     }
 
     public Role(String roleId, String roleName, List<String> permissions) {

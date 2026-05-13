@@ -219,6 +219,7 @@ public class DoctorLoginActivity extends AppCompatActivity {
                                         finish();
                                     } else {
                                         Toast.makeText(DoctorLoginActivity.this, "Your account is pending verification by admin.", Toast.LENGTH_LONG).show();
+                                        sessionManager.clearSession();
                                         authRepository.signOut();
                                     }
                                 }
@@ -288,6 +289,7 @@ public class DoctorLoginActivity extends AppCompatActivity {
                                                 finish();
                                             } else {
                                                 Toast.makeText(DoctorLoginActivity.this, "Your account is pending verification by admin.", Toast.LENGTH_LONG).show();
+                                                sessionManager.clearSession();
                                                 authRepository.signOut();
                                             }
                                         }

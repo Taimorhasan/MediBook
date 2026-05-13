@@ -40,7 +40,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 
         if (!currentRole.equalsIgnoreCase(requiredRole)) {
             // Special case: If original role is admin, allow access to admin screens even if impersonating
-            if (requiredRole.equalsIgnoreCase("admin") && "admin".equalsIgnoreCase(originalRole)) {
+            if (requiredRole.equalsIgnoreCase("admin") && "admin".equalsIgnoreCase(sessionManager.getOriginalRole())) {
                 android.util.Log.d("BaseActivity", "Bypassing role check for admin (original role)");
                 return true;
             }

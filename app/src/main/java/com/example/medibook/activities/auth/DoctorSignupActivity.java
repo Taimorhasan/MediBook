@@ -104,6 +104,7 @@ public class DoctorSignupActivity extends AppCompatActivity {
                 // Now save doctor-specific details
                 Doctor doctor = new Doctor(user.getUid(), name, specialty, "", phone, email, 
                         experience, "0", "", true);
+                doctor.setVerified(false); // Explicitly set as unverified until admin approval
 
                 // Save to both doctors and update users collection with doctor details
                 doctorRepository.saveDoctorProfile(user.getUid(), doctor, new DoctorDetailRepository.VoidCallback() {

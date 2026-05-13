@@ -165,8 +165,8 @@ public class DoctorListActivity extends AppCompatActivity implements DoctorAdapt
 
     @Override
     public void onDoctorClick(Doctor doctor) {
-        // Navigate to BookAppointmentActivity with doctor data
-        Intent intent = new Intent(this, BookAppointmentActivity.class);
+        // Navigate to DoctorProfileActivity with doctor data
+        Intent intent = new Intent(this, DoctorProfileActivity.class);
         intent.putExtra("doctorId", doctor.getDoctorId());
         intent.putExtra("doctorName", doctor.getName());
         intent.putExtra("doctorSpecialty", doctor.getSpecialty());

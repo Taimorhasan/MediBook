@@ -170,6 +170,7 @@
 
             <!-- Upcoming Appointments Section -->
             <TextView
+                android:id="@+id/upcoming_appointments_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Upcoming Appointments"
@@ -178,26 +179,35 @@
                 android:textColor="#111827"
                 android:layout_marginBottom="12dp" />
 
-            <androidx.cardview.widget.CardView
+            <!-- Appointments RecyclerView -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/appointments_recycler_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
-                app:cardBackgroundColor="#FFFFFF"
-                android:layout_marginBottom="24dp">
-                
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp"
-                    android:gravity="center_horizontal">
+                android:layout_marginBottom="16dp"
+                android:nestedScrollingEnabled="false"
+                android:visibility="gone" />
 
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="#E0F2FE"
-                        android:orientation="vertical"
+            <!-- Loading Progress -->
+            <ProgressBar
+                android:id="@+id/appointments_loading_progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginBottom="16dp"
+                android:visibility="visible" />
+
+            <!-- No Appointments Text -->
+            <TextView
+                android:id="@+id/no_appointments_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="No upcoming appointments"
+                android:textSize="16sp"
+                android:textColor="#6B7280"
+                android:gravity="center"
+                android:layout_marginBottom="24dp"
+                android:visibility="gone" />
                         android:padding="8dp"
                         android:gravity="center"
                         android:layout_marginBottom="16dp">
@@ -255,190 +265,6 @@
                         app:cornerRadius="12dp"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
-
-            <!-- Featured Doctors Section -->
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Featured Doctors"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:textColor="#111827" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:text="See Popular"
-                    android:textSize="14sp"
-                    android:textColor="#2563EB"
-                    android:textStyle="bold" />
-            </RelativeLayout>
-
-            <HorizontalScrollView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:scrollbars="none"
-                android:layout_marginBottom="24dp">
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <!-- Doctor Card 1 -->
-                    <androidx.cardview.widget.CardView
-                        android:layout_width="200dp"
-                        android:layout_height="340dp"
-                        app:cardCornerRadius="16dp"
-                        app:cardElevation="2dp"
-                        app:cardBackgroundColor="#FFFFFF"
-                        android:layout_marginEnd="16dp">
-                        
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:orientation="vertical">
-                            
-                            <RelativeLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="140dp">
-                                <ImageView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:scaleType="centerCrop"
-                                    android:background="#34D399" /> 
-                                
-                                <LinearLayout
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_alignParentEnd="true"
-                                    android:layout_margin="8dp"
-                                    android:background="#FFFFFF"
-                                    android:paddingHorizontal="6dp"
-                                    android:paddingVertical="2dp"
-                                    android:gravity="center_vertical">
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:text="★ 4.9"
-                                        android:textColor="#F59E0B"
-                                        android:textSize="12sp"
-                                        android:textStyle="bold"/>
-                                </LinearLayout>
-                            </RelativeLayout>
-
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="0dp"
-                                android:layout_weight="1"
-                                android:orientation="vertical"
-                                android:padding="12dp"
-                                android:paddingBottom="20dp"
-                                android:gravity="bottom">
-                                
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Dr. James Wilson"
-                                    android:textSize="14sp"
-                                    android:textStyle="bold"
-                                    android:textColor="#111827"/>
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Neurologist • 12 yrs exp"
-                                    android:textSize="12sp"
-                                    android:textColor="#6B7280"
-                                    android:layout_marginBottom="12dp"/>
-
-                                <Button
-                                    android:id="@+id/btn_book_visit"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="48dp"
-                                    android:text="Book Visit"
-                                    android:textSize="14sp"
-                                    android:textColor="#2563EB"
-                                    android:backgroundTint="#EFF6FF"
-                                    app:cornerRadius="12dp"/>
-                            </LinearLayout>
-                        </LinearLayout>
-                    </androidx.cardview.widget.CardView>
-
-                    <!-- Doctor Card 2 -->
-                    <androidx.cardview.widget.CardView
-                        android:layout_width="200dp"
-                        android:layout_height="340dp"
-                        app:cardCornerRadius="16dp"
-                        app:cardElevation="2dp"
-                        app:cardBackgroundColor="#FFFFFF">
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:orientation="vertical">
-                            <RelativeLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="140dp">
-                                <View
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:background="#0D9488"/>
-                                <LinearLayout
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_alignParentEnd="true"
-                                    android:layout_margin="8dp"
-                                    android:background="#FFFFFF"
-                                    android:paddingHorizontal="6dp"
-                                    android:paddingVertical="2dp"
-                                    android:gravity="center_vertical">
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:text="★ 4.8"
-                                        android:textColor="#F59E0B"
-                                        android:textSize="12sp"
-                                        android:textStyle="bold"/>
-                                </LinearLayout>
-                            </RelativeLayout>
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="0dp"
-                                android:layout_weight="1"
-                                android:orientation="vertical"
-                                android:padding="12dp"
-                                android:paddingBottom="20dp"
-                                android:gravity="bottom">
-                                <TextView 
-                                    android:layout_width="wrap_content" 
-                                    android:layout_height="wrap_content" 
-                                    android:text="Dr. Elara Smith" 
-                                    android:textStyle="bold"
-                                    android:textColor="#111827"/>
-                                <TextView 
-                                    android:layout_width="wrap_content" 
-                                    android:layout_height="wrap_content" 
-                                    android:text="Pediatrician • 8 yrs exp" 
-                                    android:textSize="12sp"
-                                    android:textColor="#6B7280"
-                                    android:layout_marginBottom="12dp"/>
-                                <Button
-                                    android:layout_width="match_parent"
-                                    android:layout_height="48dp"
-                                    android:text="Book Visit"
-                                    android:textSize="14sp"
-                                    android:textColor="#2563EB"
-                                    android:backgroundTint="#EFF6FF"
-                                    app:cornerRadius="12dp"/>
-                            </LinearLayout>
-                        </LinearLayout>
-                    </androidx.cardview.widget.CardView>
-
-                </LinearLayout>
-            </HorizontalScrollView>
 
             <!-- Health Stats ROW -->
             <LinearLayout

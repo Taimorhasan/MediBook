@@ -24,8 +24,6 @@ import java.util.List;
 
 public class UserHomeActivity extends AppCompatActivity implements AppointmentAdapter.OnAppointmentClickListener {
 
-    private Button btnViewDetails;
-    private Button btnBookVisit;
     private LinearLayout navHome;
     private LinearLayout navBookings;
     private LinearLayout navAlerts;
@@ -54,10 +52,6 @@ public class UserHomeActivity extends AppCompatActivity implements AppointmentAd
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         appointments = new ArrayList<>();
 
-        // Initialize Buttons
-        btnViewDetails = findViewById(R.id.btn_view_details);
-        btnBookVisit = findViewById(R.id.btn_book_visit);
-        
         // Initialize Bottom Nav Items
         navHome = findViewById(R.id.nav_home_layout);
         navBookings = findViewById(R.id.nav_bookings_layout);
@@ -126,20 +120,8 @@ public class UserHomeActivity extends AppCompatActivity implements AppointmentAd
         }
 
         // 2. Make "View Details" functional - hide this button since we have RecyclerView now
-        if (btnViewDetails != null) {
-            btnViewDetails.setVisibility(View.GONE);
-        }
+        // Button removed as it doesn't exist in layout
 
-        // 3. Make "Book Visit" functional
-        btnBookVisit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Navigate to Doctor List Activity
-                Intent intent = new Intent(UserHomeActivity.this, DoctorListActivity.class);
-                startActivity(intent);
-                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-            }
-        });
     }
 
     private void loadAppointments() {

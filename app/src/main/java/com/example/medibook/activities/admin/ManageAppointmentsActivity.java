@@ -20,6 +20,7 @@ public class ManageAppointmentsActivity extends BaseActivity implements Appointm
     private AppointmentAdapter adapter;
     private AppointmentRepository appointmentRepository;
     private ProgressBar progressBar;
+    private View emptyStateView;
     private List<Appointment> appointmentList = new ArrayList<>();
 
     @Override
@@ -49,6 +50,7 @@ public class ManageAppointmentsActivity extends BaseActivity implements Appointm
     private void initViews() {
         recyclerView = findViewById(R.id.appointments_recycler_view);
         progressBar = findViewById(R.id.loading_progress);
+        emptyStateView = findViewById(R.id.empty_state_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new AppointmentAdapter(appointmentList, this);
         recyclerView.setAdapter(adapter);
@@ -62,6 +64,7 @@ public class ManageAppointmentsActivity extends BaseActivity implements Appointm
                 progressBar.setVisibility(View.GONE);
                 appointmentList = appointments;
                 adapter.updateList(appointmentList);
+                emptyStateView.setVisibility(appointmentList.isEmpty() ? View.VISIBLE : View.GONE);
             }
 
             @Override

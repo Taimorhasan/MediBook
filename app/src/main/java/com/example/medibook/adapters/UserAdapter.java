@@ -22,6 +22,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
     public interface OnUserActionListener {
         void onChangeRole(User user);
+        void onImpersonateUser(User user);
     }
 
     public UserAdapter(List<User> userList, Context context, OnUserActionListener listener) {
@@ -61,6 +62,12 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
                 listener.onChangeRole(user);
             }
         });
+
+        holder.actAsBtn.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onImpersonateUser(user);
+            }
+        });
     }
 
     @Override
@@ -76,7 +83,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     static class UserViewHolder extends RecyclerView.ViewHolder {
         TextView nameText, emailText;
         Chip roleChip;
-        Button changeRoleBtn;
+        Button changeRoleBtn, actAsBtn;
         ImageView userImage;
 
         public UserViewHolder(@NonNull View itemView) {
@@ -85,6 +92,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             emailText = itemView.findViewById(R.id.user_email);
             roleChip = itemView.findViewById(R.id.role_chip);
             changeRoleBtn = itemView.findViewById(R.id.change_role_button);
+            actAsBtn = itemView.findViewById(R.id.act_as_button);
             userImage = itemView.findViewById(R.id.user_image);
         }
     }

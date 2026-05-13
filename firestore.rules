@@ -1,78 +1,65 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Helper function to check if user has a specific role (Case Insensitive)
-    function hasRole(roleName) {
-      let userDoc = get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
-      let roleLower = roleName.lower();
-      return request.auth != null && 
-             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-             (
-               (userDoc.get('role', '').lower() == roleLower) ||
-               (userDoc.get('roleIds', []).hasAny([roleName, roleLower, roleName.upper()]))
-             );
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
     }
 
-    // Helper function to check if user is an admin
     function isAdmin() {
-      return hasRole('admin');
+      let user = get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+      return isSignedIn() && 
+             (user.get('role', '').lower() == 'admin' ||
+              'admin' in user.get('roleIds', []));
     }
 
-    // Helper function to check if user is a manager
-    function isManager() {
-      return hasRole('manager');
+    function hasPermission(permission) {
+      let user = get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+      return isSignedIn() && 
+             (isAdmin() || 
+              permission in user.get('permissions', []));
     }
 
     // Users collection
     match /users/{userId} {
-      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin() || isManager());
-      allow write: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow read: if isSignedIn();
+      allow write: if request.auth.uid == userId || isAdmin();
     }
 
     // Roles collection
     match /roles/{roleId} {
-      allow read: if request.auth != null;
-      allow write: if isAdmin();
+      allow read: if isSignedIn();
+      allow write: if isAdmin() || hasPermission('manage_roles');
     }
 
     // Doctors collection
     match /doctors/{doctorId} {
-      allow read: if request.auth != null;
-      allow write: if isAdmin() || isManager();
+      // Patients can only see verified doctors. Admins and Managers can see all.
+      allow read: if isSignedIn() && (isAdmin() || hasPermission('manage_doctors') || resource.data.get('isVerified', false) == true);
+      allow write: if isAdmin() || hasPermission('manage_doctors');
     }
 
     // Hospitals collection
     match /hospitals/{hospitalId} {
-      allow read: if request.auth != null;
-      allow write: if isAdmin() || isManager();
-    }
-
-    // Schedules collection
-    match /schedules/{scheduleId} {
-      allow read: if request.auth != null;
-      allow write: if isAdmin() || isManager();
+      allow read: if isSignedIn();
+      allow write: if isAdmin() || hasPermission('manage_hospitals');
     }
 
     // Appointments collection
     match /appointments/{appointmentId} {
-      allow read: if request.auth != null && (
-        request.auth.uid == resource.data.patientId || 
-        request.auth.uid == resource.data.doctorId || 
-        isAdmin() || 
-        isManager()
-      );
-      allow create: if request.auth != null;
-      allow update, delete: if request.auth != null && (
-        request.auth.uid == resource.data.patientId || 
-        isAdmin() || 
-        isManager()
-      );
+      allow read: if isSignedIn() && (resource.data.patientId == request.auth.uid || resource.data.doctorId == request.auth.uid || isAdmin() || hasPermission('view_reports'));
+      allow write: if isSignedIn();
     }
-
+    
     // Notifications collection
-    match /notifications/{notificationId} {
-      allow read, write: if request.auth != null && (request.auth.uid == resource.data.userId || isAdmin());
+    match /notifications/{notifId} {
+      allow read, write: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+    }
+    
+    // General fallback
+    match /{path=**} {
+      allow read, write: if isAdmin();
     }
   }
 }

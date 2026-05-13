@@ -14,6 +14,8 @@ import com.example.medibook.repositories.NotificationRepository;
 import com.example.medibook.repositories.UserRepository;
 import com.example.medibook.activities.doctor.DoctorDashboardActivity;
 import com.example.medibook.models.User;
+import com.example.medibook.models.Doctor;
+import com.example.medibook.repositories.DoctorRepository;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -200,16 +202,39 @@ public class DoctorLoginActivity extends AppCompatActivity {
                 userRepository.getUser(firebaseUser.getUid(), new UserRepository.UserCallback() {
                     @Override
                     public void onSuccess(User user) {
-                        progressBar.setVisibility(View.GONE);
-                        googleLoginButton.setEnabled(true);
-                        loginButton.setEnabled(true);
-
                         // Verify user is a doctor
                         if (user.getRoleIds() != null && user.getRoleIds().contains("doctor")) {
-                            sessionManager.saveUserSession(firebaseUser.getUid(), "doctor");
-                            startActivity(new Intent(DoctorLoginActivity.this, DoctorDashboardActivity.class));
-                            finish();
+                            // Now check if doctor is verified
+                            DoctorRepository doctorRepo = new DoctorRepository();
+                            doctorRepo.getDoctor(firebaseUser.getUid(), new DoctorRepository.DoctorCallback() {
+                                @Override
+                                public void onSuccess(Doctor doctor) {
+                                    progressBar.setVisibility(View.GONE);
+                                    googleLoginButton.setEnabled(true);
+                                    loginButton.setEnabled(true);
+
+                                    if (doctor.isVerified()) {
+                                        sessionManager.saveUserSession(firebaseUser.getUid(), "doctor");
+                                        startActivity(new Intent(DoctorLoginActivity.this, DoctorDashboardActivity.class));
+                                        finish();
+                                    } else {
+                                        Toast.makeText(DoctorLoginActivity.this, "Your account is pending verification by admin.", Toast.LENGTH_LONG).show();
+                                        authRepository.signOut();
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(String error) {
+                                    progressBar.setVisibility(View.GONE);
+                                    googleLoginButton.setEnabled(true);
+                                    loginButton.setEnabled(true);
+                                    Toast.makeText(DoctorLoginActivity.this, "Failed to load doctor profile: " + error, Toast.LENGTH_SHORT).show();
+                                }
+                            });
                         } else {
+                            progressBar.setVisibility(View.GONE);
+                            googleLoginButton.setEnabled(true);
+                            loginButton.setEnabled(true);
                             Toast.makeText(DoctorLoginActivity.this, "This account is not registered as a doctor", Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -245,17 +270,40 @@ public class DoctorLoginActivity extends AppCompatActivity {
                         userRepository.getUser(firebaseUser.getUid(), new UserRepository.UserCallback() {
                             @Override
                             public void onSuccess(User user) {
-                                progressBar.setVisibility(View.GONE);
-                                loginButton.setEnabled(true);
-                                googleLoginButton.setEnabled(true);
-
                                 // Verify user is a doctor
                                 if (user.getRoleIds() != null && user.getRoleIds().contains("doctor")) {
-                                    boolean saved = sessionManager.saveUserSession(firebaseUser.getUid(), "doctor");
-                                    android.util.Log.d("DoctorLogin", "Session saved: " + saved + " for role: doctor");
-                                    startActivity(new Intent(DoctorLoginActivity.this, DoctorDashboardActivity.class));
-                                    finish();
+                                    // Now check if doctor is verified
+                                    DoctorRepository doctorRepo = new DoctorRepository();
+                                    doctorRepo.getDoctor(firebaseUser.getUid(), new DoctorRepository.DoctorCallback() {
+                                        @Override
+                                        public void onSuccess(Doctor doctor) {
+                                            progressBar.setVisibility(View.GONE);
+                                            loginButton.setEnabled(true);
+                                            googleLoginButton.setEnabled(true);
+
+                                            if (doctor.isVerified()) {
+                                                boolean saved = sessionManager.saveUserSession(firebaseUser.getUid(), "doctor");
+                                                android.util.Log.d("DoctorLogin", "Session saved: " + saved + " for role: doctor");
+                                                startActivity(new Intent(DoctorLoginActivity.this, DoctorDashboardActivity.class));
+                                                finish();
+                                            } else {
+                                                Toast.makeText(DoctorLoginActivity.this, "Your account is pending verification by admin.", Toast.LENGTH_LONG).show();
+                                                authRepository.signOut();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onFailure(String error) {
+                                            progressBar.setVisibility(View.GONE);
+                                            loginButton.setEnabled(true);
+                                            googleLoginButton.setEnabled(true);
+                                            Toast.makeText(DoctorLoginActivity.this, "Failed to load doctor profile: " + error, Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
                                 } else {
+                                    progressBar.setVisibility(View.GONE);
+                                    loginButton.setEnabled(true);
+                                    googleLoginButton.setEnabled(true);
                                     Toast.makeText(DoctorLoginActivity.this, "This account is not registered as a doctor", Toast.LENGTH_SHORT).show();
                                 }
                             }

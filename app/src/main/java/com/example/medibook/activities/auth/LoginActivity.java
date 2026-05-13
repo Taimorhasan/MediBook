@@ -22,6 +22,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.example.medibook.models.Doctor;
+import com.example.medibook.repositories.DoctorRepository;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -276,12 +278,35 @@ public class LoginActivity extends AppCompatActivity {
     private void navigateBasedOnRole(User user) {
         if (user.getRoleIds().contains("admin")) {
             startActivity(new Intent(this, com.example.medibook.activities.admin.AdminDashboardActivity.class));
+            finish();
         } else if (user.getRoleIds().contains("doctor")) {
-            startActivity(new Intent(this, com.example.medibook.activities.doctor.DoctorDashboardActivity.class));
+            // Check if doctor is verified before allowing login
+            new DoctorRepository().getDoctor(user.getUserId(), new DoctorRepository.DoctorCallback() {
+                @Override
+                public void onSuccess(Doctor doctor) {
+                    if (doctor != null && doctor.isVerified()) {
+                        startActivity(new Intent(LoginActivity.this, com.example.medibook.activities.doctor.DoctorDashboardActivity.class));
+                        finish();
+                    } else {
+                        Toast.makeText(LoginActivity.this, "Your account is pending verification. Please contact admin.", Toast.LENGTH_LONG).show();
+                        authRepository.signOut();
+                        sessionManager.clearSession();
+                    }
+                }
+
+                @Override
+                public void onFailure(String error) {
+                    // If no doctor profile found, they might need to complete registration
+                    // For now, treat as unverified or error
+                    Toast.makeText(LoginActivity.this, "Doctor profile not found or pending verification.", Toast.LENGTH_LONG).show();
+                    authRepository.signOut();
+                    sessionManager.clearSession();
+                }
+            });
         } else {
             // Default to patient dashboard
             startActivity(new Intent(this, com.example.medibook.activities.user.UserHomeActivity.class));
+            finish();
         }
-        finish();
     }
 }

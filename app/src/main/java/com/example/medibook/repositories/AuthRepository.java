@@ -46,6 +46,11 @@ public class AuthRepository {
         void onFailure(String error);
     }
 
+    public interface PermissionsCallback {
+        void onResult(java.util.List<String> permissions);
+        void onFailure(String error);
+    }
+
     // 🔹 Sign up with email/password + save user to Firestore
     public void signUp(String name, String email, String phone, String password, String role, AuthCallback callback) {
         mAuth.createUserWithEmailAndPassword(email, password)
@@ -191,6 +196,60 @@ public class AuthRepository {
                     mAuth.signOut();
                     callback.onFailure(e.getMessage());
                 });
+    }
+
+    // 🔹 Get user permissions based on their roles
+    public void getUserPermissions(String userId, PermissionsCallback callback) {
+        if (userId == null) {
+            callback.onResult(new java.util.ArrayList<>());
+            return;
+        }
+
+        db.collection("users").document(userId).get()
+            .addOnSuccessListener(documentSnapshot -> {
+                if (documentSnapshot.exists()) {
+                    java.util.List<String> roleIds = (java.util.List<String>) documentSnapshot.get("roleIds");
+                    if (roleIds == null || roleIds.isEmpty()) {
+                        // Fallback to single role field
+                        String role = documentSnapshot.getString("role");
+                        if (role != null) {
+                            roleIds = java.util.Collections.singletonList(role);
+                        } else {
+                            callback.onResult(new java.util.ArrayList<>());
+                            return;
+                        }
+                    }
+
+                    // Fetch permissions for all roles
+                    final java.util.Set<String> allPermissions = new java.util.HashSet<>();
+                    final int[] pendingRoles = {roleIds.size()};
+
+                    for (String roleId : roleIds) {
+                        db.collection("roles").document(roleId).get()
+                            .addOnSuccessListener(roleDoc -> {
+                                if (roleDoc.exists()) {
+                                    java.util.List<String> perms = (java.util.List<String>) roleDoc.get("permissions");
+                                    if (perms != null) {
+                                        allPermissions.addAll(perms);
+                                    }
+                                }
+                                pendingRoles[0]--;
+                                if (pendingRoles[0] == 0) {
+                                    callback.onResult(new java.util.ArrayList<>(allPermissions));
+                                }
+                            })
+                            .addOnFailureListener(e -> {
+                                pendingRoles[0]--;
+                                if (pendingRoles[0] == 0) {
+                                    callback.onResult(new java.util.ArrayList<>(allPermissions));
+                                }
+                            });
+                    }
+                } else {
+                    callback.onResult(new java.util.ArrayList<>());
+                }
+            })
+            .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
     }
 
     // 🔹 Get current user

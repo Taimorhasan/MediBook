@@ -152,8 +152,12 @@ public class ManageDoctorsActivity extends BaseActivity implements DoctorVerific
             @Override
             public void onSuccess() {
                 progressBar.setVisibility(View.GONE);
-                Toast.makeText(ManageDoctorsActivity.this, "Doctor verified successfully", Toast.LENGTH_SHORT).show();
-                loadDoctors(); // Refresh list
+                String msg = verify ? "Doctor verified successfully" : "Doctor verification removed";
+                Toast.makeText(ManageDoctorsActivity.this, msg, Toast.LENGTH_SHORT).show();
+                
+                // Update local model to reflect change immediately without full reload
+                doctor.setVerified(verify);
+                applyFilters();
             }
 
             @Override

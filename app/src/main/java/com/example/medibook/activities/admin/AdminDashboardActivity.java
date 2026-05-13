@@ -26,6 +26,9 @@ public class AdminDashboardActivity extends BaseActivity {
     private AppointmentRepository appointmentRepository;
     private String currentAdminId;
     private TextView doctorsCountText, appointmentsCountText;
+    private View impersonationBanner;
+    private TextView impersonationText;
+    private Button stopImpersonationBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +54,12 @@ public class AdminDashboardActivity extends BaseActivity {
 
         doctorsCountText = findViewById(R.id.total_doctors_count);
         appointmentsCountText = findViewById(R.id.total_appointments_count);
+        
+        impersonationBanner = findViewById(R.id.impersonation_banner);
+        impersonationText = findViewById(R.id.impersonation_text);
+        stopImpersonationBtn = findViewById(R.id.stop_impersonation_btn);
+
+        setupImpersonationUI();
 
         MaterialCardView manageDoctorsCard = findViewById(R.id.manage_doctors_card);
         MaterialCardView manageAppointmentsCard = findViewById(R.id.manage_appointments_card);
@@ -107,6 +116,27 @@ public class AdminDashboardActivity extends BaseActivity {
                 performLogout();
             }
         });
+    }
+
+    private void setupImpersonationUI() {
+        if (sessionManager.isImpersonating()) {
+            impersonationBanner.setVisibility(View.VISIBLE);
+            String role = sessionManager.getUserRole();
+            impersonationText.setText("Acting as: " + role.toUpperCase());
+            
+            stopImpersonationBtn.setOnClickListener(v -> {
+                sessionManager.stopImpersonation();
+                Toast.makeText(this, "Stopped acting as user", Toast.LENGTH_SHORT).show();
+                
+                // Refresh activity to update UI
+                Intent intent = new Intent(this, AdminDashboardActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
+            });
+        } else {
+            impersonationBanner.setVisibility(View.GONE);
+        }
     }
 
     private void fetchStats() {

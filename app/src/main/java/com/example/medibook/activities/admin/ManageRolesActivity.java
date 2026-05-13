@@ -1,83 +1,73 @@
 package com.example.medibook.activities.admin;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
-import androidx.appcompat.widget.Toolbar;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.medibook.R;
-import com.example.medibook.activities.common.BaseActivity;
-import com.example.medibook.adapters.PermissionsAdapter;
-import com.example.medibook.adapters.RolesAdapter;
+import com.example.medibook.adapters.RoleAdapter;
 import com.example.medibook.models.Permission;
 import com.example.medibook.models.Role;
-import com.example.medibook.repositories.AuthRepository;
 import com.example.medibook.repositories.RoleRepository;
-import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputEditText;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
+import java.util.stream.Collectors;
 
-public class ManageRolesActivity extends BaseActivity implements RolesAdapter.OnRoleActionListener {
+public class ManageRolesActivity extends AppCompatActivity implements RoleAdapter.OnRoleClickListener {
 
-    private EditText roleNameEditText;
-    private RecyclerView permissionsRecyclerView, rolesRecyclerView;
-    private MaterialButton createRoleButton;
-    private ProgressBar progressBar;
-    private View emptyStateView;
-
-    private PermissionsAdapter permissionsAdapter;
-    private RolesAdapter rolesAdapter;
+    private RecyclerView recyclerView;
+    private RoleAdapter adapter;
     private RoleRepository roleRepository;
-    private List<Role> rolesList = new ArrayList<>();
+    private List<Role> fullRoleList = new ArrayList<>();
+    private ProgressBar progressBar;
+    private TextView emptyText;
+    private TextInputEditText searchEditText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_manage_roles);
 
-        if (!checkRoleAndRedirect("admin")) {
-            return;
-        }
-
-        initViews();
-        setupToolbar();
         roleRepository = new RoleRepository();
+        
+        recyclerView = findViewById(R.id.recycler_view_roles);
+        progressBar = findViewById(R.id.progress_bar);
+        emptyText = findViewById(R.id.empty_text);
+        searchEditText = findViewById(R.id.search_edit_text);
+        
+        findViewById(R.id.btn_back).setOnClickListener(v -> finish());
+        findViewById(R.id.btn_add_role).setOnClickListener(v -> showRoleDialog(null));
+
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new RoleAdapter(new ArrayList<>(), this);
+        recyclerView.setAdapter(adapter);
+
         loadRoles();
-    }
 
-    private void setupToolbar() {
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle("Manage Roles");
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
-        toolbar.setNavigationOnClickListener(v -> onBackPressed());
-    }
+        searchEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
-    private void initViews() {
-        roleNameEditText = findViewById(R.id.role_name_edit_text);
-        permissionsRecyclerView = findViewById(R.id.permissions_recycler_view);
-        rolesRecyclerView = findViewById(R.id.roles_recycler_view);
-        createRoleButton = findViewById(R.id.create_role_button);
-        progressBar = findViewById(R.id.loading_progress);
-        emptyStateView = findViewById(R.id.empty_state_view);
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                filterRoles(s.toString());
+            }
 
-        // Setup Permissions List
-        permissionsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        permissionsAdapter = new PermissionsAdapter(Permission.getAllPermissions());
-        permissionsRecyclerView.setAdapter(permissionsAdapter);
-
-        // Setup Roles List
-        rolesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        rolesAdapter = new RolesAdapter(rolesList, this);
-        rolesRecyclerView.setAdapter(rolesAdapter);
-
-        createRoleButton.setOnClickListener(v -> createRole());
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
     }
 
     private void loadRoles() {
@@ -86,9 +76,8 @@ public class ManageRolesActivity extends BaseActivity implements RolesAdapter.On
             @Override
             public void onSuccess(List<Role> roles) {
                 progressBar.setVisibility(View.GONE);
-                rolesList = roles;
-                rolesAdapter.updateList(rolesList);
-                emptyStateView.setVisibility(rolesList.isEmpty() ? View.VISIBLE : View.GONE);
+                fullRoleList = roles;
+                updateUI(roles);
             }
 
             @Override
@@ -99,61 +88,128 @@ public class ManageRolesActivity extends BaseActivity implements RolesAdapter.On
         });
     }
 
-    private void createRole() {
-        String roleName = roleNameEditText.getText().toString().trim();
-        List<String> selectedPermissions = permissionsAdapter.getSelectedPermissions();
+    private void updateUI(List<Role> roles) {
+        if (roles.isEmpty()) {
+            emptyText.setVisibility(View.VISIBLE);
+            recyclerView.setVisibility(View.GONE);
+        } else {
+            emptyText.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
+            adapter.updateList(roles);
+        }
+    }
 
-        if (roleName.isEmpty()) {
-            roleNameEditText.setError("Role name required");
-            return;
+    private void filterRoles(String query) {
+        List<Role> filtered = fullRoleList.stream()
+                .filter(r -> r.getRoleName().toLowerCase().contains(query.toLowerCase()))
+                .collect(Collectors.toList());
+        updateUI(filtered);
+    }
+
+    @Override
+    public void onEditClick(Role role) {
+        showRoleDialog(role);
+    }
+
+    private void showRoleDialog(Role roleToEdit) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View view = LayoutInflater.from(this).inflate(R.layout.dialog_add_edit_role, null);
+        
+        EditText etRoleName = view.findViewById(R.id.et_role_name);
+        LinearLayout permissionsContainer = view.findViewById(R.id.permissions_container);
+        
+        List<String> allPermissions = Permission.getAllPermissions();
+        List<CheckBox> checkBoxes = new ArrayList<>();
+
+        for (String perm : allPermissions) {
+            CheckBox cb = new CheckBox(this);
+            cb.setText(Permission.getPermissionLabel(perm));
+            cb.setTag(perm);
+            if (roleToEdit != null && roleToEdit.getPermissions().contains(perm)) {
+                cb.setChecked(true);
+            }
+            permissionsContainer.addView(cb);
+            checkBoxes.add(cb);
         }
 
-        if (selectedPermissions.isEmpty()) {
-            Toast.makeText(this, "Please select at least one permission", Toast.LENGTH_SHORT).show();
-            return;
+        if (roleToEdit != null) {
+            etRoleName.setText(roleToEdit.getRoleName());
+            builder.setTitle("Edit Role");
+        } else {
+            builder.setTitle("Add New Role");
         }
 
-        progressBar.setVisibility(View.VISIBLE);
-        String roleId = UUID.randomUUID().toString();
-        Role newRole = new Role(roleId, roleName, selectedPermissions);
+        builder.setView(view);
+        builder.setPositiveButton(roleToEdit != null ? "Update" : "Add", (dialog, which) -> {
+            String name = etRoleName.getText().toString().trim();
+            if (name.isEmpty()) {
+                Toast.makeText(this, "Role name cannot be empty", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-        roleRepository.addRole(newRole, new RoleRepository.RoleCallback() {
+            List<String> selectedPermissions = checkBoxes.stream()
+                    .filter(CheckBox::isChecked)
+                    .map(cb -> (String) cb.getTag())
+                    .collect(Collectors.toList());
+
+            if (roleToEdit != null) {
+                roleToEdit.setRoleName(name);
+                roleToEdit.setPermissions(selectedPermissions);
+                updateRole(roleToEdit);
+            } else {
+                Role newRole = new Role(null, name, selectedPermissions);
+                createRole(newRole);
+            }
+        });
+        
+        builder.setNegativeButton("Cancel", null);
+        if (roleToEdit != null) {
+            builder.setNeutralButton("Delete", (dialog, which) -> deleteRole(roleToEdit.getRoleId()));
+        }
+        
+        builder.show();
+    }
+
+    private void createRole(Role role) {
+        roleRepository.createRole(role, new RoleRepository.RoleCallback() {
             @Override
-            public void onSuccess(Role role) {
-                progressBar.setVisibility(View.GONE);
-                Toast.makeText(ManageRolesActivity.this, "Role created successfully", Toast.LENGTH_SHORT).show();
-                roleNameEditText.setText("");
-                permissionsAdapter.clearSelection();
+            public void onSuccess(Role createdRole) {
+                Toast.makeText(ManageRolesActivity.this, "Role created", Toast.LENGTH_SHORT).show();
                 loadRoles();
             }
 
             @Override
             public void onFailure(String error) {
-                progressBar.setVisibility(View.GONE);
                 Toast.makeText(ManageRolesActivity.this, "Error: " + error, Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    @Override
-    public void onDeleteRole(Role role) {
-        if (role.getName().equalsIgnoreCase("admin")) {
-            Toast.makeText(this, "Cannot delete system admin role", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        progressBar.setVisibility(View.VISIBLE);
-        roleRepository.deleteRole(role.getRoleId(), new AuthRepository.VoidCallback() {
+    private void updateRole(Role role) {
+        roleRepository.updateRole(role, new com.example.medibook.repositories.AuthRepository.VoidCallback() {
             @Override
             public void onSuccess() {
-                progressBar.setVisibility(View.GONE);
+                Toast.makeText(ManageRolesActivity.this, "Role updated", Toast.LENGTH_SHORT).show();
+                loadRoles();
+            }
+
+            @Override
+            public void onFailure(String error) {
+                Toast.makeText(ManageRolesActivity.this, "Error: " + error, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void deleteRole(String roleId) {
+        roleRepository.deleteRole(roleId, new com.example.medibook.repositories.AuthRepository.VoidCallback() {
+            @Override
+            public void onSuccess() {
                 Toast.makeText(ManageRolesActivity.this, "Role deleted", Toast.LENGTH_SHORT).show();
                 loadRoles();
             }
 
             @Override
             public void onFailure(String error) {
-                progressBar.setVisibility(View.GONE);
                 Toast.makeText(ManageRolesActivity.this, "Error: " + error, Toast.LENGTH_SHORT).show();
             }
         });

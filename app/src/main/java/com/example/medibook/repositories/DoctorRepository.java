@@ -50,6 +50,7 @@ public class DoctorRepository {
     public void getAllDoctors(DoctorsCallback callback) {
         db.collection("doctors")
                 .whereEqualTo("isActive", true)
+                .whereEqualTo("isVerified", true)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -59,6 +60,7 @@ public class DoctorRepository {
                             for (DocumentSnapshot document : task.getResult()) {
                                 Doctor doctor = document.toObject(Doctor.class);
                                 if (doctor != null) {
+                                    doctor.setDoctorId(document.getId());
                                     doctors.add(doctor);
                                 }
                             }
@@ -80,6 +82,7 @@ public class DoctorRepository {
                             for (DocumentSnapshot document : task.getResult()) {
                                 Doctor doctor = document.toObject(Doctor.class);
                                 if (doctor != null) {
+                                    doctor.setDoctorId(document.getId());
                                     doctors.add(doctor);
                                 }
                             }
@@ -95,6 +98,8 @@ public class DoctorRepository {
     public void getDoctorsBySpecialty(String specialty, DoctorsCallback callback) {
         db.collection("doctors")
                 .whereEqualTo("specialty", specialty)
+                .whereEqualTo("isActive", true)
+                .whereEqualTo("isVerified", true)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -104,6 +109,7 @@ public class DoctorRepository {
                             for (DocumentSnapshot document : task.getResult()) {
                                 Doctor doctor = document.toObject(Doctor.class);
                                 if (doctor != null) {
+                                    doctor.setDoctorId(document.getId());
                                     doctors.add(doctor);
                                 }
                             }

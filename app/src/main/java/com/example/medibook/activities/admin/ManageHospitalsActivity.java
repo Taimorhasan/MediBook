@@ -28,6 +28,7 @@ public class ManageHospitalsActivity extends BaseActivity implements HospitalAda
     private ProgressBar progressBar;
     private View emptyView;
     private List<Hospital> hospitalList = new ArrayList<>();
+    private FloatingActionButton addFab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

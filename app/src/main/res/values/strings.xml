@@ -65,4 +65,11 @@
         <item>Active Doctors</item>
         <item>Inactive Doctors</item>
     </string-array>
+
+    <string-array name="user_role_filters">
+        <item>All Roles</item>
+        <item>Admin</item>
+        <item>Doctor</item>
+        <item>Patient</item>
+    </string-array>
 </resources>

@@ -86,9 +86,10 @@ public class UserHomeActivity extends AppCompatActivity {
         btnBookVisit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(UserHomeActivity.this, "Navigating to Doctor Profile", Toast.LENGTH_SHORT).show();
-                // Intent intent = new Intent(UserHomeActivity.this, DoctorProfileActivity.class);
-                // startActivity(intent);
+                // Navigate to Doctor List Activity
+                Intent intent = new Intent(UserHomeActivity.this, DoctorListActivity.class);
+                startActivity(intent);
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             }
         });
     }

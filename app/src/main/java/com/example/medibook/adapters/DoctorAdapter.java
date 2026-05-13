@@ -7,6 +7,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.Glide;
 import com.example.medibook.R;
 import com.example.medibook.models.Doctor;
 import java.util.List;
@@ -35,10 +36,32 @@ public class DoctorAdapter extends RecyclerView.Adapter<DoctorAdapter.DoctorView
     @Override
     public void onBindViewHolder(@NonNull DoctorViewHolder holder, int position) {
         Doctor doctor = doctorList.get(position);
-        holder.nameTextView.setText(doctor.getName());
-        holder.specialtyTextView.setText(doctor.getSpecialty());
-        holder.ratingTextView.setText(doctor.getRating());
-        holder.imageView.setImageResource(doctor.getImageResId());
+        holder.nameTextView.setText(doctor.getName() != null ? doctor.getName() : "Dr. Name");
+        holder.specialtyTextView.setText(doctor.getSpecialty() != null ? doctor.getSpecialty() : "Specialty");
+
+        // Handle rating display
+        String rating = doctor.getRating();
+        if (rating != null && !rating.isEmpty()) {
+            holder.ratingTextView.setText(rating + " ⭐");
+        } else {
+            holder.ratingTextView.setText("4.5 ⭐");
+        }
+
+        // Load profile image using Glide
+        if (doctor.getProfileImage() != null && !doctor.getProfileImage().isEmpty()) {
+            Glide.with(holder.imageView.getContext())
+                .load(doctor.getProfileImage())
+                .placeholder(R.drawable.ic_medical_kit)
+                .error(R.drawable.ic_medical_kit)
+                .circleCrop()
+                .into(holder.imageView);
+        } else {
+            // Use default placeholder
+            Glide.with(holder.imageView.getContext())
+                .load(R.drawable.ic_medical_kit)
+                .circleCrop()
+                .into(holder.imageView);
+        }
     }
 
     @Override

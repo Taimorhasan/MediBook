@@ -216,50 +216,127 @@ public class UnifiedLoginActivity extends AppCompatActivity {
     }
 
     private void navigateBasedOnRole(User user) {
+        android.util.Log.d("UnifiedLogin", "User roleIds: " + (user.getRoleIds() != null ? user.getRoleIds().toString() : "null"));
         roleRepository.getRolesByIds(user.getRoleIds(), new RoleRepository.RolesCallback() {
             @Override
             public void onSuccess(java.util.List<Role> roles) {
+                android.util.Log.d("UnifiedLogin", "Fetched roles count: " + roles.size());
+                for (Role role : roles) {
+                    android.util.Log.d("UnifiedLogin", "Role: " + role.getRoleName() + ", DashboardType: " + role.getDashboardType());
+                }
+
                 showLoading(false);
                 if (roles.isEmpty()) {
                     Toast.makeText(UnifiedLoginActivity.this, "No valid roles assigned to this account", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
+                // Check if admin role exists - if so, redirect directly to admin dashboard
+                for (Role role : roles) {
+                    if (isAdminRole(role)) {
+                        android.util.Log.d("UnifiedLogin", "Admin role found, redirecting to admin dashboard");
+                        sessionManager.saveUserSession(user.getUserId(), "admin");
+                        startActivity(new Intent(UnifiedLoginActivity.this, AdminDashboardActivity.class));
+                        finish();
+                        return;
+                    }
+                }
+
+                // Check if doctor role exists - if so, check verification
+                for (Role role : roles) {
+                    if (isDoctorRole(role)) {
+                        android.util.Log.d("UnifiedLogin", "Doctor role found, checking verification");
+                        checkDoctorVerification(user);
+                        return;
+                    }
+                }
+
+                // If multiple roles but no admin/doctor, show selection screen
                 if (roles.size() > 1) {
-                    // Multiple roles: Redirect to selection screen
+                    android.util.Log.d("UnifiedLogin", "Multiple roles, showing selection screen");
+                    // Sort roles to prioritize doctor over patient for selection
+                    java.util.Collections.sort(roles, (r1, r2) -> {
+                        String d1 = r1.getDashboardType() != null ? r1.getDashboardType() : "";
+                        String d2 = r2.getDashboardType() != null ? r2.getDashboardType() : "";
+
+                        int p1 = getPriorityForDashboardType(d1);
+                        int p2 = getPriorityForDashboardType(d2);
+                        return Integer.compare(p1, p2);
+                    });
+
                     Intent intent = new Intent(UnifiedLoginActivity.this, PortalSelectionActivity.class);
                     intent.putExtra("userId", user.getUserId());
                     startActivity(intent);
                     finish();
                 } else {
                     // Single role: Direct redirect
+                    android.util.Log.d("UnifiedLogin", "Single role, direct redirect to: " + roles.get(0).getDashboardType());
                     redirectByRole(user, roles.get(0));
                 }
             }
 
             @Override
             public void onFailure(String error) {
+                android.util.Log.e("UnifiedLogin", "Failed to fetch roles: " + error);
                 showLoading(false);
                 Toast.makeText(UnifiedLoginActivity.this, "Failed to fetch roles: " + error, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+    
+    private boolean isAdminRole(Role role) {
+        // Check dashboardType first
+        if ("admin".equalsIgnoreCase(role.getDashboardType())) {
+            return true;
+        }
+        // Fallback: check role name for existing roles without dashboardType
+        String roleName = role.getRoleName();
+        return roleName != null && (roleName.toLowerCase().contains("admin") || "admin".equalsIgnoreCase(roleName));
+    }
+
+    private boolean isDoctorRole(Role role) {
+        // Check dashboardType first
+        if ("doctor".equalsIgnoreCase(role.getDashboardType())) {
+            return true;
+        }
+        // Fallback: check role name for existing roles without dashboardType
+        String roleName = role.getRoleName();
+        return roleName != null && (roleName.toLowerCase().contains("doctor") || "doctor".equalsIgnoreCase(roleName));
+    }
+
+    private int getPriorityForDashboardType(String dashboardType) {
+        if (dashboardType == null) dashboardType = "";
+        switch (dashboardType.toLowerCase()) {
+            case "admin":
+                return 1;
+            case "doctor":
+                return 2;
+            case "patient":
+                return 3;
+            default:
+                return 4;
+        }
     }
 
     private void redirectByRole(User user, Role role) {
         Intent intent = null;
         String dashboardType = role.getDashboardType();
 
-        if ("admin".equalsIgnoreCase(dashboardType)) {
+        if (isAdminRole(role)) {
             intent = new Intent(this, AdminDashboardActivity.class);
-        } else if ("doctor".equalsIgnoreCase(dashboardType)) {
+            dashboardType = "admin";
+        } else if (isDoctorRole(role)) {
             // Doctors need verification check
             checkDoctorVerification(user);
             return;
-        } else if ("patient".equalsIgnoreCase(dashboardType)) {
+        } else if ("patient".equalsIgnoreCase(dashboardType) ||
+                   (role.getRoleName() != null && role.getRoleName().toLowerCase().contains("patient"))) {
             intent = new Intent(this, UserHomeActivity.class);
+            dashboardType = "patient";
         } else {
             // Default or fallback
             intent = new Intent(this, UserHomeActivity.class);
+            dashboardType = "patient";
         }
 
         if (intent != null) {

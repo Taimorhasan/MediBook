@@ -231,7 +231,7 @@ public class ManageUsersActivity extends BaseActivity implements UserAdapter.OnU
         Toast.makeText(this, "Now acting as " + user.getName() + " (" + targetRole + ")", Toast.LENGTH_SHORT).show();
         
         // Redirect to Portal Selection to see the new perspective
-        android.content.Intent intent = new android.content.Intent(this, com.example.medibook.activities.common.UnifiedLoginActivity.class);
+        android.content.Intent intent = new android.content.Intent(this, com.example.medibook.activities.auth.UnifiedLoginActivity.class);
         intent.setFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK | android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();

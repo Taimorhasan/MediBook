@@ -1,45 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="wrap_content">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="20dp">
+  <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="20dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Role Name"
-            android:textStyle="bold"
-            android:textColor="#111827"
-            android:layout_marginBottom="8dp"/>
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Role Name" android:textStyle="bold" android:textColor="#111827" android:layout_marginBottom="8dp" />
 
-        <EditText
-            android:id="@+id/et_role_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Enter role name (e.g. Manager)"
-            android:inputType="text"
-            android:layout_marginBottom="16dp"/>
+    <EditText android:id="@+id/et_role_name" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Enter role name (e.g. Manager)" android:inputType="text" android:layout_marginBottom="16dp" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Assign Permissions"
-            android:textStyle="bold"
-            android:textColor="#111827"
-            android:layout_marginBottom="8dp"/>
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Dashboard Type" android:textStyle="bold" android:textColor="#111827" android:layout_marginBottom="8dp" />
 
-        <LinearLayout
-            android:id="@+id/permissions_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-            <!-- Checkboxes will be added dynamically -->
-        </LinearLayout>
+    <Spinner android:id="@+id/spinner_dashboard_type" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="16dp" />
 
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Assign Permissions" android:textStyle="bold" android:textColor="#111827" android:layout_marginBottom="8dp" />
+
+    <LinearLayout android:id="@+id/permissions_container" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+      <!-- Checkboxes will be added dynamically -->
     </LinearLayout>
+
+  </LinearLayout>
 </ScrollView>

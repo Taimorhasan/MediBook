@@ -9,7 +9,7 @@ import android.os.Build;
 import android.util.Log;
 import androidx.core.app.NotificationCompat;
 import com.example.medibook.R;
-import com.example.medibook.activities.common.UnifiedLoginActivity;
+import com.example.medibook.activities.auth.UnifiedLoginActivity;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 

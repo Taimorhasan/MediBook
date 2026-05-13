@@ -10,6 +10,8 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
+import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -116,7 +118,14 @@ public class ManageRolesActivity extends AppCompatActivity implements RoleAdapte
         View view = LayoutInflater.from(this).inflate(R.layout.dialog_add_edit_role, null);
         
         EditText etRoleName = view.findViewById(R.id.et_role_name);
+        Spinner spinnerDashboardType = view.findViewById(R.id.spinner_dashboard_type);
         LinearLayout permissionsContainer = view.findViewById(R.id.permissions_container);
+        
+        // Setup dashboard type spinner
+        String[] dashboardTypes = {"", "admin", "doctor", "patient"};
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, dashboardTypes);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerDashboardType.setAdapter(adapter);
         
         List<String> allPermissions = Permission.getAllPermissions();
         List<CheckBox> checkBoxes = new ArrayList<>();
@@ -134,6 +143,14 @@ public class ManageRolesActivity extends AppCompatActivity implements RoleAdapte
 
         if (roleToEdit != null) {
             etRoleName.setText(roleToEdit.getRoleName());
+            // Set dashboard type selection
+            String currentDashboardType = roleToEdit.getDashboardType() != null ? roleToEdit.getDashboardType() : "";
+            for (int i = 0; i < dashboardTypes.length; i++) {
+                if (dashboardTypes[i].equals(currentDashboardType)) {
+                    spinnerDashboardType.setSelection(i);
+                    break;
+                }
+            }
             builder.setTitle("Edit Role");
         } else {
             builder.setTitle("Add New Role");
@@ -142,6 +159,8 @@ public class ManageRolesActivity extends AppCompatActivity implements RoleAdapte
         builder.setView(view);
         builder.setPositiveButton(roleToEdit != null ? "Update" : "Add", (dialog, which) -> {
             String name = etRoleName.getText().toString().trim();
+            String selectedDashboardType = spinnerDashboardType.getSelectedItem().toString();
+            
             if (name.isEmpty()) {
                 Toast.makeText(this, "Role name cannot be empty", Toast.LENGTH_SHORT).show();
                 return;
@@ -154,10 +173,12 @@ public class ManageRolesActivity extends AppCompatActivity implements RoleAdapte
 
             if (roleToEdit != null) {
                 roleToEdit.setRoleName(name);
+                roleToEdit.setDashboardType(selectedDashboardType.isEmpty() ? null : selectedDashboardType);
                 roleToEdit.setPermissions(selectedPermissions);
                 updateRole(roleToEdit);
             } else {
                 Role newRole = new Role(null, name, selectedPermissions);
+                newRole.setDashboardType(selectedDashboardType.isEmpty() ? null : selectedDashboardType);
                 createRole(newRole);
             }
         });

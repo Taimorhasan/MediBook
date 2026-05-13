@@ -58,17 +58,17 @@ public class CloudinaryService {
                         }
                     }
 
-                    // Write folder parameter
-                    String folderParam = "\r\n--" + boundary + "\r\n" +
-                        "Content-Disposition: form-data; name=\"folder\"\r\n\r\n" +
-                        "medibook/" + folder;
-                    out.write(folderParam.getBytes());
-
                     // Write upload preset
                     String presetParam = "\r\n--" + boundary + "\r\n" +
                         "Content-Disposition: form-data; name=\"upload_preset\"\r\n\r\n" +
                         "medibook_upload";
                     out.write(presetParam.getBytes());
+
+                    // Write folder parameter
+                    String folderParam = "\r\n--" + boundary + "\r\n" +
+                        "Content-Disposition: form-data; name=\"folder\"\r\n\r\n" +
+                        "medibook/" + folder;
+                    out.write(folderParam.getBytes());
 
                     // End boundary
                     String endBoundary = "\r\n--" + boundary + "--\r\n";

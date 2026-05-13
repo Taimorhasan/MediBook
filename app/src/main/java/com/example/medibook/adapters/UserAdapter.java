@@ -13,12 +13,15 @@ import com.example.medibook.R;
 import com.example.medibook.models.User;
 import com.google.android.material.chip.Chip;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {
 
     private List<User> userList;
     private Context context;
     private OnUserActionListener listener;
+    private Map<String, String> roleIdToName = new HashMap<>();
 
     public interface OnUserActionListener {
         void onChangeRole(User user);
@@ -29,6 +32,12 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         this.userList = userList;
         this.context = context;
         this.listener = listener;
+    }
+
+    public void setRoleIdToName(Map<String, String> roleIdToName) {
+        if (roleIdToName != null) {
+            this.roleIdToName = roleIdToName;
+        }
     }
 
     @NonNull
@@ -48,14 +57,15 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         holder.nameText.setText(name);
         holder.emailText.setText(email);
         
-        String role = "PATIENT";
+String roleId = "patient";
         if (user.getRoleIds() != null && !user.getRoleIds().isEmpty()) {
-            role = user.getRoleIds().get(0);
+            roleId = user.getRoleIds().get(0).toLowerCase();
         } else if (user.getRole() != null) {
-            role = user.getRole();
+            roleId = user.getRole().toLowerCase();
         }
-        
-        holder.roleChip.setText(role.toUpperCase());
+
+        String displayRole = roleIdToName.getOrDefault(roleId, roleId).toUpperCase();
+        holder.roleChip.setText(displayRole);
 
         holder.changeRoleBtn.setOnClickListener(v -> {
             if (listener != null) {

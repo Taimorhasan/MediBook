@@ -2,6 +2,7 @@ package com.example.medibook.activities.admin;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
@@ -10,11 +11,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.medibook.R;
 import com.example.medibook.activities.common.BaseActivity;
 import com.example.medibook.adapters.UserAdapter;
+import com.example.medibook.models.Role;
 import com.example.medibook.models.User;
 import com.example.medibook.repositories.AuthRepository;
 import com.example.medibook.repositories.UserRepository;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ManageUsersActivity extends BaseActivity implements UserAdapter.OnUserActionListener {
 
@@ -28,6 +32,9 @@ public class ManageUsersActivity extends BaseActivity implements UserAdapter.OnU
     private ProgressBar progressBar;
     private android.widget.EditText searchEditText;
     private android.widget.Spinner roleFilterSpinner;
+    private List<Role> availableRoles = new ArrayList<>();
+    private Map<String, String> roleIdToName = new HashMap<>();
+    private Map<String, String> roleNameToId = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +49,7 @@ public class ManageUsersActivity extends BaseActivity implements UserAdapter.OnU
         initViews();
         userRepository = new UserRepository();
         roleRepository = new com.example.medibook.repositories.RoleRepository();
+        loadRoles();
         loadUsers();
     }
 
@@ -78,6 +86,16 @@ public class ManageUsersActivity extends BaseActivity implements UserAdapter.OnU
         android.widget.EditText passwordET = dialogView.findViewById(R.id.et_password);
         android.widget.Spinner roleSpinner = dialogView.findViewById(R.id.role_spinner);
 
+        if (!availableRoles.isEmpty()) {
+            String[] roleNames = new String[availableRoles.size()];
+            for (int i = 0; i < availableRoles.size(); i++) {
+                roleNames[i] = availableRoles.get(i).getRoleName();
+            }
+            ArrayAdapter<String> roleAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, roleNames);
+            roleAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            roleSpinner.setAdapter(roleAdapter);
+        }
+
         new AlertDialog.Builder(this)
             .setTitle("Add New User")
             .setView(dialogView)
@@ -86,19 +104,59 @@ public class ManageUsersActivity extends BaseActivity implements UserAdapter.OnU
                 String email = emailET.getText().toString().trim();
                 String phone = phoneET.getText().toString().trim();
                 String password = passwordET.getText().toString().trim();
-                String role = roleSpinner.getSelectedItem().toString().toLowerCase();
+                String selectedRole = roleSpinner.getSelectedItem() != null ? roleSpinner.getSelectedItem().toString() : "";
+                String roleId = roleNameToId.getOrDefault(selectedRole, selectedRole.toLowerCase());
 
                 if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
                     Toast.makeText(this, "Please fill required fields", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                createNewUser(name, email, phone, password, role);
+                createNewUser(name, email, phone, password, roleId);
             })
             .setNegativeButton("Cancel", null)
             .show();
     }
+    private void loadRoles() {
+        roleRepository.getAllRoles(new com.example.medibook.repositories.RoleRepository.RolesCallback() {
+            @Override
+            public void onSuccess(List<com.example.medibook.models.Role> roles) {
+                availableRoles = roles != null ? roles : new ArrayList<>();
+                roleIdToName.clear();
+                roleNameToId.clear();
 
+                List<String> roleNames = new ArrayList<>();
+                roleNames.add("All Roles");
+                for (Role role : availableRoles) {
+                    String roleName = role.getRoleName() != null ? role.getRoleName() : role.getRoleId();
+                    roleNames.add(roleName);
+                    roleIdToName.put(role.getRoleId().toLowerCase(), roleName);
+                    roleNameToId.put(roleName, role.getRoleId().toLowerCase());
+                }
+
+                ArrayAdapter<String> roleAdapter = new ArrayAdapter<>(ManageUsersActivity.this, android.R.layout.simple_spinner_item, roleNames);
+                roleAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                roleFilterSpinner.setAdapter(roleAdapter);
+                adapter.setRoleIdToName(roleIdToName);
+                adapter.notifyDataSetChanged();
+                performFiltering();
+            }
+
+            @Override
+            public void onFailure(String error) {
+                Toast.makeText(ManageUsersActivity.this, "Error loading roles: " + error, Toast.LENGTH_SHORT).show();
+                List<String> fallback = new ArrayList<>();
+                fallback.add("All Roles");
+                fallback.add("Admin");
+                fallback.add("Manager");
+                fallback.add("Patient");
+                ArrayAdapter<String> roleAdapter = new ArrayAdapter<>(ManageUsersActivity.this, android.R.layout.simple_spinner_item, fallback);
+                roleAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                roleFilterSpinner.setAdapter(roleAdapter);
+                performFiltering();
+            }
+        });
+    }
     private void createNewUser(String name, String email, String phone, String password, String role) {
         progressBar.setVisibility(View.VISIBLE);
         AuthRepository authRepository = new AuthRepository();
@@ -146,7 +204,12 @@ public class ManageUsersActivity extends BaseActivity implements UserAdapter.OnU
 
     private void performFiltering() {
         String query = searchEditText.getText().toString().toLowerCase().trim();
-        String roleFilter = roleFilterSpinner.getSelectedItem().toString().toLowerCase();
+        String rawFilter = roleFilterSpinner.getSelectedItem() != null ? roleFilterSpinner.getSelectedItem().toString() : "All Roles";
+        String roleFilterId = "";
+
+        if (!rawFilter.equalsIgnoreCase("All Roles")) {
+            roleFilterId = roleNameToId.getOrDefault(rawFilter, rawFilter.toLowerCase());
+        }
 
         filteredList.clear();
         for (User user : userList) {
@@ -154,14 +217,14 @@ public class ManageUsersActivity extends BaseActivity implements UserAdapter.OnU
                     (user.getEmail() != null && user.getEmail().toLowerCase().contains(query)) ||
                     (user.getPhone() != null && user.getPhone().contains(query));
 
-            String userRole = "patient";
-            if (user.getRole() != null) {
-                userRole = user.getRole().toLowerCase();
-            } else if (user.getRoleIds() != null && !user.getRoleIds().isEmpty()) {
-                userRole = user.getRoleIds().get(0).toLowerCase();
+            String userRoleId = "patient";
+            if (user.getRoleIds() != null && !user.getRoleIds().isEmpty()) {
+                userRoleId = user.getRoleIds().get(0).toLowerCase();
+            } else if (user.getRole() != null) {
+                userRoleId = user.getRole().toLowerCase();
             }
 
-            boolean matchesRole = roleFilter.equals("all roles") || userRole.equals(roleFilter);
+            boolean matchesRole = roleFilterId.isEmpty() || userRoleId.equals(roleFilterId);
 
             if (matchesQuery && matchesRole) {
                 filteredList.add(user);
@@ -198,13 +261,9 @@ public class ManageUsersActivity extends BaseActivity implements UserAdapter.OnU
             public void onSuccess(List<com.example.medibook.models.Role> roles) {
                 progressBar.setVisibility(View.GONE);
                 if (roles.isEmpty()) {
-                    showRoleSelectionDialog(user, new String[]{"PATIENT", "DOCTOR", "ADMIN"});
+                    showRoleSelectionDialog(user, new ArrayList<>());
                 } else {
-                    String[] roleNames = new String[roles.size()];
-                    for (int i = 0; i < roles.size(); i++) {
-                        roleNames[i] = roles.get(i).getRoleName().toUpperCase();
-                    }
-                    showRoleSelectionDialog(user, roleNames);
+                    showRoleSelectionDialog(user, roles);
                 }
             }
 
@@ -212,7 +271,7 @@ public class ManageUsersActivity extends BaseActivity implements UserAdapter.OnU
             public void onFailure(String error) {
                 progressBar.setVisibility(View.GONE);
                 Toast.makeText(ManageUsersActivity.this, "Error fetching roles: " + error, Toast.LENGTH_SHORT).show();
-                showRoleSelectionDialog(user, new String[]{"PATIENT", "DOCTOR", "ADMIN"});
+                showRoleSelectionDialog(user, new ArrayList<>());
             }
         });
     }
@@ -237,12 +296,27 @@ public class ManageUsersActivity extends BaseActivity implements UserAdapter.OnU
         finish();
     }
 
-    private void showRoleSelectionDialog(User user, String[] roles) {
+    private void showRoleSelectionDialog(User user, List<Role> roles) {
+        if (roles.isEmpty()) {
+            roles = availableRoles;
+        }
+
+        if (roles.isEmpty()) {
+            Toast.makeText(this, "No roles available to assign", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String[] roleNames = new String[roles.size()];
+        for (int i = 0; i < roles.size(); i++) {
+            roleNames[i] = roles.get(i).getRoleName();
+        }
+
+        final List<Role> dialogRoles = new ArrayList<>(roles);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Select Role for " + user.getName());
-        builder.setItems(roles, (dialog, which) -> {
-            String selectedRole = roles[which].toLowerCase();
-            updateUserRole(user, selectedRole);
+        builder.setItems(roleNames, (dialog, which) -> {
+            String selectedRoleId = dialogRoles.get(which).getRoleId();
+            updateUserRole(user, selectedRoleId);
         });
         builder.show();
     }

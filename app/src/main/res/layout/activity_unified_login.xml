@@ -24,22 +24,22 @@
 
           <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Sign In" android:textColor="#263238" android:textSize="24sp" android:textStyle="bold" />
 
-          <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Access your personalized healthcare portal" android:textColor="#78909C" android:textSize="12sp" />
+          <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Access your personalized healthcare portal" android:textColor="@color/text_secondary" android:textSize="12sp" />
 
           <!-- Email Input -->
-          <com.google.android.material.textfield.TextInputLayout style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="24dp" android:hint="Email Address" app:boxStrokeColor="#10B981" app:hintTextColor="#10B981" app:startIconDrawable="@android:drawable/ic_dialog_email" app:startIconTint="#10B981">
+          <com.google.android.material.textfield.TextInputLayout style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="24dp" android:hint="Email Address" app:boxStrokeColor="@color/primary_blue" app:hintTextColor="@color/primary_blue" app:startIconDrawable="@android:drawable/ic_dialog_email" app:startIconTint="@color/primary_blue">
 
             <com.google.android.material.textfield.TextInputEditText android:id="@+id/email_edit_text" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textEmailAddress" android:textSize="14sp" />
           </com.google.android.material.textfield.TextInputLayout>
 
           <!-- Password Input -->
-          <com.google.android.material.textfield.TextInputLayout style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:hint="Password" app:boxStrokeColor="#10B981" app:hintTextColor="#10B981" app:passwordToggleEnabled="true" app:startIconDrawable="@android:drawable/ic_lock_lock" app:startIconTint="#10B981">
+          <com.google.android.material.textfield.TextInputLayout style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:hint="Password" app:boxStrokeColor="@color/primary_blue" app:hintTextColor="@color/primary_blue" app:passwordToggleEnabled="true" app:startIconDrawable="@android:drawable/ic_lock_lock" app:startIconTint="@color/primary_blue">
 
             <com.google.android.material.textfield.TextInputEditText android:id="@+id/password_edit_text" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textPassword" android:textSize="14sp" />
           </com.google.android.material.textfield.TextInputLayout>
 
           <!-- Login Button -->
-          <com.google.android.material.button.MaterialButton android:id="@+id/login_button" android:layout_width="match_parent" android:layout_height="56dp" android:layout_marginTop="32dp" android:text="Sign In" android:textAllCaps="false" android:textSize="16sp" android:textStyle="bold" app:backgroundTint="#10B981" app:cornerRadius="12dp" />
+          <com.google.android.material.button.MaterialButton android:id="@+id/login_button" android:layout_width="match_parent" android:layout_height="56dp" android:layout_marginTop="32dp" android:text="Sign In" android:textAllCaps="false" android:textSize="16sp" android:textStyle="bold" app:backgroundTint="@color/primary_blue" app:cornerRadius="12dp" android:textColor="@color/white" />
 
           <!-- OR Divider -->
           <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="20dp" android:gravity="center" android:orientation="horizontal">
@@ -63,9 +63,9 @@
   <!-- Bottom Links -->
   <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="24dp" android:orientation="horizontal" android:gravity="center" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent">
 
-    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Don't have an account? " android:textColor="#78909C" android:textSize="14sp" />
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Don't have an account? " android:textColor="@color/text_secondary" android:textSize="14sp" />
 
-    <TextView android:id="@+id/signup_redirect" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Create Account" android:textColor="#10B981" android:textSize="14sp" android:textStyle="bold" />
+    <TextView android:id="@+id/signup_redirect" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Create Account" android:textColor="@color/primary_blue" android:textSize="14sp" android:textStyle="bold" />
   </LinearLayout>
 
   <!-- Progress Overlay -->

@@ -37,7 +37,8 @@
 
         <!-- Auth Activities - Patient -->
         <activity android:name=".activities.auth.LoginActivity" />
-        <activity android:name=".activities.auth.UnifiedLoginActivity" />
+        <activity android:name=".activities.auth.UnifiedLoginActivity"
+            android:windowSoftInputMode="stateHidden|adjustResize" />
         <activity android:name=".activities.auth.SignupActivity" />
         <activity android:name=".activities.user.UserLoginActivity" />
 

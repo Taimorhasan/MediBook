@@ -78,5 +78,7 @@
         <item>Doctor</item>
         <item>Admin</item>
     </string-array>
+
+    <string name="login_logo_description">MediBook medical kit logo</string>
 </resources>
 

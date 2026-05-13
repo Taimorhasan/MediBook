@@ -1,9 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/content_scroll_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F8F9FA">
+
+    <!-- Loading Progress Bar -->
+    <ProgressBar
+        android:id="@+id/loading_progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        android:layout_marginTop="24dp" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -36,7 +46,7 @@
                 android:id="@+id/name_text_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Patient Name"
+                android:text="Name"
                 android:textSize="24sp"
                 android:textStyle="bold"
                 android:textColor="#1F2937"
@@ -48,7 +58,7 @@
                 android:id="@+id/email_text_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="patient@example.com"
+                android:text="Email"
                 android:textSize="14sp"
                 android:textColor="#6B7280"
                 android:gravity="center" />
@@ -122,7 +132,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="N/A"
+                    android:text="Age"
                     android:textSize="14sp"
                     android:textStyle="bold"
                     android:textColor="#1F2937"
@@ -150,7 +160,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Not Specified"
+                    android:text="Gender"
                     android:textSize="14sp"
                     android:textStyle="bold"
                     android:textColor="#1F2937"
@@ -178,7 +188,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="N/A"
+                    android:text="Phone"
                     android:textSize="14sp"
                     android:textStyle="bold"
                     android:textColor="#1F2937"
@@ -212,7 +222,7 @@
                 android:id="@+id/bio_text_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="No bio provided"
+                android:text="Bio"
                 android:textSize="14sp"
                 android:textColor="#6B7280" />
 

@@ -5,11 +5,13 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.medibook.R;
-import com.example.medibook.repositories.UserRepository;
+import com.example.medibook.repositories.PatientRepository;
 import com.google.firebase.auth.FirebaseAuth;
 import com.example.medibook.activities.auth.UnifiedLoginActivity;
 
@@ -19,8 +21,10 @@ public class PatientProfileViewActivity extends com.example.medibook.activities.
     private TextView nameTextView, emailTextView, phoneTextView, ageTextView;
     private TextView genderTextView, bloodGroupTextView, bioTextView;
     private Button editButton, logoutButton;
+    private ProgressBar loadingProgress;
+    private ScrollView contentScrollView;
     
-    private UserRepository userRepository;
+    private PatientRepository patientRepository;
     private String currentUserId;
 
     @Override
@@ -28,7 +32,7 @@ public class PatientProfileViewActivity extends com.example.medibook.activities.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_patient_profile_view);
 
-        userRepository = new UserRepository();
+        patientRepository = new PatientRepository();
         currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         // Initialize views
@@ -42,6 +46,12 @@ public class PatientProfileViewActivity extends com.example.medibook.activities.
         bioTextView = findViewById(R.id.bio_text_view);
         editButton = findViewById(R.id.edit_button);
         logoutButton = findViewById(R.id.logout_button);
+        loadingProgress = findViewById(R.id.loading_progress);
+        contentScrollView = findViewById(R.id.content_scroll_view);
+
+        // Initially hide content and show loading
+        contentScrollView.setVisibility(View.GONE);
+        loadingProgress.setVisibility(View.VISIBLE);
 
         // Load profile data
         loadProfileData();
@@ -56,30 +66,45 @@ public class PatientProfileViewActivity extends com.example.medibook.activities.
     }
 
     private void loadProfileData() {
-        userRepository.getUser(currentUserId, new UserRepository.UserCallback() {
-            @Override
-            public void onSuccess(com.example.medibook.models.User user) {
-                if (user != null) {
-                    nameTextView.setText(user.getName() != null ? user.getName() : "N/A");
-                    emailTextView.setText(user.getEmail() != null ? user.getEmail() : "N/A");
-                    phoneTextView.setText(user.getPhone() != null ? user.getPhone() : "N/A");
-                    ageTextView.setText(user.getAge() != null ? user.getAge() : "N/A");
-                    genderTextView.setText(user.getGender() != null ? user.getGender() : "Not Specified");
-                    bloodGroupTextView.setText(user.getBloodGroup() != null ? user.getBloodGroup() : "Not Specified");
-                    bioTextView.setText(user.getBio() != null ? user.getBio() : "No bio provided");
+        // Show loading
+        loadingProgress.setVisibility(View.VISIBLE);
+        contentScrollView.setVisibility(View.GONE);
 
-                    if (user.getProfileImage() != null && !user.getProfileImage().isEmpty()) {
-                        Glide.with(PatientProfileViewActivity.this)
-                            .load(user.getProfileImage())
-                            .circleCrop()
-                            .into(profileImageView);
+        patientRepository.getPatient(currentUserId, new PatientRepository.PatientCallback() {
+            @Override
+            public void onSuccess(com.example.medibook.models.User patient) {
+                runOnUiThread(() -> {
+                    // Hide loading and show content
+                    loadingProgress.setVisibility(View.GONE);
+                    contentScrollView.setVisibility(View.VISIBLE);
+
+                    if (patient != null) {
+                        nameTextView.setText(patient.getName() != null ? patient.getName() : "N/A");
+                        emailTextView.setText(patient.getEmail() != null ? patient.getEmail() : "N/A");
+                        phoneTextView.setText(patient.getPhone() != null ? patient.getPhone() : "N/A");
+                        ageTextView.setText(patient.getAge() != null ? patient.getAge() : "N/A");
+                        genderTextView.setText(patient.getGender() != null ? patient.getGender() : "Not Specified");
+                        bloodGroupTextView.setText(patient.getBloodGroup() != null ? patient.getBloodGroup() : "Not Specified");
+                        bioTextView.setText(patient.getBio() != null ? patient.getBio() : "No bio provided");
+
+                        if (patient.getProfileImage() != null && !patient.getProfileImage().isEmpty()) {
+                            Glide.with(PatientProfileViewActivity.this)
+                                .load(patient.getProfileImage())
+                                .circleCrop()
+                                .into(profileImageView);
+                        }
                     }
-                }
+                });
             }
 
             @Override
             public void onFailure(String error) {
-                Toast.makeText(PatientProfileViewActivity.this, "Failed to load profile: " + error, Toast.LENGTH_SHORT).show();
+                runOnUiThread(() -> {
+                    // Hide loading and show error
+                    loadingProgress.setVisibility(View.GONE);
+                    contentScrollView.setVisibility(View.VISIBLE);
+                    Toast.makeText(PatientProfileViewActivity.this, "Failed to load profile: " + error, Toast.LENGTH_SHORT).show();
+                });
             }
         });
     }

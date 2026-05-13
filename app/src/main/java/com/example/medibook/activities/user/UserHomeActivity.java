@@ -15,10 +15,8 @@ import com.example.medibook.R;
 import com.example.medibook.adapters.AppointmentAdapter;
 import com.example.medibook.models.Appointment;
 import com.example.medibook.repositories.AppointmentRepository;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import java.util.ArrayList;
-import java.util.List;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 
 public class UserHomeActivity extends AppCompatActivity implements AppointmentAdapter.OnAppointmentClickListener {
 
@@ -34,6 +32,7 @@ public class UserHomeActivity extends AppCompatActivity implements AppointmentAd
     private ProgressBar appointmentsLoadingProgress;
     private TextView noAppointmentsTextView;
     private TextView upcomingAppointmentsTitle;
+    private ChipGroup specialtiesChipGroup;
 
     // Data
     private List<Appointment> appointments;
@@ -61,11 +60,18 @@ public class UserHomeActivity extends AppCompatActivity implements AppointmentAd
         navAlerts = findViewById(R.id.nav_alerts_layout);
         navProfile = findViewById(R.id.nav_profile_layout);
 
-        // Initialize appointment views
+        // Initialize views
         appointmentsRecyclerView = findViewById(R.id.appointments_recycler_view);
         appointmentsLoadingProgress = findViewById(R.id.appointments_loading_progress);
         noAppointmentsTextView = findViewById(R.id.no_appointments_text);
         upcomingAppointmentsTitle = findViewById(R.id.upcoming_appointments_title);
+        specialtiesChipGroup = findViewById(R.id.specialties_chip_group);
+
+        // Set dynamic welcome message
+        setWelcomeMessage();
+
+        // Populate specialties
+        populateSpecialties();
 
         // Setup appointments RecyclerView
         appointmentsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -209,5 +215,87 @@ public class UserHomeActivity extends AppCompatActivity implements AppointmentAd
         // Handle appointment cancellation
         Toast.makeText(this, "Cancel appointment functionality not implemented yet", Toast.LENGTH_SHORT).show();
         // TODO: Implement appointment cancellation
+    }
+
+    private void setWelcomeMessage() {
+        TextView welcomeTextView = findViewById(R.id.welcome_user_text);
+        if (welcomeTextView != null && currentUser != null) {
+            String greeting = getTimeBasedGreeting();
+            String userName = getUserDisplayName();
+            String welcomeMessage = greeting + ", " + userName;
+            welcomeTextView.setText(welcomeMessage);
+        }
+    }
+
+    private String getTimeBasedGreeting() {
+        java.util.Calendar calendar = java.util.Calendar.getInstance();
+        int hour = calendar.get(java.util.Calendar.HOUR_OF_DAY);
+
+        if (hour >= 5 && hour < 12) {
+            return "Good Morning";
+        } else if (hour >= 12 && hour < 17) {
+            return "Good Afternoon";
+        } else if (hour >= 17 && hour < 21) {
+            return "Good Evening";
+        } else {
+            return "Good Night";
+        }
+    }
+
+    private String getUserDisplayName() {
+        if (currentUser != null) {
+            String displayName = currentUser.getDisplayName();
+            if (displayName != null && !displayName.trim().isEmpty()) {
+                // Get first name only
+                String[] nameParts = displayName.split("\\s+");
+                return nameParts[0];
+            }
+
+            String email = currentUser.getEmail();
+            if (email != null && email.contains("@")) {
+                // Use part before @ as name
+                return email.substring(0, email.indexOf("@"));
+            }
+        }
+        return "User";
+    }
+
+    private void populateSpecialties() {
+        if (specialtiesChipGroup == null) return;
+
+        // Common medical specialties
+        String[] specialties = {
+            "General Medicine",
+            "Cardiology",
+            "Dermatology",
+            "Neurology",
+            "Orthopedics",
+            "Pediatrics",
+            "Psychiatry",
+            "Radiology"
+        };
+
+        for (String specialty : specialties) {
+            Chip chip = new Chip(this);
+            chip.setText(specialty);
+            chip.setCheckable(true);
+            chip.setChecked(specialty.equals("General Medicine")); // Default selection
+            chip.setChipBackgroundColorResource(R.color.chip_background);
+            chip.setTextColor(getColor(R.color.chip_text));
+            chip.setChipStrokeWidth(1);
+            chip.setChipStrokeColorResource(R.color.chip_stroke);
+
+            specialtiesChipGroup.addView(chip);
+        }
+
+        // Handle chip selection
+        specialtiesChipGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            // TODO: Filter doctors/specialties based on selection
+            // For now, just show a toast
+            Chip selectedChip = findViewById(checkedId);
+            if (selectedChip != null) {
+                Toast.makeText(this, "Selected: " + selectedChip.getText(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

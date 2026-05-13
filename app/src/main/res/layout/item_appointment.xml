@@ -18,7 +18,7 @@
             android:id="@+id/appointment_doctor_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Doctor: Dr. Sarah Wilson"
+            android:text="Doctor Name"
             android:textSize="16sp"
             android:textStyle="bold"
             android:textColor="@color/text_dark" />
@@ -34,7 +34,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Date: 2024-01-15"
+                android:text="Date"
                 android:textSize="14sp"
                 android:textColor="#7D8A99" />
 
@@ -43,7 +43,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Time: 10:00 AM"
+                android:text="Time"
                 android:textSize="14sp"
                 android:textColor="#7D8A99" />
         </LinearLayout>
@@ -64,7 +64,7 @@
                 android:id="@+id/appointment_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="CONFIRMED"
+                android:text="PENDING"
                 app:chipBackgroundColor="#E8EAF6"
                 app:chipStrokeWidth="0dp"
                 android:textColor="@color/primary_blue"

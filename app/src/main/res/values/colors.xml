@@ -36,6 +36,11 @@
     <color name="status_completed_bg">#DBEAFE</color>
     <color name="status_completed_text">#2563EB</color>
 
+    <!-- Chip Colors -->
+    <color name="chip_background">#FFFFFF</color>
+    <color name="chip_text">#374151</color>
+    <color name="chip_stroke">#D1D5DB</color>
+
     <!-- Borders & Dividers -->
     <color name="divider">#E0E0E0</color>
     <color name="border">#CCCCCC</color>

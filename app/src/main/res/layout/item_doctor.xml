@@ -32,7 +32,7 @@
                 android:id="@+id/doctor_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Dr. Sarah Wilson"
+                android:text="Doctor Name"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:textColor="@color/black" />
@@ -41,7 +41,7 @@
                 android:id="@+id/doctor_specialty"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Cardiologist"
+                android:text="Specialty"
                 android:textSize="14sp"
                 android:textColor="#7D8A99"
                 android:layout_marginTop="4dp" />
@@ -62,7 +62,7 @@
                     android:id="@+id/doctor_rating"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="4.8"
+                    android:text="4.5"
                     android:textSize="14sp"
                     android:textStyle="bold"
                     android:textColor="@color/black"
@@ -71,7 +71,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text=" (120 reviews)"
+                    android:text=" (0 reviews)"
                     android:textSize="12sp"
                     android:textColor="#7D8A99" />
             </LinearLayout>

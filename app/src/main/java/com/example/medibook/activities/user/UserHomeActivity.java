@@ -17,6 +17,10 @@ import com.example.medibook.models.Appointment;
 import com.example.medibook.repositories.AppointmentRepository;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserHomeActivity extends AppCompatActivity implements AppointmentAdapter.OnAppointmentClickListener {
 

@@ -78,6 +78,9 @@ public class AppointmentAdapter extends RecyclerView.Adapter<AppointmentAdapter.
                     holder.dayTextView.setText("--");
                 }
             }
+        }
+    }
+
     @Override
     public int getItemCount() {
         return appointmentList.size();

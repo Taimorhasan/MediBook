@@ -65,7 +65,7 @@
             android:id="@+id/date_time_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Date & Time"
+            android:text="Date &amp; Time"
             android:textSize="14sp"
             android:textColor="#6B7280"
             android:layout_marginBottom="12dp"/>

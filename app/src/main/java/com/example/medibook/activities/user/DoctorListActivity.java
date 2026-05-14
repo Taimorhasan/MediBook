@@ -1,6 +1,7 @@
 package com.example.medibook.activities.user;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -38,6 +39,8 @@ public class DoctorListActivity extends AppCompatActivity implements DoctorAdapt
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_doctor_list);
+        getWindow().setStatusBarColor(Color.WHITE);
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
 
         // Initialize repository
         doctorRepository = new DoctorRepository();
@@ -49,7 +52,10 @@ public class DoctorListActivity extends AppCompatActivity implements DoctorAdapt
         // Setup toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle("");
+        }
         toolbar.setNavigationOnClickListener(v -> finish());
 
         // Initialize views
@@ -128,6 +134,11 @@ public class DoctorListActivity extends AppCompatActivity implements DoctorAdapt
                 doctor.getSpecialty().toLowerCase().contains(searchQuery);
 
             boolean matchesSpecialty = selectedSpecialty.equals("All Specialties") ||
+                selectedSpecialty.equals("A-Z") ||
+                selectedSpecialty.equals("★") ||
+                selectedSpecialty.equals("♡") ||
+                selectedSpecialty.equals("♀") ||
+                selectedSpecialty.equals("♂") ||
                 doctor.getSpecialty().equalsIgnoreCase(selectedSpecialty);
 
             if (matchesSearch && matchesSpecialty) {

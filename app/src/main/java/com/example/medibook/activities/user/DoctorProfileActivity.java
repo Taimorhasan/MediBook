@@ -1,6 +1,7 @@
 package com.example.medibook.activities.user;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -36,6 +37,8 @@ public class DoctorProfileActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_doctor_profile);
+        getWindow().setStatusBarColor(Color.WHITE);
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
 
         // Initialize repository
         doctorRepository = new DoctorRepository();
@@ -54,8 +57,10 @@ public class DoctorProfileActivity extends AppCompatActivity {
         // Setup toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle(doctorName != null ? doctorName : "Doctor Profile");
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle("");
+        }
         toolbar.setNavigationOnClickListener(v -> finish());
 
         // Initialize views
@@ -163,8 +168,8 @@ public class DoctorProfileActivity extends AppCompatActivity {
         }
 
         // Update toolbar title with real name
-        if (getSupportActionBar() != null && doctor.getName() != null) {
-            getSupportActionBar().setTitle(doctor.getName());
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle("");
         }
 
         // Store updated doctor info for booking

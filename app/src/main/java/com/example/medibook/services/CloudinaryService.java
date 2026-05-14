@@ -92,11 +92,11 @@ public class CloudinaryService {
                 JSONObject jsonResponse = new JSONObject(responseBody);
                 String imageUrl = jsonResponse.getString("secure_url");
                 
-                Log.d(TAG, "Image uploaded successfully: " + imageUrl);
+                android.util.Log.d("imageDebug", "Cloudinary response: " + imageUrl);
                 callback.onSuccess(imageUrl);
 
             } catch (Exception e) {
-                Log.e(TAG, "Error uploading image", e);
+                android.util.Log.e("imageDebug", "Cloudinary upload error", e);
                 callback.onFailure("Error: " + e.getMessage());
             }
         }).start();

@@ -12,6 +12,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.medibook.R;
 import com.example.medibook.repositories.PatientRepository;
+import com.example.medibook.services.CloudinaryService;
 import com.google.firebase.auth.FirebaseAuth;
 import com.example.medibook.activities.auth.UnifiedLoginActivity;
 
@@ -25,6 +26,7 @@ public class PatientProfileViewActivity extends com.example.medibook.activities.
     private ScrollView contentScrollView;
     
     private PatientRepository patientRepository;
+    private CloudinaryService cloudinaryService;
     private String currentUserId;
 
     @Override
@@ -32,8 +34,14 @@ public class PatientProfileViewActivity extends com.example.medibook.activities.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_patient_profile_view);
 
+        if (mAuth.getCurrentUser() == null) {
+            navigateToLogin();
+            return;
+        }
+
         patientRepository = new PatientRepository();
-        currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        cloudinaryService = new CloudinaryService();
+        currentUserId = mAuth.getCurrentUser().getUid();
 
         // Initialize views
         profileImageView = findViewById(R.id.profile_image);
@@ -88,8 +96,9 @@ public class PatientProfileViewActivity extends com.example.medibook.activities.
                         bioTextView.setText(patient.getBio() != null ? patient.getBio() : "No bio provided");
 
                         if (patient.getProfileImage() != null && !patient.getProfileImage().isEmpty()) {
+                            String optimizedUrl = cloudinaryService.getOptimizedImageUrl(patient.getProfileImage(), 300, 300);
                             Glide.with(PatientProfileViewActivity.this)
-                                .load(patient.getProfileImage())
+                                .load(optimizedUrl)
                                 .circleCrop()
                                 .into(profileImageView);
                         }

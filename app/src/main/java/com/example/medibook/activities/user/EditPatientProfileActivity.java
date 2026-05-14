@@ -71,6 +71,7 @@ public class EditPatientProfileActivity extends AppCompatActivity {
     }
 
     private void pickImage() {
+        android.util.Log.d("imageDebug", "Opening image picker");
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
@@ -83,6 +84,7 @@ public class EditPatientProfileActivity extends AppCompatActivity {
         
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
             selectedImageUri = data.getData();
+            android.util.Log.d("imageDebug", "Image selected: " + (selectedImageUri != null ? selectedImageUri.toString() : "null"));
             if (selectedImageUri != null) {
                 // Show preview
                 Glide.with(this)
@@ -92,36 +94,123 @@ public class EditPatientProfileActivity extends AppCompatActivity {
                 
                 uploadImageToCloudinary(selectedImageUri);
             }
+        } else {
+            android.util.Log.d("imageDebug", "Image selection cancelled or failed. ResultCode: " + resultCode);
         }
     }
 
     private void uploadImageToCloudinary(Uri imageUri) {
+        android.util.Log.d("imageDebug", "Preparing to upload image: " + imageUri.toString());
         progressBar.setVisibility(View.VISIBLE);
         uploadPhotoButton.setEnabled(false);
 
         // Get file from URI
         String imagePath = getRealPathFromURI(imageUri);
+        android.util.Log.d("imageDebug", "Real path from URI: " + (imagePath != null ? imagePath : "NULL"));
+        
         if (imagePath != null) {
             File imageFile = new File(imagePath);
+            android.util.Log.d("imageDebug", "Uploading file: " + imageFile.getName());
             
             cloudinaryService.uploadImage(imageFile, "patient_profiles/" + currentUserId, 
                 new CloudinaryService.ImageUploadCallback() {
                     @Override
                     public void onSuccess(String imageUrl) {
                         profileImageUrl = imageUrl;
-                        progressBar.setVisibility(View.GONE);
-                        uploadPhotoButton.setEnabled(true);
-                        Toast.makeText(EditPatientProfileActivity.this, "Photo uploaded successfully", Toast.LENGTH_SHORT).show();
+                        runOnUiThread(() -> {
+                            android.util.Log.d("imageDebug", "Upload success! URL: " + imageUrl);
+                            progressBar.setVisibility(View.GONE);
+                            uploadPhotoButton.setEnabled(true);
+                            
+                            // Load the uploaded image from Cloudinary to confirm it works
+                            String optimizedUrl = cloudinaryService.getOptimizedImageUrl(imageUrl, 300, 300);
+                            Glide.with(EditPatientProfileActivity.this)
+                                .load(optimizedUrl)
+                                .circleCrop()
+                                .into(profileImageView);
+                                
+                            Toast.makeText(EditPatientProfileActivity.this, "Photo uploaded successfully", Toast.LENGTH_SHORT).show();
+                        });
                     }
 
                     @Override
                     public void onFailure(String error) {
-                        progressBar.setVisibility(View.GONE);
-                        uploadPhotoButton.setEnabled(true);
-                        Toast.makeText(EditPatientProfileActivity.this, "Failed to upload photo: " + error, Toast.LENGTH_SHORT).show();
+                        android.util.Log.e("imageDebug", "Upload failed: " + error);
+                        runOnUiThread(() -> {
+                            progressBar.setVisibility(View.GONE);
+                            uploadPhotoButton.setEnabled(true);
+                            Toast.makeText(EditPatientProfileActivity.this, "Failed to upload photo: " + error, Toast.LENGTH_SHORT).show();
+                        });
                     }
                 });
+        } else {
+            android.util.Log.d("imageDebug", "URI path is NULL (common on Android 10+). Using stream-to-temp-file fallback.");
+            // Fallback: Copy stream to temp file if getRealPathFromURI fails
+            try {
+                File tempFile = createTempFileFromUri(imageUri);
+                if (tempFile != null) {
+                    cloudinaryService.uploadImage(tempFile, "patient_profiles/" + currentUserId, new CloudinaryService.ImageUploadCallback() {
+                        @Override
+                        public void onSuccess(String imageUrl) {
+                            profileImageUrl = imageUrl;
+                            runOnUiThread(() -> {
+                                android.util.Log.d("imageDebug", "Upload success (fallback)! URL: " + imageUrl);
+                                progressBar.setVisibility(View.GONE);
+                                uploadPhotoButton.setEnabled(true);
+                                
+                                // Load the uploaded image from Cloudinary
+                                String optimizedUrl = cloudinaryService.getOptimizedImageUrl(imageUrl, 300, 300);
+                                Glide.with(EditPatientProfileActivity.this)
+                                    .load(optimizedUrl)
+                                    .circleCrop()
+                                    .into(profileImageView);
+
+                                Toast.makeText(EditPatientProfileActivity.this, "Photo uploaded successfully", Toast.LENGTH_SHORT).show();
+                            });
+                        }
+
+                        @Override
+                        public void onFailure(String error) {
+                            android.util.Log.e("imageDebug", "Upload failed (fallback): " + error);
+                            runOnUiThread(() -> {
+                                progressBar.setVisibility(View.GONE);
+                                uploadPhotoButton.setEnabled(true);
+                                Toast.makeText(EditPatientProfileActivity.this, "Failed to upload photo: " + error, Toast.LENGTH_SHORT).show();
+                            });
+                        }
+                    });
+                } else {
+                    progressBar.setVisibility(View.GONE);
+                    uploadPhotoButton.setEnabled(true);
+                    Toast.makeText(this, "Failed to process image file", Toast.LENGTH_SHORT).show();
+                }
+            } catch (Exception e) {
+                android.util.Log.e("imageDebug", "Error in fallback", e);
+                progressBar.setVisibility(View.GONE);
+                uploadPhotoButton.setEnabled(true);
+                Toast.makeText(this, "Error processing image", Toast.LENGTH_SHORT).show();
+            }
         }
+    }
+
+    private File createTempFileFromUri(Uri uri) throws java.io.IOException {
+        java.io.InputStream inputStream = getContentResolver().openInputStream(uri);
+        if (inputStream == null) return null;
+        
+        File tempFile = File.createTempFile("upload_", ".jpg", getCacheDir());
+        java.io.FileOutputStream outputStream = new java.io.FileOutputStream(tempFile);
+        
+        byte[] buffer = new byte[1024];
+        int read;
+        while ((read = inputStream.read(buffer)) != -1) {
+            outputStream.write(buffer, 0, read);
+        }
+        
+        outputStream.flush();
+        outputStream.close();
+        inputStream.close();
+        
+        return tempFile;
     }
 
     private String getRealPathFromURI(Uri uri) {
@@ -205,12 +294,14 @@ public class EditPatientProfileActivity extends AppCompatActivity {
         updates.put("gender", gender);
         updates.put("bloodGroup", bloodGroup);
         if (!profileImageUrl.isEmpty()) {
+            android.util.Log.d("imageDebug", "Saving new profile image URL to Firestore: " + profileImageUrl);
             updates.put("profileImage", profileImageUrl);
         }
 
         userRepository.updateUserFields(currentUserId, updates, new UserRepository.UserCallback() {
             @Override
             public void onSuccess(com.example.medibook.models.User user) {
+                android.util.Log.d("imageDebug", "Profile updated successfully in Firestore");
                 progressBar.setVisibility(View.GONE);
                 saveButton.setEnabled(true);
                 Toast.makeText(EditPatientProfileActivity.this, "Profile updated successfully!", Toast.LENGTH_SHORT).show();

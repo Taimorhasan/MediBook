@@ -4,21 +4,25 @@
     android:id="@+id/content_scroll_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8F9FA">
+    android:background="#F8F9FA"
+    android:fillViewport="true">
 
-    <!-- Loading Progress Bar -->
-    <ProgressBar
-        android:id="@+id/loading_progress"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:visibility="gone"
-        android:layout_marginTop="24dp" />
-
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="wrap_content">
+
+        <!-- Loading Progress Bar -->
+        <ProgressBar
+            android:id="@+id/loading_progress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
         <!-- Profile Header Card -->
         <LinearLayout
@@ -263,6 +267,8 @@
 
         </LinearLayout>
 
-    </LinearLayout>
+        </LinearLayout>
+
+    </FrameLayout>
 
 </ScrollView>

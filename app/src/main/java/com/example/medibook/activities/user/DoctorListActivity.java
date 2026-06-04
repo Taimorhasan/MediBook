@@ -154,7 +154,7 @@ public class DoctorListActivity extends AppCompatActivity implements DoctorAdapt
             boolean matchesSpecialty = selectedSpecialty.equals("⚕ Specialty") ||
                 selectedSpecialty.equals("★ Top Rated") ||
                 selectedSpecialty.equals("☐ Available") ||
-                doctorSpecialty.equalsIgnoreCase(selectedSpecialty);
+                specialtyMatches(doctorSpecialty, selectedSpecialty);
             boolean matchesAvailability = !selectedSpecialty.equals("☐ Available") ||
                 (doctor.isActive() && doctor.isVerified());
 
@@ -195,8 +195,25 @@ public class DoctorListActivity extends AppCompatActivity implements DoctorAdapt
         for (String specialty : sortedSpecialties) {
             addFilterChip(specialty, false);
         }
+        if (initialSpecialtyFilter != null && !initialSpecialtyFilter.trim().isEmpty()
+                && !containsSpecialtyChip(initialSpecialtyFilter.trim())) {
+            addFilterChip(initialSpecialtyFilter.trim(), false);
+        }
 
         applyInitialSpecialtyFilter();
+    }
+
+    private boolean containsSpecialtyChip(String specialty) {
+        for (int i = 0; i < specialtyChipGroup.getChildCount(); i++) {
+            View child = specialtyChipGroup.getChildAt(i);
+            if (child instanceof Chip) {
+                Chip chip = (Chip) child;
+                if (specialty.equalsIgnoreCase(chip.getText().toString())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private void addFilterChip(String text, boolean checked) {
@@ -279,6 +296,25 @@ public class DoctorListActivity extends AppCompatActivity implements DoctorAdapt
         } catch (NumberFormatException ignored) {
             return 0;
         }
+    }
+
+    private boolean specialtyMatches(String doctorSpecialty, String selectedSpecialty) {
+        if (doctorSpecialty == null || selectedSpecialty == null) return false;
+        String doctorValue = normalizeSpecialty(doctorSpecialty);
+        String selectedValue = normalizeSpecialty(selectedSpecialty);
+        return doctorValue.equals(selectedValue)
+                || doctorValue.contains(selectedValue)
+                || selectedValue.contains(doctorValue);
+    }
+
+    private String normalizeSpecialty(String value) {
+        String normalized = value.toLowerCase().trim();
+        if (normalized.equals("cardiologist")) return "cardiology";
+        if (normalized.equals("dermatologist")) return "dermatology";
+        if (normalized.equals("neurologist")) return "neurology";
+        if (normalized.equals("pediatrician")) return "pediatrics";
+        if (normalized.equals("orthopedic") || normalized.equals("orthopedist")) return "orthopedics";
+        return normalized;
     }
 
     private void setupBottomNavigation() {

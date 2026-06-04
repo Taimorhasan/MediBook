@@ -18,6 +18,8 @@ Doctor signup creates doctors as active, but unverified. Until an admin verifies
 - `DoctorRepository.getDoctor()` can resolve those fallback doctor IDs, so `BookAppointmentActivity` can still confirm appointment requests.
 - `DoctorListActivity` reads an optional `specialty` intent extra and pre-selects that filter.
 - Dashboard search now opens the doctor listing with the typed query applied.
+- Dashboard search now shows inline suggestions for doctors and specialties while typing.
+- Home specialty categories now navigate directly to doctor listing and support common naming differences like `Cardiology` vs `Cardiologist`.
 - Appointment booking now creates the appointment even when Firestore denies the duplicate-slot pre-check query.
 - Doctor profile bio text is aligned from the top/start so longer bios read properly.
 - Alerts screen now loads notifications through `NotificationRepository`, shows local fallback alerts when no server alerts exist, marks alerts as read, and routes appointment/booking alerts to the right screens.

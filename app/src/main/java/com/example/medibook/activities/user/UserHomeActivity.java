@@ -3,6 +3,7 @@ package com.example.medibook.activities.user;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -18,6 +19,7 @@ import com.example.medibook.repositories.AppointmentRepository;
 import com.example.medibook.repositories.NotificationRepository;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import java.util.ArrayList;
@@ -36,6 +38,7 @@ public class UserHomeActivity extends AppCompatActivity implements AppointmentAd
     private TextView noAppointmentsTextView;
     private TextView upcomingAppointmentsTitle;
     private ChipGroup specialtiesChipGroup;
+    private TextInputEditText dashboardSearchEditText;
 
     // Data
     private List<Appointment> appointments;
@@ -67,12 +70,14 @@ public class UserHomeActivity extends AppCompatActivity implements AppointmentAd
         noAppointmentsTextView = findViewById(R.id.no_appointments_text);
         upcomingAppointmentsTitle = findViewById(R.id.upcoming_appointments_title);
         specialtiesChipGroup = findViewById(R.id.specialties_chip_group);
+        dashboardSearchEditText = findViewById(R.id.dashboard_search_edit_text);
 
         // Set dynamic welcome message
         setWelcomeMessage();
 
         // Populate specialties
         populateSpecialties();
+        setupDashboardSearch();
 
         // Setup appointments RecyclerView
         appointmentsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -333,5 +338,40 @@ public class UserHomeActivity extends AppCompatActivity implements AppointmentAd
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             }
         });
+    }
+
+    private void setupDashboardSearch() {
+        if (dashboardSearchEditText == null) return;
+
+        dashboardSearchEditText.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                openDoctorSearch(dashboardSearchEditText.getText() != null
+                        ? dashboardSearchEditText.getText().toString()
+                        : "");
+                return true;
+            }
+            return false;
+        });
+
+        dashboardSearchEditText.setOnClickListener(v -> {
+            if (dashboardSearchEditText.getText() == null
+                    || dashboardSearchEditText.getText().toString().trim().isEmpty()) {
+                openDoctorSearch("");
+            }
+        });
+
+        dashboardSearchEditText.setOnFocusChangeListener((v, hasFocus) -> {
+            if (!hasFocus && dashboardSearchEditText.getText() != null
+                    && dashboardSearchEditText.getText().toString().trim().length() >= 2) {
+                openDoctorSearch(dashboardSearchEditText.getText().toString());
+            }
+        });
+    }
+
+    private void openDoctorSearch(String query) {
+        Intent intent = new Intent(UserHomeActivity.this, DoctorListActivity.class);
+        intent.putExtra("searchQuery", query == null ? "" : query.trim());
+        startActivity(intent);
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
     }
 }

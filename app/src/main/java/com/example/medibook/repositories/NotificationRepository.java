@@ -9,7 +9,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.RemoteMessage;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class NotificationRepository {
@@ -22,6 +25,11 @@ public class NotificationRepository {
 
     public interface NotificationCallback {
         void onSuccess();
+        void onFailure(String error);
+    }
+
+    public interface NotificationsCallback {
+        void onSuccess(List<Notification> notifications);
         void onFailure(String error);
     }
 
@@ -95,5 +103,44 @@ public class NotificationRepository {
                 .update("fcmToken", fcmToken)
                 .addOnSuccessListener(aVoid -> Log.d(TAG, "FCM token updated for user: " + userId))
                 .addOnFailureListener(e -> Log.e(TAG, "Failed to update FCM token", e));
+    }
+
+    public void getUserNotifications(String userId, NotificationsCallback callback) {
+        if (userId == null || userId.trim().isEmpty()) {
+            callback.onFailure("User ID is required");
+            return;
+        }
+
+        db.collection("notifications")
+                .whereEqualTo("userId", userId)
+                .limit(50)
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    List<Notification> notifications = new ArrayList<>();
+                    snapshot.forEach(document -> {
+                        Notification notification = document.toObject(Notification.class);
+                        if (notification != null) {
+                            if (notification.getNotificationId() == null || notification.getNotificationId().trim().isEmpty()) {
+                                notification.setNotificationId(document.getId());
+                            }
+                            notifications.add(notification);
+                        }
+                    });
+                    Collections.sort(notifications, (n1, n2) -> Long.compare(n2.getTimestamp(), n1.getTimestamp()));
+                    callback.onSuccess(notifications);
+                })
+                .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
+    }
+
+    public void markAsRead(String notificationId, NotificationCallback callback) {
+        if (notificationId == null || notificationId.trim().isEmpty()) {
+            callback.onFailure("Notification ID is missing");
+            return;
+        }
+
+        db.collection("notifications").document(notificationId)
+                .update("read", true)
+                .addOnSuccessListener(aVoid -> callback.onSuccess())
+                .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
     }
 }

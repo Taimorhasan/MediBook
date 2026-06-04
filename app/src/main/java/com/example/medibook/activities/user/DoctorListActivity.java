@@ -38,6 +38,7 @@ public class DoctorListActivity extends AppCompatActivity implements DoctorAdapt
     private TextInputEditText searchEditText;
     private ChipGroup specialtyChipGroup;
     private String initialSpecialtyFilter;
+    private String initialSearchQuery;
 
     private DoctorRepository doctorRepository;
 
@@ -51,6 +52,7 @@ public class DoctorListActivity extends AppCompatActivity implements DoctorAdapt
         // Initialize repository
         doctorRepository = new DoctorRepository();
         initialSpecialtyFilter = getIntent().getStringExtra("specialty");
+        initialSearchQuery = getIntent().getStringExtra("searchQuery");
 
         // Initialize lists
         allDoctors = new ArrayList<>();
@@ -71,6 +73,9 @@ public class DoctorListActivity extends AppCompatActivity implements DoctorAdapt
         emptyStateLayout = findViewById(R.id.empty_state_layout);
         searchEditText = findViewById(R.id.search_edit_text);
         specialtyChipGroup = findViewById(R.id.specialty_chip_group);
+        if (initialSearchQuery != null && !initialSearchQuery.trim().isEmpty()) {
+            searchEditText.setText(initialSearchQuery.trim());
+        }
 
         // Setup RecyclerView
         doctorsRecyclerView.setLayoutManager(new LinearLayoutManager(this));

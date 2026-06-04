@@ -99,14 +99,19 @@
                             <TextView
                                 android:id="@+id/doctor_bio_tv"
                                 android:layout_width="match_parent"
-                                android:layout_height="96dp"
+                                android:layout_height="wrap_content"
+                                android:minHeight="96dp"
                                 android:layout_marginTop="8dp"
                                 android:background="@drawable/bg_pill_blue"
-                                android:gravity="center"
-                                android:padding="10dp"
+                                android:gravity="start|top"
+                                android:paddingStart="12dp"
+                                android:paddingTop="10dp"
+                                android:paddingEnd="12dp"
+                                android:paddingBottom="10dp"
                                 android:text="Focus: The impact of hormonal imbalances on skin conditions, specializing in acne, hirsutism, and other skin disorders."
                                 android:textColor="@android:color/white"
-                                android:textSize="11sp" />
+                                android:textSize="11sp"
+                                android:lineSpacingExtra="2dp" />
                         </LinearLayout>
                     </LinearLayout>
 

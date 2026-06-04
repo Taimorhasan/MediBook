@@ -40,7 +40,7 @@
     <activity android:name=".activities.user.BookingsListActivity" />
 
     <!-- ADDED ALERTS ACTIVITY HERE -->
-    <activity android:name=".activities.user.AlertsActivity" android:exported="false" android:theme="@style/Theme.MediBook.NoActionBar" />
+    <activity android:name=".activities.user.AlertsActivity" android:exported="true" android:theme="@style/Theme.MediBook.NoActionBar" />
 
     <activity android:name=".activities.user.NotificationsActivity" />
     <activity android:name=".activities.user.ProfileActivity" />

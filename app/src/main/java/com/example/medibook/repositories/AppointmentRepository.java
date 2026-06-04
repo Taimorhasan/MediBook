@@ -59,6 +59,16 @@ public class AppointmentRepository {
                             .addOnSuccessListener(aVoid -> callback.onSuccess(appointment))
                             .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
                 })
+                .addOnFailureListener(e -> {
+                    Log.w(TAG, "Could not pre-check duplicate appointment slot. Creating appointment directly.", e);
+                    createAppointmentDirectly(appointment, callback);
+                });
+    }
+
+    private void createAppointmentDirectly(Appointment appointment, AppointmentCallback callback) {
+        db.collection("appointments").document(appointment.getAppointmentId())
+                .set(appointment)
+                .addOnSuccessListener(aVoid -> callback.onSuccess(appointment))
                 .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
     }
 

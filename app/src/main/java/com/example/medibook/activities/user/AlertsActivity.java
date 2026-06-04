@@ -17,13 +17,10 @@ import com.example.medibook.R;
 import com.example.medibook.adapters.AlertsAdapter;
 import com.example.medibook.models.Notification;
 import com.example.medibook.repositories.AuthRepository;
+import com.example.medibook.repositories.NotificationRepository;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 public class AlertsActivity extends AppCompatActivity {
@@ -35,7 +32,7 @@ public class AlertsActivity extends AppCompatActivity {
     private List<Notification> notificationsList;
     
     private AuthRepository authRepository;
-    private FirebaseFirestore db;
+    private NotificationRepository notificationRepository;
     
     // Navigation elements
     private LinearLayout navHomeLayout, navBookingsLayout, navAlertsLayout, navProfileLayout;
@@ -48,7 +45,7 @@ public class AlertsActivity extends AppCompatActivity {
 
         // Initialize repositories
         authRepository = new AuthRepository();
-        db = FirebaseFirestore.getInstance();
+        notificationRepository = new NotificationRepository();
 
         // Initialize views
         initializeViews();
@@ -91,7 +88,7 @@ public class AlertsActivity extends AppCompatActivity {
         // Bookings navigation
         if (navBookingsLayout != null) {
             navBookingsLayout.setOnClickListener(v -> {
-                Intent intent = new Intent(AlertsActivity.this, BookingsListActivity.class);
+                Intent intent = new Intent(AlertsActivity.this, DoctorListActivity.class);
                 startActivity(intent);
                 overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
                 finish();
@@ -139,41 +136,67 @@ public class AlertsActivity extends AppCompatActivity {
 
         String userId = currentUser.getUid();
 
-        db.collection("notifications")
-                .whereEqualTo("userId", userId)
-                .limit(50)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
+        notificationRepository.getUserNotifications(userId, new NotificationRepository.NotificationsCallback() {
+            @Override
+            public void onSuccess(List<Notification> notifications) {
+                runOnUiThread(() -> {
                     progressBar.setVisibility(View.GONE);
-                    
-                    if (queryDocumentSnapshots.isEmpty()) {
-                        emptyStateLayout.setVisibility(View.VISIBLE);
-                    } else {
-                        emptyStateLayout.setVisibility(View.GONE);
-                        
-                        for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                            Notification notification = document.toObject(Notification.class);
-                            notificationsList.add(notification);
-                        }
-                        
-                        // Sort by timestamp (newest first) just in case
-                        Collections.sort(notificationsList, new Comparator<Notification>() {
-                            @Override
-                            public int compare(Notification n1, Notification n2) {
-                                return Long.compare(n2.getTimestamp(), n1.getTimestamp());
-                            }
-                        });
-                        
-                        alertsAdapter.notifyDataSetChanged();
+                    notificationsList.clear();
+                    notificationsList.addAll(notifications);
+
+                    if (notificationsList.isEmpty()) {
+                        notificationsList.addAll(getDefaultAlerts(userId));
                     }
-                })
-                .addOnFailureListener(e -> {
+
+                    alertsAdapter.notifyDataSetChanged();
+                    alertsRecyclerView.setVisibility(View.VISIBLE);
+                    emptyStateLayout.setVisibility(View.GONE);
+                });
+            }
+
+            @Override
+            public void onFailure(String error) {
+                runOnUiThread(() -> {
                     progressBar.setVisibility(View.GONE);
-                    emptyStateLayout.setVisibility(View.VISIBLE);
-                    Toast.makeText(AlertsActivity.this, 
-                            "Failed to load alerts: " + e.getMessage(), 
+                    notificationsList.clear();
+                    notificationsList.addAll(getDefaultAlerts(userId));
+                    alertsAdapter.notifyDataSetChanged();
+                    alertsRecyclerView.setVisibility(View.VISIBLE);
+                    emptyStateLayout.setVisibility(View.GONE);
+                    Toast.makeText(AlertsActivity.this,
+                            "Showing local alerts: " + error,
                             Toast.LENGTH_SHORT).show();
                 });
+            }
+        });
+    }
+
+    private List<Notification> getDefaultAlerts(String userId) {
+        List<Notification> defaults = new ArrayList<>();
+
+        Notification booking = new Notification(
+                "local-alert-book-doctor",
+                userId,
+                "Book your next appointment",
+                "Choose a doctor by specialty and request an appointment from the Bookings tab.",
+                "doctor_booking",
+                false
+        );
+        booking.setTimestamp(System.currentTimeMillis());
+
+        Notification reminder = new Notification(
+                "local-alert-profile",
+                userId,
+                "Keep your profile updated",
+                "A complete patient profile helps doctors review your appointment request faster.",
+                "profile",
+                true
+        );
+        reminder.setTimestamp(System.currentTimeMillis() - 3600000);
+
+        defaults.add(booking);
+        defaults.add(reminder);
+        return defaults;
     }
 
     @Override

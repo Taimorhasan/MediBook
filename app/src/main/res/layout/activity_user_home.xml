@@ -99,9 +99,12 @@
                 app:startIconDrawable="@android:drawable/ic_menu_search">
 
                 <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/dashboard_search_edit_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Search doctors, specialties..."
+                    android:imeOptions="actionSearch"
+                    android:singleLine="true"
                     android:textColor="#6B7280" />
             </com.google.android.material.textfield.TextInputLayout>
 

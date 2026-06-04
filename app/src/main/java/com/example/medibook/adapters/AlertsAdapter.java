@@ -74,10 +74,11 @@ public class AlertsAdapter extends RecyclerView.Adapter<AlertsAdapter.AlertViewH
 
         public void bind(Notification notification) {
             // Set title
-            alertTitle.setText(notification.getTitle());
+            String title = notification.getTitle() != null ? notification.getTitle() : "Alert";
+            alertTitle.setText(title);
             
             // Set description
-            alertDescription.setText(notification.getMessage());
+            alertDescription.setText(notification.getMessage() != null ? notification.getMessage() : "");
             
             // Set timestamp
             String timeAgo = getTimeAgo(notification.getTimestamp());
@@ -94,16 +95,16 @@ public class AlertsAdapter extends RecyclerView.Adapter<AlertsAdapter.AlertViewH
             setAlertIcon(notification);
             
             // Set accent line for important alerts (Reminders/Confirmations)
-            if (notification.getTitle().contains("confirmed") || 
-                notification.getTitle().contains("Reminder")) {
+            if (title.toLowerCase().contains("confirmed") ||
+                title.toLowerCase().contains("reminder")) {
                 accentLine.setVisibility(View.VISIBLE);
             } else {
                 accentLine.setVisibility(View.GONE);
             }
             
             // Show/hide action button (Check-in for upcoming appointments)
-            if (notification.getTitle().contains("Appointment") && 
-                notification.getTitle().contains("1 hour")) {
+            if (title.contains("Appointment") &&
+                title.contains("1 hour")) {
                 alertActionButton.setVisibility(View.VISIBLE);
                 alertActionButton.setOnClickListener(v -> {
                     // Handle check-in action (e.g., navigate to video call or appointment details)
@@ -123,7 +124,7 @@ public class AlertsAdapter extends RecyclerView.Adapter<AlertsAdapter.AlertViewH
         }
 
         private void setAlertIcon(Notification notification) {
-            String title = notification.getTitle().toLowerCase();
+            String title = notification.getTitle() != null ? notification.getTitle().toLowerCase() : "";
             
             if (title.contains("appointment") || title.contains("reminder")) {
                 alertIcon.setImageResource(android.R.drawable.ic_menu_my_calendar);

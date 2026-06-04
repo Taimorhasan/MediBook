@@ -141,7 +141,6 @@ public class AlertsActivity extends AppCompatActivity {
 
         db.collection("notifications")
                 .whereEqualTo("userId", userId)
-                .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
                 .limit(50)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {

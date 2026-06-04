@@ -26,12 +26,30 @@ public class NotificationRepository {
     }
 
     public void sendNotification(String userId, String title, String message, NotificationCallback callback) {
+        sendNotification(userId, title, message, "general", callback);
+    }
+
+    public void sendNotification(String userId, String title, String message, String type, NotificationCallback callback) {
+        if (userId == null || userId.trim().isEmpty()) {
+            callback.onFailure("User ID is required for notification");
+            return;
+        }
+        if (title == null || title.trim().isEmpty()) {
+            callback.onFailure("Notification title is required");
+            return;
+        }
+        if (message == null || message.trim().isEmpty()) {
+            callback.onFailure("Notification message is required");
+            return;
+        }
+
         // Store notification in Firestore
         Notification notification = new Notification();
         notification.setNotificationId(db.collection("notifications").document().getId());
         notification.setUserId(userId);
         notification.setTitle(title);
         notification.setMessage(message);
+        notification.setType(type);
         notification.setTimestamp(System.currentTimeMillis());
         notification.setRead(false);
 

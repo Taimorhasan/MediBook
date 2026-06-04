@@ -20,7 +20,10 @@ import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.textfield.TextInputEditText;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class DoctorListActivity extends AppCompatActivity implements DoctorAdapter.OnDoctorClickListener {
 
@@ -88,6 +91,7 @@ public class DoctorListActivity extends AppCompatActivity implements DoctorAdapt
         specialtyChipGroup.setOnCheckedChangeListener(new ChipGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(ChipGroup group, int checkedId) {
+                updateFilterChipStyles();
                 filterDoctors();
             }
         });
@@ -106,6 +110,7 @@ public class DoctorListActivity extends AppCompatActivity implements DoctorAdapt
                     showLoading(false);
                     allDoctors.clear();
                     allDoctors.addAll(doctors);
+                    buildSpecialtyFilters();
                     filterDoctors();
                 });
             }
@@ -129,9 +134,11 @@ public class DoctorListActivity extends AppCompatActivity implements DoctorAdapt
         filteredDoctors.clear();
 
         for (Doctor doctor : allDoctors) {
+            String doctorName = doctor.getName() != null ? doctor.getName() : "";
+            String doctorSpecialty = doctor.getSpecialty() != null ? doctor.getSpecialty() : "";
             boolean matchesSearch = searchQuery.isEmpty() ||
-                doctor.getName().toLowerCase().contains(searchQuery) ||
-                doctor.getSpecialty().toLowerCase().contains(searchQuery);
+                doctorName.toLowerCase().contains(searchQuery) ||
+                doctorSpecialty.toLowerCase().contains(searchQuery);
 
             boolean matchesSpecialty = selectedSpecialty.equals("All Specialties") ||
                 selectedSpecialty.equals("A-Z") ||
@@ -139,15 +146,66 @@ public class DoctorListActivity extends AppCompatActivity implements DoctorAdapt
                 selectedSpecialty.equals("♡") ||
                 selectedSpecialty.equals("♀") ||
                 selectedSpecialty.equals("♂") ||
-                doctor.getSpecialty().equalsIgnoreCase(selectedSpecialty);
+                doctorSpecialty.equalsIgnoreCase(selectedSpecialty);
 
             if (matchesSearch && matchesSpecialty) {
                 filteredDoctors.add(doctor);
             }
         }
 
+        if (selectedSpecialty.equals("A-Z")) {
+            Collections.sort(filteredDoctors, (d1, d2) -> {
+                String name1 = d1.getName() != null ? d1.getName() : "";
+                String name2 = d2.getName() != null ? d2.getName() : "";
+                return name1.compareToIgnoreCase(name2);
+            });
+        }
+
         doctorAdapter.notifyDataSetChanged();
         showEmptyState(filteredDoctors.isEmpty());
+    }
+
+    private void buildSpecialtyFilters() {
+        specialtyChipGroup.removeAllViews();
+        addFilterChip("A-Z", true);
+
+        Set<String> specialties = new HashSet<>();
+        for (Doctor doctor : allDoctors) {
+            if (doctor.getSpecialty() != null && !doctor.getSpecialty().trim().isEmpty()) {
+                specialties.add(doctor.getSpecialty().trim());
+            }
+        }
+
+        List<String> sortedSpecialties = new ArrayList<>(specialties);
+        Collections.sort(sortedSpecialties, String::compareToIgnoreCase);
+        for (String specialty : sortedSpecialties) {
+            addFilterChip(specialty, false);
+        }
+    }
+
+    private void addFilterChip(String text, boolean checked) {
+        Chip chip = new Chip(this);
+        chip.setText(text);
+        chip.setCheckable(true);
+        chip.setChecked(checked);
+        chip.setTextSize(11);
+        chip.setChipMinHeight(28);
+        chip.setMinHeight(28);
+        chip.setCheckedIconVisible(false);
+        chip.setTextColor(getColor(checked ? android.R.color.white : R.color.primary_blue));
+        chip.setChipBackgroundColorResource(checked ? R.color.primary_blue : R.color.chip_background);
+        specialtyChipGroup.addView(chip);
+    }
+
+    private void updateFilterChipStyles() {
+        for (int i = 0; i < specialtyChipGroup.getChildCount(); i++) {
+            View child = specialtyChipGroup.getChildAt(i);
+            if (child instanceof Chip) {
+                Chip chip = (Chip) child;
+                chip.setTextColor(getColor(chip.isChecked() ? android.R.color.white : R.color.primary_blue));
+                chip.setChipBackgroundColorResource(chip.isChecked() ? R.color.primary_blue : R.color.chip_background);
+            }
+        }
     }
 
     private String getSelectedSpecialty() {

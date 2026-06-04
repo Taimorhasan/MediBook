@@ -10,7 +10,9 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.medibook.R;
 import com.example.medibook.models.Appointment;
+import com.example.medibook.models.Doctor;
 import com.example.medibook.repositories.AppointmentRepository;
+import com.example.medibook.repositories.DoctorRepository;
 import com.example.medibook.repositories.NotificationRepository;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
@@ -29,8 +31,11 @@ public class BookAppointmentActivity extends AppCompatActivity {
     private String doctorName;
 
     private AppointmentRepository appointmentRepository;
+    private DoctorRepository doctorRepository;
     private NotificationRepository notificationRepository;
     private FirebaseUser currentUser;
+    private Doctor selectedDoctor;
+    private Button confirmButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +44,7 @@ public class BookAppointmentActivity extends AppCompatActivity {
 
         // Initialize repositories
         appointmentRepository = new AppointmentRepository();
+        doctorRepository = new DoctorRepository();
         notificationRepository = new NotificationRepository();
 
         // Get current user
@@ -57,6 +63,7 @@ public class BookAppointmentActivity extends AppCompatActivity {
         // Set up date picker
         DatePicker datePicker = findViewById(R.id.date_picker);
         Calendar calendar = Calendar.getInstance();
+        datePicker.setMinDate(startOfTodayMillis());
         datePicker.init(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
                 calendar.get(Calendar.DAY_OF_MONTH), new DatePicker.OnDateChangedListener() {
             @Override
@@ -84,11 +91,42 @@ public class BookAppointmentActivity extends AppCompatActivity {
             }
         });
 
-        Button confirmButton = findViewById(R.id.confirm_appointment_button);
+        confirmButton = findViewById(R.id.confirm_appointment_button);
         confirmButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 bookAppointment();
+            }
+        });
+
+        loadDoctorForBooking();
+    }
+
+    private void loadDoctorForBooking() {
+        confirmButton.setEnabled(false);
+        doctorRepository.getDoctor(doctorId, new DoctorRepository.DoctorCallback() {
+            @Override
+            public void onSuccess(Doctor doctor) {
+                runOnUiThread(() -> {
+                    selectedDoctor = doctor;
+                    if (doctor == null || !doctor.isActive() || !doctor.isVerified()) {
+                        Toast.makeText(BookAppointmentActivity.this,
+                                "This doctor is not available for booking", Toast.LENGTH_LONG).show();
+                        finish();
+                        return;
+                    }
+                    doctorName = doctor.getName();
+                    confirmButton.setEnabled(true);
+                });
+            }
+
+            @Override
+            public void onFailure(String error) {
+                runOnUiThread(() -> {
+                    Toast.makeText(BookAppointmentActivity.this,
+                            "Unable to verify doctor: " + error, Toast.LENGTH_LONG).show();
+                    finish();
+                });
             }
         });
     }
@@ -99,13 +137,9 @@ public class BookAppointmentActivity extends AppCompatActivity {
             return;
         }
 
-        if (selectedDate.isEmpty()) {
-            Toast.makeText(this, "Please select a date", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (selectedTime.isEmpty()) {
-            Toast.makeText(this, "Please select a time slot", Toast.LENGTH_SHORT).show();
+        String validationError = validateBookingInput();
+        if (validationError != null) {
+            Toast.makeText(this, validationError, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -113,11 +147,14 @@ public class BookAppointmentActivity extends AppCompatActivity {
         Appointment appointment = new Appointment();
         appointment.setAppointmentId(java.util.UUID.randomUUID().toString());
         appointment.setPatientId(currentUser.getUid());
+        appointment.setPatientName(getCurrentPatientName());
         appointment.setDoctorId(doctorId);
         appointment.setDoctorName(doctorName);
+        appointment.setHospitalId(selectedDoctor != null ? selectedDoctor.getHospitalId() : null);
         appointment.setDate(selectedDate);
         appointment.setTime(selectedTime);
         appointment.setStatus("pending");
+        appointment.setCreatedBy(currentUser.getUid());
         appointment.setCreatedAt(System.currentTimeMillis());
         appointment.setUpdatedAt(System.currentTimeMillis());
 
@@ -132,15 +169,12 @@ public class BookAppointmentActivity extends AppCompatActivity {
                 notificationRepository.sendNotification(
                     currentUser.getUid(),
                     "Appointment Booked",
-                    "Your appointment with Dr. " + doctorName + " on " + selectedDate + " at " + selectedTime + " has been booked successfully.",
+                    "Your appointment with Dr. " + doctorName + " on " + selectedDate + " at " + selectedTime + " has been requested.",
+                    "appointment_booked",
                     new NotificationRepository.NotificationCallback() {
                         @Override
                         public void onSuccess() {
-                            runOnUiThread(() -> {
-                                Toast.makeText(BookAppointmentActivity.this,
-                                    "Appointment booked successfully!", Toast.LENGTH_LONG).show();
-                                finish();
-                            });
+                            notifyDoctorAndFinish();
                         }
 
                         @Override
@@ -164,5 +198,100 @@ public class BookAppointmentActivity extends AppCompatActivity {
                 });
             }
         });
+    }
+
+    private void notifyDoctorAndFinish() {
+        notificationRepository.sendNotification(
+                doctorId,
+                "New Appointment Request",
+                getCurrentPatientName() + " requested an appointment on " + selectedDate + " at " + selectedTime + ".",
+                "appointment_request",
+                new NotificationRepository.NotificationCallback() {
+                    @Override
+                    public void onSuccess() {
+                        runOnUiThread(() -> {
+                            Toast.makeText(BookAppointmentActivity.this,
+                                    "Appointment requested successfully!", Toast.LENGTH_LONG).show();
+                            finish();
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(String error) {
+                        runOnUiThread(() -> {
+                            Toast.makeText(BookAppointmentActivity.this,
+                                    "Appointment requested, but doctor alert failed: " + error, Toast.LENGTH_LONG).show();
+                            finish();
+                        });
+                    }
+                }
+        );
+    }
+
+    private String validateBookingInput() {
+        if (doctorId == null || doctorId.trim().isEmpty()) return "Doctor information is missing";
+        if (doctorName == null || doctorName.trim().isEmpty()) return "Doctor name is missing";
+        if (selectedDoctor == null) return "Doctor details are still loading";
+        if (!selectedDoctor.isActive() || !selectedDoctor.isVerified()) return "This doctor is not available for booking";
+        if (selectedDate == null || selectedDate.trim().isEmpty()) return "Please select a date";
+        if (selectedTime == null || selectedTime.trim().isEmpty()) return "Please select a time slot";
+        if (isPastDate(selectedDate)) return "Please select today or a future date";
+        if (!isDoctorAvailableOnSelectedDay()) return "Doctor is not available on the selected day";
+        return null;
+    }
+
+    private boolean isPastDate(String dateValue) {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            Date selected = sdf.parse(dateValue);
+            Date today = sdf.parse(sdf.format(new Date()));
+            return selected != null && today != null && selected.before(today);
+        } catch (Exception e) {
+            return true;
+        }
+    }
+
+    private boolean isDoctorAvailableOnSelectedDay() {
+        if (selectedDoctor == null || selectedDoctor.getAvailableDays() == null || selectedDoctor.getAvailableDays().isEmpty()) {
+            return true;
+        }
+
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            Date selected = sdf.parse(selectedDate);
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(selected);
+            String dayName = new SimpleDateFormat("EEEE", Locale.getDefault()).format(calendar.getTime());
+            for (String availableDay : selectedDoctor.getAvailableDays()) {
+                if (availableDay != null && availableDay.equalsIgnoreCase(dayName)) {
+                    return true;
+                }
+            }
+        } catch (Exception ignored) {
+            return false;
+        }
+        return false;
+    }
+
+    private long startOfTodayMillis() {
+        Calendar today = Calendar.getInstance();
+        today.set(Calendar.HOUR_OF_DAY, 0);
+        today.set(Calendar.MINUTE, 0);
+        today.set(Calendar.SECOND, 0);
+        today.set(Calendar.MILLISECOND, 0);
+        return today.getTimeInMillis();
+    }
+
+    private String getCurrentPatientName() {
+        if (currentUser == null) return "";
+        String displayName = currentUser.getDisplayName();
+        if (displayName != null && !displayName.trim().isEmpty()) {
+            return displayName.trim();
+        }
+        String email = currentUser.getEmail();
+        if (email != null && email.contains("@")) {
+            return email.substring(0, email.indexOf("@"));
+        }
+        return "Patient";
     }
 }

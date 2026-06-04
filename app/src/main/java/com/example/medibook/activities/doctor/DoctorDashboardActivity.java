@@ -10,7 +10,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.medibook.R;
 import com.example.medibook.repositories.AuthRepository;
+import com.example.medibook.repositories.AppointmentRepository;
 import com.example.medibook.repositories.DoctorDetailRepository;
+import com.example.medibook.repositories.NotificationRepository;
 import com.example.medibook.repositories.UserRepository;
 import com.example.medibook.models.Doctor;
 import com.example.medibook.models.Appointment;
@@ -28,6 +30,8 @@ public class DoctorDashboardActivity extends com.example.medibook.activities.com
     private AppointmentAdapter appointmentAdapter;
     
     private DoctorDetailRepository doctorRepository;
+    private AppointmentRepository appointmentRepository;
+    private NotificationRepository notificationRepository;
     private UserRepository userRepository;
     private AuthRepository authRepository;
     private String currentDoctorId;
@@ -44,6 +48,8 @@ public class DoctorDashboardActivity extends com.example.medibook.activities.com
 
         // Initialize repositories
         doctorRepository = new DoctorDetailRepository();
+        appointmentRepository = new AppointmentRepository();
+        notificationRepository = new NotificationRepository();
         userRepository = new UserRepository();
         authRepository = new AuthRepository();
 
@@ -60,7 +66,7 @@ public class DoctorDashboardActivity extends com.example.medibook.activities.com
 
         // Setup RecyclerView with empty list first
         appointmentsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        appointmentAdapter = new AppointmentAdapter(new ArrayList<>(), this);
+        appointmentAdapter = new AppointmentAdapter(new ArrayList<>(), this, true, false);
         appointmentsRecyclerView.setAdapter(appointmentAdapter);
 
         // Load doctor profile
@@ -97,13 +103,12 @@ public class DoctorDashboardActivity extends com.example.medibook.activities.com
         doctorRepository.getDoctorAppointments(currentDoctorId, new DoctorDetailRepository.AppointmentListCallback() {
             @Override
             public void onSuccess(List<Appointment> appointments) {
-                appointmentAdapter = new AppointmentAdapter(appointments, DoctorDashboardActivity.this);
-                appointmentsRecyclerView.setAdapter(appointmentAdapter);
+                runOnUiThread(() -> appointmentAdapter.updateList(appointments));
             }
 
             @Override
             public void onFailure(String error) {
-                Toast.makeText(DoctorDashboardActivity.this, "Failed to load appointments", Toast.LENGTH_SHORT).show();
+                runOnUiThread(() -> Toast.makeText(DoctorDashboardActivity.this, "Failed to load appointments", Toast.LENGTH_SHORT).show());
             }
         });
     }
@@ -131,7 +136,90 @@ public class DoctorDashboardActivity extends com.example.medibook.activities.com
 
     @Override
     public void onCancelAppointment(Appointment appointment) {
-        Toast.makeText(this, "Cancel appointment feature coming soon", Toast.LENGTH_SHORT).show();
+        updateAppointmentStatus(appointment, "cancelled");
+    }
+
+    @Override
+    public void onConfirmAppointment(Appointment appointment) {
+        updateAppointmentStatus(appointment, "confirmed");
+    }
+
+    @Override
+    public void onCompleteAppointment(Appointment appointment) {
+        updateAppointmentStatus(appointment, "completed");
+    }
+
+    private void updateAppointmentStatus(Appointment appointment, String status) {
+        if (appointment == null || appointment.getAppointmentId() == null || appointment.getAppointmentId().trim().isEmpty()) {
+            Toast.makeText(this, "Appointment information is missing", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        appointmentRepository.updateAppointmentStatus(appointment.getAppointmentId(), status, new AppointmentRepository.AppointmentCallback() {
+            @Override
+            public void onSuccess(Appointment updatedAppointment) {
+                sendStatusNotification(updatedAppointment, status);
+            }
+
+            @Override
+            public void onFailure(String error) {
+                runOnUiThread(() -> Toast.makeText(DoctorDashboardActivity.this,
+                        "Failed to update appointment: " + error, Toast.LENGTH_SHORT).show());
+            }
+        });
+    }
+
+    private void sendStatusNotification(Appointment appointment, String status) {
+        if (appointment == null || appointment.getPatientId() == null || appointment.getPatientId().trim().isEmpty()) {
+            runOnUiThread(() -> {
+                Toast.makeText(DoctorDashboardActivity.this,
+                        "Appointment " + status, Toast.LENGTH_SHORT).show();
+                loadAppointments();
+            });
+            return;
+        }
+
+        String title = "Appointment " + capitalize(status);
+        String message = "Your appointment with Dr. " + safeDoctorName()
+                + " on " + appointment.getDate()
+                + " at " + appointment.getTime()
+                + " has been " + status + ".";
+
+        notificationRepository.sendNotification(
+                appointment.getPatientId(),
+                title,
+                message,
+                "appointment_" + status,
+                new NotificationRepository.NotificationCallback() {
+                    @Override
+                    public void onSuccess() {
+                        runOnUiThread(() -> {
+                            Toast.makeText(DoctorDashboardActivity.this,
+                                    "Appointment " + status, Toast.LENGTH_SHORT).show();
+                            loadAppointments();
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(String error) {
+                        runOnUiThread(() -> {
+                            Toast.makeText(DoctorDashboardActivity.this,
+                                    "Appointment updated, alert failed: " + error, Toast.LENGTH_SHORT).show();
+                            loadAppointments();
+                        });
+                    }
+                }
+        );
+    }
+
+    private String safeDoctorName() {
+        CharSequence name = doctorNameTextView != null ? doctorNameTextView.getText() : "";
+        return name != null && name.length() > 0 ? name.toString() : "your doctor";
+    }
+
+    private String capitalize(String value) {
+        if (value == null || value.isEmpty()) return "";
+        return value.substring(0, 1).toUpperCase() + value.substring(1);
     }
 
     @Override

@@ -15,6 +15,7 @@ import com.example.medibook.R;
 import com.example.medibook.adapters.AppointmentAdapter;
 import com.example.medibook.models.Appointment;
 import com.example.medibook.repositories.AppointmentRepository;
+import com.example.medibook.repositories.NotificationRepository;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.firebase.auth.FirebaseAuth;
@@ -40,6 +41,7 @@ public class UserHomeActivity extends AppCompatActivity implements AppointmentAd
     private List<Appointment> appointments;
     private AppointmentAdapter appointmentAdapter;
     private AppointmentRepository appointmentRepository;
+    private NotificationRepository notificationRepository;
     private FirebaseUser currentUser;
 
     @Override
@@ -49,6 +51,7 @@ public class UserHomeActivity extends AppCompatActivity implements AppointmentAd
 
         // Initialize repositories and data
         appointmentRepository = new AppointmentRepository();
+        notificationRepository = new NotificationRepository();
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         appointments = new ArrayList<>();
 
@@ -73,7 +76,7 @@ public class UserHomeActivity extends AppCompatActivity implements AppointmentAd
 
         // Setup appointments RecyclerView
         appointmentsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        appointmentAdapter = new AppointmentAdapter(appointments, this);
+        appointmentAdapter = new AppointmentAdapter(appointments, this, false, true);
         appointmentsRecyclerView.setAdapter(appointmentAdapter);
 
         // Load appointments
@@ -198,9 +201,58 @@ public class UserHomeActivity extends AppCompatActivity implements AppointmentAd
 
     @Override
     public void onCancelAppointment(Appointment appointment) {
-        // Handle appointment cancellation
-        Toast.makeText(this, "Cancel appointment functionality not implemented yet", Toast.LENGTH_SHORT).show();
-        // TODO: Implement appointment cancellation
+        if (appointment == null || appointment.getAppointmentId() == null) {
+            Toast.makeText(this, "Appointment information is missing", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        appointmentRepository.cancelAppointment(appointment.getAppointmentId(), new AppointmentRepository.AppointmentCallback() {
+            @Override
+            public void onSuccess(Appointment updatedAppointment) {
+                notifyDoctorAboutCancellation(updatedAppointment);
+            }
+
+            @Override
+            public void onFailure(String error) {
+                runOnUiThread(() -> Toast.makeText(UserHomeActivity.this,
+                        "Failed to cancel appointment: " + error, Toast.LENGTH_SHORT).show());
+            }
+        });
+    }
+
+    private void notifyDoctorAboutCancellation(Appointment appointment) {
+        if (appointment == null || appointment.getDoctorId() == null || appointment.getDoctorId().trim().isEmpty()) {
+            runOnUiThread(() -> {
+                Toast.makeText(UserHomeActivity.this, "Appointment cancelled", Toast.LENGTH_SHORT).show();
+                loadAppointments();
+            });
+            return;
+        }
+
+        notificationRepository.sendNotification(
+                appointment.getDoctorId(),
+                "Appointment Cancelled",
+                "A patient cancelled the appointment on " + appointment.getDate() + " at " + appointment.getTime() + ".",
+                "appointment_cancelled",
+                new NotificationRepository.NotificationCallback() {
+                    @Override
+                    public void onSuccess() {
+                        runOnUiThread(() -> {
+                            Toast.makeText(UserHomeActivity.this, "Appointment cancelled", Toast.LENGTH_SHORT).show();
+                            loadAppointments();
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(String error) {
+                        runOnUiThread(() -> {
+                            Toast.makeText(UserHomeActivity.this,
+                                    "Appointment cancelled, alert failed: " + error, Toast.LENGTH_SHORT).show();
+                            loadAppointments();
+                        });
+                    }
+                }
+        );
     }
 
     private void setWelcomeMessage() {

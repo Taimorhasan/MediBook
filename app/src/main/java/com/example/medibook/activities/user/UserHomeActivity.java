@@ -95,10 +95,8 @@ public class UserHomeActivity extends AppCompatActivity implements AppointmentAd
             navBookings.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    // Navigate to Appointments Activity
-                    Intent intent = new Intent(UserHomeActivity.this, BookingsListActivity.class);
+                    Intent intent = new Intent(UserHomeActivity.this, DoctorListActivity.class);
                     startActivity(intent);
-                    // Add smooth slide animation: new screen slides in from right, current slides out to left
                     overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
                 }
             });
@@ -326,13 +324,13 @@ public class UserHomeActivity extends AppCompatActivity implements AppointmentAd
             specialtiesChipGroup.addView(chip);
         }
 
-        // Handle chip selection
         specialtiesChipGroup.setOnCheckedChangeListener((group, checkedId) -> {
-            // TODO: Filter doctors/specialties based on selection
-            // For now, just show a toast
             Chip selectedChip = findViewById(checkedId);
             if (selectedChip != null) {
-                Toast.makeText(this, "Selected: " + selectedChip.getText(), Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(UserHomeActivity.this, DoctorListActivity.class);
+                intent.putExtra("specialty", selectedChip.getText().toString());
+                startActivity(intent);
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             }
         });
     }

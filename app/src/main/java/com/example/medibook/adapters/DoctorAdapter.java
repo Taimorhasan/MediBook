@@ -19,6 +19,7 @@ public class DoctorAdapter extends RecyclerView.Adapter<DoctorAdapter.DoctorView
 
     public interface OnDoctorClickListener {
         void onDoctorClick(Doctor doctor);
+        void onBookDoctorClick(Doctor doctor);
     }
 
     public DoctorAdapter(List<Doctor> doctorList, OnDoctorClickListener listener) {
@@ -38,30 +39,47 @@ public class DoctorAdapter extends RecyclerView.Adapter<DoctorAdapter.DoctorView
         Doctor doctor = doctorList.get(position);
         holder.nameTextView.setText(doctor.getName() != null ? doctor.getName() : "Dr. Name");
         holder.specialtyTextView.setText(doctor.getSpecialty() != null ? doctor.getSpecialty() : "Specialty");
+        holder.locationTextView.setText(getLocationText(doctor));
+        holder.availableTextView.setText(getAvailabilityText(doctor));
 
-        // Handle rating display
         String rating = doctor.getRating();
         if (rating != null && !rating.isEmpty()) {
-            holder.ratingTextView.setText(rating + " ⭐");
+            holder.ratingTextView.setText("★ " + rating);
         } else {
-            holder.ratingTextView.setText("4.5 ⭐");
+            holder.ratingTextView.setText("★ 4.5");
         }
 
-        // Load profile image using Glide
         if (doctor.getProfileImage() != null && !doctor.getProfileImage().isEmpty()) {
             Glide.with(holder.imageView.getContext())
                 .load(doctor.getProfileImage())
                 .placeholder(R.drawable.ic_medical_kit)
                 .error(R.drawable.ic_medical_kit)
-                .circleCrop()
                 .into(holder.imageView);
         } else {
-            // Use default placeholder
             Glide.with(holder.imageView.getContext())
                 .load(R.drawable.ic_medical_kit)
-                .circleCrop()
                 .into(holder.imageView);
         }
+    }
+
+    private String getLocationText(Doctor doctor) {
+        if (doctor.getHospitalName() != null && !doctor.getHospitalName().trim().isEmpty()) {
+            return doctor.getHospitalName().trim().toUpperCase();
+        }
+        return "HOSPITAL DETAILS AVAILABLE IN PROFILE";
+    }
+
+    private String getAvailabilityText(Doctor doctor) {
+        if (doctor.getAvailableDays() != null && !doctor.getAvailableDays().isEmpty()) {
+            String day = doctor.getAvailableDays().get(0);
+            if (day != null && !day.trim().isEmpty()) {
+                return "Next available:\n" + day.trim();
+            }
+        }
+        if (doctor.isActive() && doctor.isVerified()) {
+            return "Next available:\nToday";
+        }
+        return "Booking unavailable";
     }
 
     @Override
@@ -71,19 +89,29 @@ public class DoctorAdapter extends RecyclerView.Adapter<DoctorAdapter.DoctorView
 
     public static class DoctorViewHolder extends RecyclerView.ViewHolder {
         ImageView imageView;
-        TextView nameTextView, specialtyTextView, ratingTextView;
+        TextView nameTextView, specialtyTextView, locationTextView, availableTextView, ratingTextView, bookButton;
 
         public DoctorViewHolder(@NonNull View itemView, OnDoctorClickListener listener, List<Doctor> doctors) {
             super(itemView);
             imageView = itemView.findViewById(R.id.doctor_image);
             nameTextView = itemView.findViewById(R.id.doctor_name);
             specialtyTextView = itemView.findViewById(R.id.doctor_specialty);
+            locationTextView = itemView.findViewById(R.id.doctor_location);
+            availableTextView = itemView.findViewById(R.id.doctor_available);
             ratingTextView = itemView.findViewById(R.id.doctor_rating);
+            bookButton = itemView.findViewById(R.id.book_button);
 
             itemView.setOnClickListener(v -> {
                 int position = getAdapterPosition();
                 if (position != RecyclerView.NO_POSITION && listener != null) {
                     listener.onDoctorClick(doctors.get(position));
+                }
+            });
+
+            bookButton.setOnClickListener(v -> {
+                int position = getAdapterPosition();
+                if (position != RecyclerView.NO_POSITION && listener != null) {
+                    listener.onBookDoctorClick(doctors.get(position));
                 }
             });
         }

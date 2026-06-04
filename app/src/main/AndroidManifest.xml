@@ -33,7 +33,7 @@
 
     <!-- User Activities -->
     <activity android:name=".activities.user.UserHomeActivity" />
-    <activity android:name=".activities.user.DoctorListActivity" />
+    <activity android:name=".activities.user.DoctorListActivity" android:exported="true" />
     <activity android:name=".activities.user.DoctorProfileActivity" />
     <activity android:name=".activities.user.BookAppointmentActivity" />
     <activity android:name=".activities.user.AppointmentsActivity" />

@@ -36,8 +36,25 @@ service cloud.firestore {
     // Doctors collection
     match /doctors/{doctorId} {
       // Patients can only see verified doctors. Admins and Managers can see all.
-      allow read: if isSignedIn() && (isAdmin() || hasPermission('manage_doctors') || resource.data.get('isVerified', false) == true);
-      allow write: if isAdmin() || hasPermission('manage_doctors');
+      allow read: if isSignedIn() && (
+        doctorId == request.auth.uid ||
+        isAdmin() ||
+        hasPermission('manage_doctors') ||
+        resource.data.get('isVerified', false) == true
+      );
+      allow create: if isSignedIn()
+        && doctorId == request.auth.uid
+        && request.resource.data.get('isVerified', false) == false;
+      allow update: if isSignedIn() && (
+        isAdmin() ||
+        hasPermission('manage_doctors') ||
+        (
+          doctorId == request.auth.uid &&
+          request.resource.data.get('isVerified', false) == resource.data.get('isVerified', false) &&
+          request.resource.data.get('isActive', true) == resource.data.get('isActive', true)
+        )
+      );
+      allow delete: if isAdmin() || hasPermission('manage_doctors');
     }
 
     // Hospitals collection
@@ -49,12 +66,27 @@ service cloud.firestore {
     // Appointments collection
     match /appointments/{appointmentId} {
       allow read: if isSignedIn() && (resource.data.patientId == request.auth.uid || resource.data.doctorId == request.auth.uid || isAdmin() || hasPermission('view_reports'));
-      allow write: if isSignedIn();
+      allow create: if isSignedIn()
+        && request.resource.data.patientId == request.auth.uid
+        && request.resource.data.doctorId is string
+        && request.resource.data.date is string
+        && request.resource.data.slotTime is string
+        && request.resource.data.status in ['pending', 'confirmed'];
+      allow update: if isSignedIn()
+        && (
+          resource.data.patientId == request.auth.uid ||
+          resource.data.doctorId == request.auth.uid ||
+          isAdmin() ||
+          hasPermission('manage_appointments')
+        )
+        && request.resource.data.status in ['pending', 'confirmed', 'cancelled', 'completed'];
     }
     
     // Notifications collection
     match /notifications/{notifId} {
-      allow read, write: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && request.resource.data.userId is string;
+      allow update: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
     }
     
     // General fallback

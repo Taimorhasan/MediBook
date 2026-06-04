@@ -13,6 +13,7 @@ import com.example.medibook.adapters.AppointmentAdapter;
 import com.example.medibook.models.Appointment;
 import com.example.medibook.repositories.AppointmentRepository;
 import com.example.medibook.repositories.AuthRepository;
+import com.example.medibook.repositories.NotificationRepository;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +24,7 @@ public class BookingsListActivity extends AppCompatActivity implements Appointme
     private List<Appointment> bookingList;
     private AppointmentRepository appointmentRepository;
     private AuthRepository authRepository;
+    private NotificationRepository notificationRepository;
     private LinearLayout emptyStateLayout;
 
     @Override
@@ -33,6 +35,7 @@ public class BookingsListActivity extends AppCompatActivity implements Appointme
         // Initialize repositories
         appointmentRepository = new AppointmentRepository();
         authRepository = new AuthRepository();
+        notificationRepository = new NotificationRepository();
 
         // Initialize views
         bookingsRecyclerView = findViewById(R.id.bookings_recycler_view);
@@ -43,7 +46,7 @@ public class BookingsListActivity extends AppCompatActivity implements Appointme
         }
 
         bookingList = new ArrayList<>();
-        appointmentAdapter = new AppointmentAdapter(bookingList, this);
+        appointmentAdapter = new AppointmentAdapter(bookingList, this, false, true);
         if (bookingsRecyclerView != null) {
             bookingsRecyclerView.setAdapter(appointmentAdapter);
         }
@@ -166,10 +169,7 @@ public class BookingsListActivity extends AppCompatActivity implements Appointme
         appointmentRepository.cancelAppointment(appointment.getAppointmentId(), new AppointmentRepository.AppointmentCallback() {
             @Override
             public void onSuccess(Appointment updatedAppointment) {
-                runOnUiThread(() -> {
-                    Toast.makeText(BookingsListActivity.this, "Appointment cancelled", Toast.LENGTH_SHORT).show();
-                    loadBookings(); // Refresh list
-                });
+                notifyDoctorAboutCancellation(updatedAppointment);
             }
 
             @Override
@@ -179,5 +179,40 @@ public class BookingsListActivity extends AppCompatActivity implements Appointme
                 });
             }
         });
+    }
+
+    private void notifyDoctorAboutCancellation(Appointment appointment) {
+        if (appointment == null || appointment.getDoctorId() == null || appointment.getDoctorId().trim().isEmpty()) {
+            runOnUiThread(() -> {
+                Toast.makeText(BookingsListActivity.this, "Appointment cancelled", Toast.LENGTH_SHORT).show();
+                loadBookings();
+            });
+            return;
+        }
+
+        notificationRepository.sendNotification(
+                appointment.getDoctorId(),
+                "Appointment Cancelled",
+                "A patient cancelled the appointment on " + appointment.getDate() + " at " + appointment.getTime() + ".",
+                "appointment_cancelled",
+                new NotificationRepository.NotificationCallback() {
+                    @Override
+                    public void onSuccess() {
+                        runOnUiThread(() -> {
+                            Toast.makeText(BookingsListActivity.this, "Appointment cancelled", Toast.LENGTH_SHORT).show();
+                            loadBookings();
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(String error) {
+                        runOnUiThread(() -> {
+                            Toast.makeText(BookingsListActivity.this,
+                                    "Appointment cancelled, alert failed: " + error, Toast.LENGTH_SHORT).show();
+                            loadBookings();
+                        });
+                    }
+                }
+        );
     }
 }

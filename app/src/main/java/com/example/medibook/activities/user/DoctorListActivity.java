@@ -1,11 +1,14 @@
 package com.example.medibook.activities.user;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -19,7 +22,10 @@ import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.textfield.TextInputEditText;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class DoctorListActivity extends AppCompatActivity implements DoctorAdapter.OnDoctorClickListener {
 
@@ -31,6 +37,8 @@ public class DoctorListActivity extends AppCompatActivity implements DoctorAdapt
     private View emptyStateLayout;
     private TextInputEditText searchEditText;
     private ChipGroup specialtyChipGroup;
+    private String initialSpecialtyFilter;
+    private String initialSearchQuery;
 
     private DoctorRepository doctorRepository;
 
@@ -38,9 +46,13 @@ public class DoctorListActivity extends AppCompatActivity implements DoctorAdapt
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_doctor_list);
+        getWindow().setStatusBarColor(Color.WHITE);
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
 
         // Initialize repository
         doctorRepository = new DoctorRepository();
+        initialSpecialtyFilter = getIntent().getStringExtra("specialty");
+        initialSearchQuery = getIntent().getStringExtra("searchQuery");
 
         // Initialize lists
         allDoctors = new ArrayList<>();
@@ -49,7 +61,10 @@ public class DoctorListActivity extends AppCompatActivity implements DoctorAdapt
         // Setup toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle("");
+        }
         toolbar.setNavigationOnClickListener(v -> finish());
 
         // Initialize views
@@ -58,6 +73,9 @@ public class DoctorListActivity extends AppCompatActivity implements DoctorAdapt
         emptyStateLayout = findViewById(R.id.empty_state_layout);
         searchEditText = findViewById(R.id.search_edit_text);
         specialtyChipGroup = findViewById(R.id.specialty_chip_group);
+        if (initialSearchQuery != null && !initialSearchQuery.trim().isEmpty()) {
+            searchEditText.setText(initialSearchQuery.trim());
+        }
 
         // Setup RecyclerView
         doctorsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -82,9 +100,12 @@ public class DoctorListActivity extends AppCompatActivity implements DoctorAdapt
         specialtyChipGroup.setOnCheckedChangeListener(new ChipGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(ChipGroup group, int checkedId) {
+                updateFilterChipStyles();
                 filterDoctors();
             }
         });
+
+        setupBottomNavigation();
 
         // Load doctors
         loadDoctors();
@@ -100,6 +121,7 @@ public class DoctorListActivity extends AppCompatActivity implements DoctorAdapt
                     showLoading(false);
                     allDoctors.clear();
                     allDoctors.addAll(doctors);
+                    buildSpecialtyFilters();
                     filterDoctors();
                 });
             }
@@ -123,26 +145,130 @@ public class DoctorListActivity extends AppCompatActivity implements DoctorAdapt
         filteredDoctors.clear();
 
         for (Doctor doctor : allDoctors) {
+            String doctorName = doctor.getName() != null ? doctor.getName() : "";
+            String doctorSpecialty = doctor.getSpecialty() != null ? doctor.getSpecialty() : "";
             boolean matchesSearch = searchQuery.isEmpty() ||
-                doctor.getName().toLowerCase().contains(searchQuery) ||
-                doctor.getSpecialty().toLowerCase().contains(searchQuery);
+                doctorName.toLowerCase().contains(searchQuery) ||
+                doctorSpecialty.toLowerCase().contains(searchQuery);
 
-            boolean matchesSpecialty = selectedSpecialty.equals("All Specialties") ||
-                doctor.getSpecialty().equalsIgnoreCase(selectedSpecialty);
+            boolean matchesSpecialty = selectedSpecialty.equals("⚕ Specialty") ||
+                selectedSpecialty.equals("★ Top Rated") ||
+                selectedSpecialty.equals("☐ Available") ||
+                specialtyMatches(doctorSpecialty, selectedSpecialty);
+            boolean matchesAvailability = !selectedSpecialty.equals("☐ Available") ||
+                (doctor.isActive() && doctor.isVerified());
 
-            if (matchesSearch && matchesSpecialty) {
+            if (matchesSearch && matchesSpecialty && matchesAvailability) {
                 filteredDoctors.add(doctor);
             }
+        }
+
+        if (selectedSpecialty.equals("★ Top Rated")) {
+            Collections.sort(filteredDoctors, (d1, d2) -> parseRating(d2.getRating()) - parseRating(d1.getRating()));
+        } else {
+            Collections.sort(filteredDoctors, (d1, d2) -> {
+                String name1 = d1.getName() != null ? d1.getName() : "";
+                String name2 = d2.getName() != null ? d2.getName() : "";
+                return name1.compareToIgnoreCase(name2);
+            });
         }
 
         doctorAdapter.notifyDataSetChanged();
         showEmptyState(filteredDoctors.isEmpty());
     }
 
+    private void buildSpecialtyFilters() {
+        specialtyChipGroup.removeAllViews();
+        addFilterChip("⚕ Specialty", true);
+        addFilterChip("★ Top Rated", false);
+        addFilterChip("☐ Available", false);
+
+        Set<String> specialties = new HashSet<>();
+        for (Doctor doctor : allDoctors) {
+            if (doctor.getSpecialty() != null && !doctor.getSpecialty().trim().isEmpty()) {
+                specialties.add(doctor.getSpecialty().trim());
+            }
+        }
+
+        List<String> sortedSpecialties = new ArrayList<>(specialties);
+        Collections.sort(sortedSpecialties, String::compareToIgnoreCase);
+        for (String specialty : sortedSpecialties) {
+            addFilterChip(specialty, false);
+        }
+        if (initialSpecialtyFilter != null && !initialSpecialtyFilter.trim().isEmpty()
+                && !containsSpecialtyChip(initialSpecialtyFilter.trim())) {
+            addFilterChip(initialSpecialtyFilter.trim(), false);
+        }
+
+        applyInitialSpecialtyFilter();
+    }
+
+    private boolean containsSpecialtyChip(String specialty) {
+        for (int i = 0; i < specialtyChipGroup.getChildCount(); i++) {
+            View child = specialtyChipGroup.getChildAt(i);
+            if (child instanceof Chip) {
+                Chip chip = (Chip) child;
+                if (specialty.equalsIgnoreCase(chip.getText().toString())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private void addFilterChip(String text, boolean checked) {
+        Chip chip = new Chip(this);
+        chip.setText(text);
+        chip.setCheckable(true);
+        chip.setChecked(checked);
+        chip.setTextSize(12);
+        chip.setChipMinHeight(40);
+        chip.setMinHeight(40);
+        chip.setEnsureMinTouchTargetSize(false);
+        chip.setCheckedIconVisible(false);
+        chip.setChipCornerRadius(22);
+        styleFilterChip(chip);
+        specialtyChipGroup.addView(chip);
+    }
+
+    private void applyInitialSpecialtyFilter() {
+        if (initialSpecialtyFilter == null || initialSpecialtyFilter.trim().isEmpty()) {
+            return;
+        }
+
+        for (int i = 0; i < specialtyChipGroup.getChildCount(); i++) {
+            View child = specialtyChipGroup.getChildAt(i);
+            if (child instanceof Chip) {
+                Chip chip = (Chip) child;
+                if (initialSpecialtyFilter.equalsIgnoreCase(chip.getText().toString())) {
+                    chip.setChecked(true);
+                    updateFilterChipStyles();
+                    return;
+                }
+            }
+        }
+    }
+
+    private void updateFilterChipStyles() {
+        for (int i = 0; i < specialtyChipGroup.getChildCount(); i++) {
+            View child = specialtyChipGroup.getChildAt(i);
+            if (child instanceof Chip) {
+                Chip chip = (Chip) child;
+                styleFilterChip(chip);
+            }
+        }
+    }
+
+    private void styleFilterChip(Chip chip) {
+        chip.setTextColor(chip.isChecked() ? Color.WHITE : Color.rgb(15, 23, 42));
+        chip.setChipBackgroundColor(ColorStateList.valueOf(
+                chip.isChecked() ? Color.rgb(0, 122, 255) : Color.WHITE));
+    }
+
     private String getSelectedSpecialty() {
         int checkedId = specialtyChipGroup.getCheckedChipId();
         if (checkedId == View.NO_ID) {
-            return "All Specialties";
+            return "⚕ Specialty";
         }
 
         Chip selectedChip = findViewById(checkedId);
@@ -163,10 +289,61 @@ public class DoctorListActivity extends AppCompatActivity implements DoctorAdapt
         loadingProgress.setVisibility(View.GONE);
     }
 
+    private int parseRating(String rating) {
+        if (rating == null) return 0;
+        try {
+            return Math.round(Float.parseFloat(rating.trim()) * 10);
+        } catch (NumberFormatException ignored) {
+            return 0;
+        }
+    }
+
+    private boolean specialtyMatches(String doctorSpecialty, String selectedSpecialty) {
+        if (doctorSpecialty == null || selectedSpecialty == null) return false;
+        String doctorValue = normalizeSpecialty(doctorSpecialty);
+        String selectedValue = normalizeSpecialty(selectedSpecialty);
+        return doctorValue.equals(selectedValue)
+                || doctorValue.contains(selectedValue)
+                || selectedValue.contains(doctorValue);
+    }
+
+    private String normalizeSpecialty(String value) {
+        String normalized = value.toLowerCase().trim();
+        if (normalized.equals("cardiologist")) return "cardiology";
+        if (normalized.equals("dermatologist")) return "dermatology";
+        if (normalized.equals("neurologist")) return "neurology";
+        if (normalized.equals("pediatrician")) return "pediatrics";
+        if (normalized.equals("orthopedic") || normalized.equals("orthopedist")) return "orthopedics";
+        return normalized;
+    }
+
+    private void setupBottomNavigation() {
+        TextView navHome = findViewById(R.id.nav_home);
+        TextView navBookings = findViewById(R.id.nav_bookings);
+        TextView navAlerts = findViewById(R.id.nav_alerts);
+        TextView navProfile = findViewById(R.id.nav_profile);
+
+        navHome.setOnClickListener(v -> {
+            startActivity(new Intent(this, UserHomeActivity.class));
+            finish();
+        });
+        navBookings.setOnClickListener(v -> startActivity(new Intent(this, BookingsListActivity.class)));
+        navAlerts.setOnClickListener(v -> startActivity(new Intent(this, AlertsActivity.class)));
+        navProfile.setOnClickListener(v -> startActivity(new Intent(this, PatientProfileViewActivity.class)));
+    }
+
     @Override
     public void onDoctorClick(Doctor doctor) {
-        // Navigate to DoctorProfileActivity with doctor data
         Intent intent = new Intent(this, DoctorProfileActivity.class);
+        intent.putExtra("doctorId", doctor.getDoctorId());
+        intent.putExtra("doctorName", doctor.getName());
+        intent.putExtra("doctorSpecialty", doctor.getSpecialty());
+        startActivity(intent);
+    }
+
+    @Override
+    public void onBookDoctorClick(Doctor doctor) {
+        Intent intent = new Intent(this, BookAppointmentActivity.class);
         intent.putExtra("doctorId", doctor.getDoctorId());
         intent.putExtra("doctorName", doctor.getName());
         intent.putExtra("doctorSpecialty", doctor.getSpecialty());

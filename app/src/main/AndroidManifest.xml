@@ -33,14 +33,14 @@
 
     <!-- User Activities -->
     <activity android:name=".activities.user.UserHomeActivity" />
-    <activity android:name=".activities.user.DoctorListActivity" />
+    <activity android:name=".activities.user.DoctorListActivity" android:exported="true" />
     <activity android:name=".activities.user.DoctorProfileActivity" />
     <activity android:name=".activities.user.BookAppointmentActivity" />
     <activity android:name=".activities.user.AppointmentsActivity" />
     <activity android:name=".activities.user.BookingsListActivity" />
 
     <!-- ADDED ALERTS ACTIVITY HERE -->
-    <activity android:name=".activities.user.AlertsActivity" android:exported="false" android:theme="@style/Theme.MediBook.NoActionBar" />
+    <activity android:name=".activities.user.AlertsActivity" android:exported="true" android:theme="@style/Theme.MediBook.NoActionBar" />
 
     <activity android:name=".activities.user.NotificationsActivity" />
     <activity android:name=".activities.user.ProfileActivity" />

@@ -36,5 +36,15 @@
         <item name="colorOnPrimary">@color/white</item>
         <item name="android:statusBarColor">@color/primary_blue</item>
     </style>
+
+    <style name="ShapeAppearanceOverlay_MediBook_Circle">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
+    <style name="ShapeAppearanceOverlay_MediBook_Rounded">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">14dp</item>
+    </style>
     
 </resources>

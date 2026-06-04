@@ -4,6 +4,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.google.android.material.chip.Chip;
 import androidx.annotation.NonNull;
@@ -16,15 +17,25 @@ public class AppointmentAdapter extends RecyclerView.Adapter<AppointmentAdapter.
 
     private List<Appointment> appointmentList;
     private OnAppointmentClickListener listener;
+    private boolean showDoctorActions;
+    private boolean showPatientCancel;
 
     public interface OnAppointmentClickListener {
         void onAppointmentClick(Appointment appointment);
         void onCancelAppointment(Appointment appointment);
+        default void onConfirmAppointment(Appointment appointment) {}
+        default void onCompleteAppointment(Appointment appointment) {}
     }
 
     public AppointmentAdapter(List<Appointment> appointmentList, OnAppointmentClickListener listener) {
+        this(appointmentList, listener, false, false);
+    }
+
+    public AppointmentAdapter(List<Appointment> appointmentList, OnAppointmentClickListener listener, boolean showDoctorActions, boolean showPatientCancel) {
         this.appointmentList = appointmentList;
         this.listener = listener;
+        this.showDoctorActions = showDoctorActions;
+        this.showPatientCancel = showPatientCancel;
     }
 
     public void updateList(List<Appointment> newList) {
@@ -43,9 +54,13 @@ public class AppointmentAdapter extends RecyclerView.Adapter<AppointmentAdapter.
     public void onBindViewHolder(@NonNull AppointmentViewHolder holder, int position) {
         Appointment appointment = appointmentList.get(position);
 
-        // Set doctor name
-        String doctorName = appointment.getDoctorName();
-        holder.doctorNameTextView.setText(doctorName != null ? "Dr. " + doctorName : "Dr. Name");
+        // Set primary name based on who is viewing the appointment.
+        if (showDoctorActions) {
+            holder.doctorNameTextView.setText(getPatientDisplayName(appointment));
+        } else {
+            String doctorName = appointment.getDoctorName();
+            holder.doctorNameTextView.setText(doctorName != null ? "Dr. " + doctorName : "Dr. Name");
+        }
 
         // Set specialty (placeholder for now - would need to get from doctor data)
         holder.specialtyTextView.setText("Specialty");
@@ -79,6 +94,8 @@ public class AppointmentAdapter extends RecyclerView.Adapter<AppointmentAdapter.
                 }
             }
         }
+
+        bindActionButtons(holder, appointment);
     }
 
     @Override
@@ -88,6 +105,8 @@ public class AppointmentAdapter extends RecyclerView.Adapter<AppointmentAdapter.
 
     public static class AppointmentViewHolder extends RecyclerView.ViewHolder {
         TextView doctorNameTextView, specialtyTextView, dateTimeTextView, statusTextView, monthTextView, dayTextView;
+        LinearLayout actionButtonsLayout;
+        Button confirmButton, completeButton, cancelButton;
 
         public AppointmentViewHolder(@NonNull View itemView, OnAppointmentClickListener listener, List<Appointment> appointments) {
             super(itemView);
@@ -97,12 +116,47 @@ public class AppointmentAdapter extends RecyclerView.Adapter<AppointmentAdapter.
             statusTextView = itemView.findViewById(R.id.status_text);
             monthTextView = itemView.findViewById(R.id.month_text);
             dayTextView = itemView.findViewById(R.id.day_text);
+            actionButtonsLayout = itemView.findViewById(R.id.action_buttons_layout);
+            confirmButton = itemView.findViewById(R.id.confirm_appointment_button);
+            completeButton = itemView.findViewById(R.id.complete_appointment_button);
+            cancelButton = itemView.findViewById(R.id.cancel_appointment_button);
 
             itemView.setOnClickListener(v -> {
                 int position = getAdapterPosition();
                 if (position != RecyclerView.NO_POSITION && listener != null) {
                     listener.onAppointmentClick(appointments.get(position));
                 }
+            });
+        }
+    }
+
+    private void bindActionButtons(AppointmentViewHolder holder, Appointment appointment) {
+        if (holder.actionButtonsLayout == null) return;
+
+        String status = appointment.getStatus() != null ? appointment.getStatus().toLowerCase() : "pending";
+        boolean canDoctorAct = showDoctorActions && ("pending".equals(status) || "confirmed".equals(status));
+        boolean canPatientCancel = showPatientCancel && ("pending".equals(status) || "confirmed".equals(status));
+
+        holder.actionButtonsLayout.setVisibility((canDoctorAct || canPatientCancel) ? View.VISIBLE : View.GONE);
+
+        if (holder.confirmButton != null) {
+            holder.confirmButton.setVisibility(canDoctorAct && "pending".equals(status) ? View.VISIBLE : View.GONE);
+            holder.confirmButton.setOnClickListener(v -> {
+                if (listener != null) listener.onConfirmAppointment(appointment);
+            });
+        }
+
+        if (holder.completeButton != null) {
+            holder.completeButton.setVisibility(canDoctorAct && "confirmed".equals(status) ? View.VISIBLE : View.GONE);
+            holder.completeButton.setOnClickListener(v -> {
+                if (listener != null) listener.onCompleteAppointment(appointment);
+            });
+        }
+
+        if (holder.cancelButton != null) {
+            holder.cancelButton.setVisibility((canDoctorAct || canPatientCancel) ? View.VISIBLE : View.GONE);
+            holder.cancelButton.setOnClickListener(v -> {
+                if (listener != null) listener.onCancelAppointment(appointment);
             });
         }
     }
@@ -130,6 +184,18 @@ public class AppointmentAdapter extends RecyclerView.Adapter<AppointmentAdapter.
         }
 
         return date + " • " + time;
+    }
+
+    private String getPatientDisplayName(Appointment appointment) {
+        String patientName = appointment.getPatientName();
+        if (patientName != null && !patientName.trim().isEmpty()) {
+            return patientName;
+        }
+        String patientId = appointment.getPatientId();
+        if (patientId != null && patientId.length() > 8) {
+            return "Patient " + patientId.substring(0, 8);
+        }
+        return "Patient";
     }
 
     private String getMonthAbbrev(int month) {

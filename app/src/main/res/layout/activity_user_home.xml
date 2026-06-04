@@ -89,7 +89,7 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
+                android:layout_marginBottom="8dp"
                 app:boxBackgroundMode="filled"
                 app:boxCornerRadiusTopStart="12dp"
                 app:boxCornerRadiusTopEnd="12dp"
@@ -99,11 +99,25 @@
                 app:startIconDrawable="@android:drawable/ic_menu_search">
 
                 <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/dashboard_search_edit_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Search doctors, specialties..."
+                    android:imeOptions="actionSearch"
+                    android:singleLine="true"
                     android:textColor="#6B7280" />
             </com.google.android.material.textfield.TextInputLayout>
+
+            <LinearLayout
+                android:id="@+id/search_suggestions_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:background="@android:color/white"
+                android:elevation="4dp"
+                android:orientation="vertical"
+                android:paddingVertical="6dp"
+                android:visibility="gone" />
 
             <!-- Specialties Section -->
             <RelativeLayout
@@ -111,6 +125,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp">
                 <TextView
+                    android:id="@+id/view_all_specialties"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Specialties"

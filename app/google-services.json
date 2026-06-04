@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:665861535550:android:2d1cfbfcf965ac88581e6f",
         "android_client_info": {
-          "package_name": "com.example.medibook"
+          "package_name": "com.example.myapplication"
         }
       },
       "oauth_client": [
@@ -17,7 +17,7 @@
           "client_id": "665861535550-ipke6id429j10f2b3rrg171l6fcbias3.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.medibook",
+            "package_name": "com.example.myapplication",
             "certificate_hash": "4c2c269a35ac464eaa68d531bf4dee2bbf54e419"
           }
         },
@@ -25,7 +25,7 @@
           "client_id": "665861535550-l3p923f7eh8eqso0icj4oi55s4cbhmpn.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.medibook",
+            "package_name": "com.example.myapplication",
             "certificate_hash": "fa926c5505b970f5718755934502961754d0e4de"
           }
         },
@@ -33,7 +33,7 @@
           "client_id": "665861535550-m5tu71pucolf44jd3utbhk4h1ql92rpb.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.medibook",
+            "package_name": "com.example.myapplication",
             "certificate_hash": "2af437b26335745dc53976b57ab527708d23d50a"
           }
         },

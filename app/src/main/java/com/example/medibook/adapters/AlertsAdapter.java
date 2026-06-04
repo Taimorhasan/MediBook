@@ -1,6 +1,7 @@
 package com.example.medibook.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,8 +13,10 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.medibook.R;
+import com.example.medibook.activities.user.BookingsListActivity;
+import com.example.medibook.activities.user.DoctorListActivity;
 import com.example.medibook.models.Notification;
-import com.google.firebase.firestore.FirebaseFirestore;
+import com.example.medibook.repositories.NotificationRepository;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -24,12 +27,12 @@ public class AlertsAdapter extends RecyclerView.Adapter<AlertsAdapter.AlertViewH
 
     private List<Notification> notificationsList;
     private Context context;
-    private FirebaseFirestore db;
+    private NotificationRepository notificationRepository;
 
     public AlertsAdapter(List<Notification> notificationsList, Context context) {
         this.notificationsList = notificationsList;
         this.context = context;
-        this.db = FirebaseFirestore.getInstance();
+        this.notificationRepository = new NotificationRepository();
     }
 
     @NonNull
@@ -74,10 +77,11 @@ public class AlertsAdapter extends RecyclerView.Adapter<AlertsAdapter.AlertViewH
 
         public void bind(Notification notification) {
             // Set title
-            alertTitle.setText(notification.getTitle());
+            String title = notification.getTitle() != null ? notification.getTitle() : "Alert";
+            alertTitle.setText(title);
             
             // Set description
-            alertDescription.setText(notification.getMessage());
+            alertDescription.setText(notification.getMessage() != null ? notification.getMessage() : "");
             
             // Set timestamp
             String timeAgo = getTimeAgo(notification.getTimestamp());
@@ -94,21 +98,20 @@ public class AlertsAdapter extends RecyclerView.Adapter<AlertsAdapter.AlertViewH
             setAlertIcon(notification);
             
             // Set accent line for important alerts (Reminders/Confirmations)
-            if (notification.getTitle().contains("confirmed") || 
-                notification.getTitle().contains("Reminder")) {
+            if (title.toLowerCase().contains("confirmed") ||
+                title.toLowerCase().contains("reminder")) {
                 accentLine.setVisibility(View.VISIBLE);
             } else {
                 accentLine.setVisibility(View.GONE);
             }
             
             // Show/hide action button (Check-in for upcoming appointments)
-            if (notification.getTitle().contains("Appointment") && 
-                notification.getTitle().contains("1 hour")) {
+            if (isAppointmentAlert(notification)) {
                 alertActionButton.setVisibility(View.VISIBLE);
+                alertActionButton.setText("View");
                 alertActionButton.setOnClickListener(v -> {
-                    // Handle check-in action (e.g., navigate to video call or appointment details)
-                    // For now, just show a toast
-                    android.widget.Toast.makeText(context, "Checking in...", android.widget.Toast.LENGTH_SHORT).show();
+                    markAsRead(notification);
+                    context.startActivity(new Intent(context, BookingsListActivity.class));
                 });
             } else {
                 alertActionButton.setVisibility(View.GONE);
@@ -119,11 +122,16 @@ public class AlertsAdapter extends RecyclerView.Adapter<AlertsAdapter.AlertViewH
                 if (!notification.isRead()) {
                     markAsRead(notification);
                 }
+                if (isAppointmentAlert(notification)) {
+                    context.startActivity(new Intent(context, BookingsListActivity.class));
+                } else if (isBookingPrompt(notification)) {
+                    context.startActivity(new Intent(context, DoctorListActivity.class));
+                }
             });
         }
 
         private void setAlertIcon(Notification notification) {
-            String title = notification.getTitle().toLowerCase();
+            String title = notification.getTitle() != null ? notification.getTitle().toLowerCase() : "";
             
             if (title.contains("appointment") || title.contains("reminder")) {
                 alertIcon.setImageResource(android.R.drawable.ic_menu_my_calendar);
@@ -142,16 +150,42 @@ public class AlertsAdapter extends RecyclerView.Adapter<AlertsAdapter.AlertViewH
         }
 
         private void markAsRead(Notification notification) {
-            db.collection("notifications")
-                    .document(notification.getNotificationId())
-                    .update("read", true)
-                    .addOnSuccessListener(aVoid -> {
+            if (notification.getNotificationId() != null && notification.getNotificationId().startsWith("local-")) {
+                notification.setRead(true);
+                int position = getAdapterPosition();
+                if (position != RecyclerView.NO_POSITION) {
+                    notifyItemChanged(position);
+                }
+                return;
+            }
+
+            notificationRepository.markAsRead(notification.getNotificationId(), new NotificationRepository.NotificationCallback() {
+                @Override
+                public void onSuccess() {
                         notification.setRead(true);
-                        notifyItemChanged(getAdapterPosition());
-                    })
-                    .addOnFailureListener(e -> {
-                        // Handle error silently or log it
-                    });
+                    int position = getAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION) {
+                        notifyItemChanged(position);
+                    }
+                }
+
+                @Override
+                public void onFailure(String error) {
+                    android.widget.Toast.makeText(context, "Could not mark alert as read", android.widget.Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
+        private boolean isAppointmentAlert(Notification notification) {
+            String type = notification.getType() != null ? notification.getType().toLowerCase() : "";
+            String title = notification.getTitle() != null ? notification.getTitle().toLowerCase() : "";
+            return type.contains("appointment") || title.contains("appointment");
+        }
+
+        private boolean isBookingPrompt(Notification notification) {
+            String type = notification.getType() != null ? notification.getType().toLowerCase() : "";
+            String title = notification.getTitle() != null ? notification.getTitle().toLowerCase() : "";
+            return type.contains("doctor") || title.contains("doctor") || title.contains("booking");
         }
 
         private String getTimeAgo(long timestamp) {

@@ -20,6 +20,11 @@ public class BackendInitializer {
             "manage_doctors", "manage_schedules", "manage_appointments", 
             "view_doctor_appointments", "send_notifications"
         ));
+
+        // Doctor Role
+        Role doctor = new Role("doctor", "Doctor", Arrays.asList(
+            "view_doctor_appointments", "update_appointments", "manage_schedules"
+        ));
         
         // Patient Role
         Role patient = new Role("patient", "Patient", Arrays.asList(
@@ -28,6 +33,7 @@ public class BackendInitializer {
         
         roleRepo.addRole(admin);
         roleRepo.addRole(manager);
+        roleRepo.addRole(doctor);
         roleRepo.addRole(patient);
     }
 }

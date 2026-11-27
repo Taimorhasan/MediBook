@@ -1,83 +1,297 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <!-- General App Info -->
-  <string name="app_name">MediBook</string>
-  <string name="tagline">EMPATHETIC PRECISION</string>
+    <string name="app_name">MediBook</string>
+    <string name="default_web_client_id" translatable="false">665861535550-16tsn95ro0lhmqva5as9ji08k51hgbed.apps.googleusercontent.com</string>
 
-  <!-- Splash Screen Strings -->
-  <string name="initializing_session">Initializing Secure Session...</string>
-  <string name="loading_resources">Loading Resources...</string>
-  <string name="verifying_security">Verifying Security...</string>
-  <string name="finalizing_setup">Finalizing Setup...</string>
-  <!-- Note: Using the longer version here to cover both screens -->
-  <string name="hipaa_compliant">HIPAA COMPLIANT &amp; SECURE</string>
+    <!-- Tabs -->
+    <string name="tab_home">Home</string>
+    <string name="tab_doctors">Doctors</string>
+    <string name="tab_bookings">Bookings</string>
+    <string name="tab_alerts">Alerts</string>
+    <string name="tab_profile">Profile</string>
+    <string name="tab_today">Today</string>
+    <string name="tab_schedule">Schedule</string>
+    <string name="tab_overview">Overview</string>
+    <string name="tab_appointments">Bookings</string>
+    <string name="tab_users">Users</string>
+    <string name="tab_more">More</string>
 
-  <!-- Portal Selection Strings -->
-  <string name="portal_title">Choose Your Portal</string>
-  <string name="portal_subtitle">Select your role to continue to the appropriate workspace.</string>
+    <!-- Common -->
+    <string name="back">Back</string>
+    <string name="retry">Try again</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="save_changes">Save changes</string>
+    <string name="see_all">See all</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="add">Add</string>
+    <string name="close">Close</string>
+    <string name="not_set">Not set</string>
+    <string name="loading_failed">Couldn\'t load this</string>
+    <string name="error_generic">Something went wrong: %1$s</string>
+    <string name="logo_description">MediBook logo</string>
 
-  <!-- Patient Portal -->
-  <string name="patient_title">Patient Portal</string>
-  <string name="patient_desc">Access your medical records, book appointments, and message your providers with seamless precision.</string>
-  <string name="btn_patient">PATIENT ACCESS</string>
+    <!-- Status -->
+    <string name="status_pending">Pending</string>
+    <string name="status_confirmed">Confirmed</string>
+    <string name="status_completed">Completed</string>
+    <string name="status_cancelled">Cancelled</string>
+    <string name="status_line_pending">Waiting for the doctor to confirm</string>
+    <string name="status_line_confirmed">Confirmed. Please arrive 10 minutes early.</string>
+    <string name="status_line_completed">Visit completed</string>
+    <string name="status_line_cancelled">This appointment was cancelled</string>
 
-  <!-- Doctor Portal -->
-  <string name="doctor_title">Doctor Portal</string>
-  <string name="doctor_desc">Access your clinical workspace, manage patient consultations, and update medical records with ease.</string>
-  <string name="btn_doctor">DOCTOR ACCESS</string>
+    <!-- Auth -->
+    <string name="splash_tagline">Book a doctor in a few taps.</string>
+    <string name="login_title">Sign in</string>
+    <string name="login_subtitle">Use the email you registered with.</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="sign_in">Sign in</string>
+    <string name="sign_in_google">Continue with Google</string>
+    <string name="or">or</string>
+    <string name="have_account">Already have an account?</string>
+    <string name="years_short">Years</string>
+    <string name="no_account">New to MediBook?</string>
+    <string name="create_account">Create an account</string>
+    <string name="signup_subtitle">Book appointments with verified doctors.</string>
+    <string name="doctor_signup_subtitle">An admin verifies your profile before patients can book you.</string>
+    <string name="full_name">Full name</string>
+    <string name="phone">Phone</string>
+    <string name="phone_hint">03XX XXXXXXX</string>
+    <string name="specialty">Specialty</string>
+    <string name="experience_years">Experience (years)</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="create_account_button">Create account</string>
+    <string name="error_required">Required</string>
+    <string name="error_email">Enter a valid email</string>
+    <string name="error_password_short">Use at least 6 characters</string>
+    <string name="error_password_match">Passwords don\'t match</string>
+    <string name="error_age">Enter an age between 0 and 120</string>
+    <string name="error_phone">Enter an 11-digit number starting with 03</string>
+    <string name="login_failed">Sign-in failed: %1$s</string>
+    <string name="signup_failed">Couldn\'t create the account: %1$s</string>
+    <string name="google_failed">Google sign-in didn\'t complete. Try again.</string>
+    <string name="profile_missing">This account has no MediBook profile. Contact an admin.</string>
+    <string name="doctor_pending">Your doctor profile is waiting for admin verification. You can sign in once it\'s approved.</string>
+    <string name="doctor_created">Account created. An admin will verify your profile before you can sign in.</string>
 
-  <!-- Admin Portal -->
-  <string name="admin_title">Admin Portal</string>
-  <string name="admin_desc">Manage clinic operations, oversee staff schedules, and view system analytics to optimize care delivery.</string>
-  <string name="btn_admin">SYSTEM ACCESS</string>
+    <!-- Brand pass on sign-in and sign-up -->
+    <string name="brand_tag">Health pass</string>
+    <string name="brand_title">Your doctor,\nbooked in minutes.</string>
+    <string name="brand_title_signup">Get your\nMediBook pass.</string>
+    <string name="brand_title_doctor">Bring your\npractice online.</string>
+    <string name="brand_find">Find</string>
+    <string name="brand_find_value">Verified doctors</string>
+    <string name="brand_book">Book</string>
+    <string name="brand_book_value">Your time</string>
+    <string name="brand_chat">Chat</string>
+    <string name="brand_chat_value">Once confirmed</string>
+    <string name="welcome_back">Welcome back</string>
+    <string name="forgot_password">Forgot password?</string>
+    <string name="reset_sent">We sent a reset link to %1$s</string>
+    <string name="reset_enter_email">Enter your email above, then tap Forgot password.</string>
 
-  <!-- Footer Strings -->
-  <string name="new_to_medibook">New to MediBook?</string>
-  <string name="contact_support">Contact Support</string>
-  <string name="encryption_256">256-BIT ENCRYPTION</string>
-  <string name="default_web_client_id">665861535550-16tsn95ro0lhmqva5as9ji08k51hgbed.apps.googleusercontent.com</string>
+    <!-- Patient home -->
+    <string name="greeting_name">Hi, %1$s</string>
+    <string name="search_doctors">Search doctors or specialties</string>
+    <string name="next_appointment">Next appointment</string>
+    <string name="your_bookings">Your bookings</string>
+    <string name="book_appointment">Book an appointment</string>
+    <string name="no_upcoming_title">No upcoming appointments</string>
+    <string name="no_upcoming_body">Find a verified doctor and pick a time that suits you.</string>
+    <string name="find_a_doctor">Find a doctor</string>
+    <string name="specialties">Specialties</string>
+    <string name="label_date">Date</string>
+    <string name="label_time">Time</string>
+    <string name="label_ref">Ref</string>
+    <string name="label_fee">Fee</string>
+    <string name="label_patient">Patient</string>
 
-  <!-- Gender Array -->
-  <string-array name="gender_array">
-    <item>Not Specified</item>
-    <item>Male</item>
-    <item>Female</item>
-    <item>Other</item>
-  </string-array>
+    <!-- Doctors -->
+    <string name="doctors_title">Find a doctor</string>
+    <string name="all_specialties">All</string>
+    <string name="doctors_count">%1$d verified doctors</string>
+    <string name="doctors_count_one">1 verified doctor</string>
+    <string name="no_doctors_title">No doctors found</string>
+    <string name="no_doctors_body">Try another name or specialty.</string>
+    <string name="no_doctors_yet">No verified doctors yet. Check back soon.</string>
+    <string name="book">Book</string>
+    <string name="years_experience">%1$s yrs experience</string>
+    <string name="fee_pkr">Rs %1$s</string>
+    <string name="about">About</string>
+    <string name="availability">Available on</string>
+    <string name="any_day">Any day</string>
+    <string name="details">Details</string>
+    <string name="degree">Degree</string>
+    <string name="license">License no.</string>
+    <string name="hospital">Hospital</string>
+    <string name="no_bio">This doctor hasn\'t added a bio yet.</string>
 
-  <!-- Blood Group Array -->
-  <string-array name="blood_group_array">
-    <item>Not Specified</item>
-    <item>O+</item>
-    <item>O-</item>
-    <item>A+</item>
-    <item>A-</item>
-    <item>B+</item>
-    <item>B-</item>
-    <item>AB+</item>
-    <item>AB-</item>
-  </string-array>
-  <!-- Doctor Status Filters -->
-  <string-array name="doctor_status_filters">
-    <item>All Doctors</item>
-    <item>Pending Verification</item>
-    <item>Verified Only</item>
-    <item>Active Doctors</item>
-    <item>Inactive Doctors</item>
-  </string-array>
+    <!-- Booking -->
+    <string name="book_title">Book appointment</string>
+    <string name="choose_day">Choose a day</string>
+    <string name="choose_time">Choose a time</string>
+    <string name="notes_optional">Reason for visit (optional)</string>
+    <string name="confirm_booking">Request appointment</string>
+    <string name="booking_summary">%1$s at %2$s</string>
+    <string name="booking_pick_both">Pick a day and a time</string>
+    <string name="booking_sent">Request sent. You\'ll get an alert when the doctor confirms.</string>
+    <string name="booking_failed">Couldn\'t book: %1$s</string>
+    <string name="doctor_unavailable">This doctor isn\'t taking bookings right now.</string>
 
-  <string-array name="user_role_filters">
-    <item>All Roles</item>
-    <item>Admin</item>
-    <item>Doctor</item>
-    <item>Patient</item>
-  </string-array>
+    <!-- Bookings -->
+    <string name="bookings_title">Bookings</string>
+    <string name="upcoming">Upcoming</string>
+    <string name="past">Past</string>
+    <string name="no_bookings_title">Nothing here yet</string>
+    <string name="no_upcoming_bookings">You have no upcoming appointments.</string>
+    <string name="no_past_bookings">Past and cancelled appointments will show here.</string>
+    <string name="cancel_appointment">Cancel appointment</string>
+    <string name="cancel_confirm_title">Cancel this appointment?</string>
+    <string name="cancel_confirm_body">%1$s on %2$s at %3$s. The doctor will be told.</string>
+    <string name="keep_it">Keep it</string>
+    <string name="book_again">Book again</string>
+    <string name="view_doctor">View doctor</string>
+    <string name="reason">Reason</string>
 
-  <string-array name="admin_roles">
-    <item>Patient</item>
-    <item>Doctor</item>
-    <item>Admin</item>
-  </string-array>
+    <!-- Alerts -->
+    <string name="alerts_title">Alerts</string>
+    <string name="mark_all_read">Mark all read</string>
+    <string name="no_alerts_title">You\'re all caught up</string>
+    <string name="no_alerts_body">Booking updates and messages will appear here.</string>
+    <string name="just_now">Just now</string>
 
-  <string name="login_logo_description">MediBook medical kit logo</string>
+    <!-- Chat -->
+    <string name="tab_inbox">Inbox</string>
+    <string name="messages">Messages</string>
+    <string name="message_doctor">Message doctor</string>
+    <string name="message_patient">Message patient</string>
+    <string name="chat_hint">Message</string>
+    <string name="chat_send">Send</string>
+    <string name="chat_attach">Send a photo</string>
+    <string name="chat_photo">Photo</string>
+    <string name="chat_empty_title">Start the conversation</string>
+    <string name="chat_empty_body">Only the two of you can see these messages and photos.</string>
+    <string name="no_chats_title">No conversations yet</string>
+    <string name="no_chats_patient">You can message a doctor once they confirm your appointment.</string>
+    <string name="no_chats_doctor">You can message a patient once you confirm their appointment.</string>
+    <string name="you_prefix">You: %1$s</string>
+
+    <!-- Profile -->
+    <string name="profile_title">Profile</string>
+    <string name="edit_profile">Edit profile</string>
+    <string name="appearance">Appearance</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="sign_out">Sign out</string>
+    <string name="sign_out_confirm">Sign out of MediBook?</string>
+    <string name="age">Age</string>
+    <string name="gender">Gender</string>
+    <string name="blood_group">Blood group</string>
+    <string name="bio">Bio</string>
+    <string name="change_photo">Change photo</string>
+    <string name="photo_uploaded">Photo updated</string>
+    <string name="photo_failed">Couldn\'t upload the photo: %1$s</string>
+    <string name="consultation_fee">Consultation fee (Rs)</string>
+    <string name="working_days">Working days</string>
+    <string name="verified_doctor">Verified doctor</string>
+    <string name="awaiting_verification">Awaiting verification</string>
+    <string name="role_patient">Patient</string>
+    <string name="role_doctor">Doctor</string>
+    <string name="role_admin">Admin</string>
+
+    <!-- Doctor -->
+    <string name="requests">Requests</string>
+    <string name="today_visits">Today\'s visits</string>
+    <string name="no_requests">No requests waiting.</string>
+    <string name="no_visits_today">No confirmed visits today.</string>
+    <string name="confirm">Confirm</string>
+    <string name="decline">Decline</string>
+    <string name="mark_completed">Mark completed</string>
+    <string name="appointment_updated">Appointment %1$s</string>
+    <string name="schedule_title">Schedule</string>
+    <string name="no_schedule_upcoming">No upcoming visits.</string>
+    <string name="no_schedule_past">No past visits yet.</string>
+
+    <!-- Admin -->
+    <string name="overview_title">Overview</string>
+    <string name="needs_attention">Needs attention</string>
+    <string name="doctors_awaiting">Doctors awaiting verification</string>
+    <string name="pending_bookings">Bookings waiting for a doctor</string>
+    <string name="system">System</string>
+    <string name="total_users">Users</string>
+    <string name="total_doctors">Doctors</string>
+    <string name="total_bookings">Bookings</string>
+    <string name="hospitals">Hospitals</string>
+    <string name="verify">Verify</string>
+    <string name="unverify">Revoke</string>
+    <string name="activate">Activate</string>
+    <string name="deactivate">Deactivate</string>
+    <string name="assign_hospital">Assign hospital</string>
+    <string name="filter_all">All</string>
+    <string name="filter_unverified">Unverified</string>
+    <string name="filter_verified">Verified</string>
+    <string name="filter_inactive">Inactive</string>
+    <string name="no_doctors_admin">No doctors match this filter.</string>
+    <string name="no_bookings_admin">No bookings match this filter.</string>
+    <string name="change_status">Change status</string>
+    <string name="users_title">Users</string>
+    <string name="search_bookings">Search by patient or doctor</string>
+    <string name="search_users">Search by name or email</string>
+    <string name="add_user">Add user</string>
+    <string name="change_role">Change role</string>
+    <string name="role">Role</string>
+    <string name="no_users">No users match.</string>
+    <string name="user_added">User added</string>
+    <string name="role_changed">Role changed to %1$s</string>
+    <string name="more_title">More</string>
+    <string name="manage_hospitals">Hospitals</string>
+    <string name="manage_hospitals_desc">Add and edit hospitals doctors work at</string>
+    <string name="manage_roles">Roles and permissions</string>
+    <string name="manage_roles_desc">Control what each role can do</string>
+    <string name="add_hospital">Add hospital</string>
+    <string name="edit_hospital">Edit hospital</string>
+    <string name="hospital_name">Hospital name</string>
+    <string name="address">Address</string>
+    <string name="no_hospitals">No hospitals yet. Add the first one.</string>
+    <string name="delete_hospital_confirm">Delete %1$s?</string>
+    <string name="add_role">Add role</string>
+    <string name="edit_role">Edit role</string>
+    <string name="role_name">Role name</string>
+    <string name="dashboard_type">Opens the</string>
+    <string name="permissions">Permissions</string>
+    <string name="permissions_count">%1$d permissions</string>
+    <string name="delete_role_confirm">Delete the %1$s role? Users with it lose access.</string>
+    <string name="no_hospitals_assign">Add a hospital first under More, Hospitals.</string>
+
+    <!-- Notifications sent to users -->
+    <string name="notif_booked_title">Appointment requested</string>
+    <string name="notif_booked_body">Your request with %1$s on %2$s at %3$s has been sent.</string>
+    <string name="notif_request_title">New appointment request</string>
+    <string name="notif_request_body">%1$s requested %2$s at %3$s.</string>
+    <string name="notif_status_title">Appointment %1$s</string>
+    <string name="notif_status_body">Your appointment with %1$s on %2$s at %3$s is %4$s.</string>
+    <string name="notif_cancel_title">Appointment cancelled</string>
+    <string name="notif_cancel_body">%1$s cancelled the appointment on %2$s at %3$s.</string>
+
+    <string-array name="gender_array">
+        <item>Not specified</item>
+        <item>Male</item>
+        <item>Female</item>
+        <item>Other</item>
+    </string-array>
+    <string-array name="blood_group_array">
+        <item>Not specified</item>
+        <item>O+</item>
+        <item>O-</item>
+        <item>A+</item>
+        <item>A-</item>
+        <item>B+</item>
+        <item>B-</item>
+        <item>AB+</item>
+        <item>AB-</item>
+    </string-array>
 </resources>

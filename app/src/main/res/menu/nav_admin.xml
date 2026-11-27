@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/nav_overview" android:icon="@drawable/ic_nav_squares_four" android:title="@string/tab_overview" />
+    <item android:id="@+id/nav_admin_doctors" android:icon="@drawable/ic_nav_stethoscope" android:title="@string/tab_doctors" />
+    <item android:id="@+id/nav_admin_appointments" android:icon="@drawable/ic_nav_calendar_blank" android:title="@string/tab_appointments" />
+    <item android:id="@+id/nav_users" android:icon="@drawable/ic_nav_users" android:title="@string/tab_users" />
+    <item android:id="@+id/nav_more" android:icon="@drawable/ic_nav_dots_three_outline" android:title="@string/tab_more" />
+</menu>

@@ -11,8 +11,9 @@ import org.json.JSONObject;
 
 public class CloudinaryService {
     private static final String TAG = "CloudinaryService";
-    private static final String CLOUD_NAME = "dda7wmxvw";
-    private static final String UPLOAD_URL = "https://api.cloudinary.com/v1_1/" + CLOUD_NAME + "/image/upload";
+    // Set in local.properties (cloudinary.cloudName / cloudinary.uploadPreset), not in source.
+    private static final String UPLOAD_URL =
+            "https://api.cloudinary.com/v1_1/" + com.example.medibook.BuildConfig.CLOUDINARY_CLOUD_NAME + "/image/upload";
     
     public interface ImageUploadCallback {
         void onSuccess(String imageUrl);
@@ -61,7 +62,7 @@ public class CloudinaryService {
                     // Write upload preset
                     String presetParam = "\r\n--" + boundary + "\r\n" +
                         "Content-Disposition: form-data; name=\"upload_preset\"\r\n\r\n" +
-                        "medibook_upload";
+                        com.example.medibook.BuildConfig.CLOUDINARY_UPLOAD_PRESET;
                     out.write(presetParam.getBytes());
 
                     // Write folder parameter

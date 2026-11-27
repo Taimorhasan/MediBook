@@ -1,179 +1,111 @@
 package com.example.medibook.activities.user;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
+import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import com.bumptech.glide.Glide;
 import com.example.medibook.R;
+import com.example.medibook.adapters.DoctorAdapter;
 import com.example.medibook.models.Doctor;
 import com.example.medibook.repositories.DoctorRepository;
+import com.example.medibook.utils.StateView;
+import com.example.medibook.utils.Ui;
+import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
+import java.util.List;
 
+/** A doctor's public profile, with booking. Admins open it in preview mode, without booking. */
 public class DoctorProfileActivity extends AppCompatActivity {
+    public static final String EXTRA_DOCTOR_ID = "doctorId";
+    public static final String EXTRA_PREVIEW = "preview";
 
-    private TextView doctorNameTextView;
-    private TextView doctorSpecialtyTextView;
-    private TextView doctorExperienceTextView;
-    private TextView doctorRatingTextView;
-    private TextView doctorBioTextView;
-    private ImageView doctorImageView;
-    private Button bookButton;
-    private ProgressBar loadingProgress;
-    private View contentLayout;
-
-    private DoctorRepository doctorRepository;
+    private StateView state;
     private String doctorId;
-    private String doctorName;
-    private String doctorSpecialty;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_doctor_profile);
-        getWindow().setStatusBarColor(Color.WHITE);
-        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-
-        // Initialize repository
-        doctorRepository = new DoctorRepository();
-
-        // Get doctor info from intent
-        doctorId = getIntent().getStringExtra("doctorId");
-        doctorName = getIntent().getStringExtra("doctorName");
-        doctorSpecialty = getIntent().getStringExtra("doctorSpecialty");
-
-        if (doctorId == null) {
-            Toast.makeText(this, "Doctor information not available", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
-        }
-
-        // Setup toolbar
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle("");
-        }
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setNavigationOnClickListener(v -> finish());
-
-        // Initialize views
-        initializeViews();
-
-        // Setup book appointment button
-        bookButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(DoctorProfileActivity.this, BookAppointmentActivity.class);
-                intent.putExtra("doctorId", doctorId);
-                intent.putExtra("doctorName", doctorName);
-                intent.putExtra("doctorSpecialty", doctorSpecialty);
-                startActivity(intent);
-            }
-        });
-
-        // Load doctor profile
-        loadDoctorProfile();
+        doctorId = getIntent().getStringExtra(EXTRA_DOCTOR_ID);
+        state = new StateView(findViewById(R.id.profile_state));
+        load();
     }
 
-    private void initializeViews() {
-        doctorNameTextView = findViewById(R.id.doctor_name_tv);
-        doctorSpecialtyTextView = findViewById(R.id.doctor_specialty_tv);
-        doctorExperienceTextView = findViewById(R.id.doctor_experience_tv);
-        doctorRatingTextView = findViewById(R.id.doctor_rating_tv);
-        doctorBioTextView = findViewById(R.id.doctor_bio_tv);
-        doctorImageView = findViewById(R.id.doctor_image_view);
-        bookButton = findViewById(R.id.profile_book_button);
-        loadingProgress = findViewById(R.id.loading_progress);
-        contentLayout = findViewById(R.id.content_layout);
-
-        // Initially hide content and show loading
-        contentLayout.setVisibility(View.GONE);
-        loadingProgress.setVisibility(View.VISIBLE);
-    }
-
-    private void loadDoctorProfile() {
-        doctorRepository.getDoctor(doctorId, new DoctorRepository.DoctorCallback() {
+    private void load() {
+        state.loading();
+        new DoctorRepository().getDoctor(doctorId, new DoctorRepository.DoctorCallback() {
             @Override
             public void onSuccess(Doctor doctor) {
-                runOnUiThread(() -> {
-                    loadingProgress.setVisibility(View.GONE);
-                    contentLayout.setVisibility(View.VISIBLE);
-                    populateDoctorData(doctor);
-                });
+                if (isFinishing()) return;
+                state.hide();
+                render(doctor);
             }
 
             @Override
             public void onFailure(String error) {
-                runOnUiThread(() -> {
-                    loadingProgress.setVisibility(View.GONE);
-                    Toast.makeText(DoctorProfileActivity.this,
-                        "Failed to load doctor profile: " + error, Toast.LENGTH_SHORT).show();
-                    finish();
-                });
+                if (!isFinishing()) state.error(error, DoctorProfileActivity.this::load);
             }
         });
     }
 
-    private void populateDoctorData(Doctor doctor) {
-        // Set doctor name
-        if (doctor.getName() != null && !doctor.getName().trim().isEmpty()) {
-            doctorNameTextView.setText(doctor.getName());
+    private void render(Doctor d) {
+        findViewById(R.id.profile_scroll).setVisibility(View.VISIBLE);
+        String name = Ui.doctorName(d.getName());
+        ((TextView) findViewById(R.id.doc_name)).setText(name);
+        ((TextView) findViewById(R.id.doc_specialty)).setText(DoctorAdapter.specialtyLine(d));
+        View avatar = findViewById(R.id.doc_avatar);
+        Ui.avatar(avatar.findViewById(R.id.avatar_image), avatar.findViewById(R.id.avatar_initials), d.getProfileImage(), name);
+        if (d.isVerified()) {
+            TextView verified = findViewById(R.id.doc_verified);
+            verified.setVisibility(View.VISIBLE);
+            Ui.pill(verified, getString(R.string.verified_doctor), R.color.mb_ok, R.color.mb_ok_bg, R.color.mb_ok_bg);
         }
 
-        // Set specialty
-        if (doctor.getSpecialty() != null && !doctor.getSpecialty().trim().isEmpty()) {
-            doctorSpecialtyTextView.setText(doctor.getSpecialty());
-        } else {
-            doctorSpecialtyTextView.setText("Specialty not specified");
+        String years = d.getExperience() == null ? "" : d.getExperience().replaceAll("[^0-9]", "");
+        ((TextView) findViewById(R.id.doc_experience)).setText(years.isEmpty() ? "—" : years);
+        String fee = d.getConsultationFee() == null ? "" : d.getConsultationFee().replaceAll("[^0-9]", "");
+        ((TextView) findViewById(R.id.doc_fee)).setText(fee.isEmpty() ? "—" : getString(R.string.fee_pkr, fee));
+        List<String> days = d.getAvailableDays();
+        boolean anyDay = days == null || days.isEmpty();
+        ((TextView) findViewById(R.id.doc_days_count)).setText(anyDay ? "7/7" : days.size() + "/7");
+
+        ((TextView) findViewById(R.id.doc_bio)).setText(Ui.blank(d.getBio()) ? getString(R.string.no_bio) : d.getBio());
+
+        ChipGroup chips = findViewById(R.id.doc_days);
+        chips.removeAllViews();
+        for (String day : Ui.WEEK) {
+            boolean on = anyDay || Ui.worksOn(days, day);
+            Chip chip = new Chip(this);
+            chip.setText(day.substring(0, 3));
+            chip.setCheckable(true);
+            chip.setChecked(on);
+            chip.setClickable(false);
+            chip.setEnabled(on);
+            chip.setContentDescription(day);
+            chips.addView(chip);
         }
 
-        // Set experience
-        if (doctor.getExperience() != null && !doctor.getExperience().trim().isEmpty()) {
-            doctorExperienceTextView.setText(doctor.getExperience());
-        } else {
-            doctorExperienceTextView.setText("Experience not specified");
-        }
+        LinearLayout details = findViewById(R.id.doc_details);
+        details.removeAllViews();
+        Ui.detailRow(details, getString(R.string.hospital), d.getHospitalName());
+        Ui.detailRow(details, getString(R.string.degree), d.getDegree());
+        Ui.detailRow(details, getString(R.string.license), d.getLicenseNumber());
 
-        // Set rating
-        if (doctor.getRating() != null && !doctor.getRating().trim().isEmpty()) {
-            doctorRatingTextView.setText(doctor.getRating() + " ⭐");
-        } else {
-            doctorRatingTextView.setText("Not rated yet");
-        }
-
-        // Set bio
-        if (doctor.getBio() != null && !doctor.getBio().trim().isEmpty()) {
-            doctorBioTextView.setText(doctor.getBio());
-        } else {
-            doctorBioTextView.setText("No bio available");
-        }
-
-        // Load profile image
-        if (doctor.getProfileImage() != null && !doctor.getProfileImage().trim().isEmpty()) {
-            Glide.with(this)
-                .load(doctor.getProfileImage())
-                .placeholder(R.drawable.ic_medical_kit)
-                .error(R.drawable.ic_medical_kit)
-                .circleCrop()
-                .into(doctorImageView);
-        } else {
-            doctorImageView.setImageResource(R.drawable.ic_medical_kit);
-        }
-
-        // Update toolbar title with real name
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle("");
-        }
-
-        // Store updated doctor info for booking
-        doctorName = doctor.getName();
-        doctorSpecialty = doctor.getSpecialty();
+        boolean bookable = d.isVerified() && d.isActive() && !getIntent().getBooleanExtra(EXTRA_PREVIEW, false);
+        View bar = findViewById(R.id.profile_bar);
+        bar.setVisibility(bookable ? View.VISIBLE : View.GONE);
+        MaterialButton book = bar.findViewById(R.id.bar_button);
+        book.setText(R.string.book_appointment);
+        book.setIconResource(R.drawable.ic_calendar_plus);
+        book.setIconGravity(MaterialButton.ICON_GRAVITY_TEXT_START);
+        book.setOnClickListener(v -> startActivity(new Intent(this, BookAppointmentActivity.class)
+                .putExtra(BookAppointmentActivity.EXTRA_DOCTOR_ID, d.getDoctorId())));
     }
+
 }

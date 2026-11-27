@@ -1,7 +1,17 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("com.google.gms.google-services")
 }
+
+// Cloudinary settings live in local.properties (git-ignored), never in source. See README.
+val localProps = Properties().apply {
+    val file = rootProject.file("local.properties")
+    if (file.exists()) file.inputStream().use { load(it) }
+}
+fun localProp(key: String): String = localProps.getProperty(key)
+    ?: error("Missing '$key' in local.properties. See README, section Setup.")
 
 android {
     namespace = "com.example.medibook"
@@ -15,6 +25,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "CLOUDINARY_CLOUD_NAME", "\"${localProp("cloudinary.cloudName")}\"")
+        buildConfigField("String", "CLOUDINARY_UPLOAD_PRESET", "\"${localProp("cloudinary.uploadPreset")}\"")
     }
 
     buildTypes {
@@ -33,6 +46,7 @@ android {
     buildFeatures {
         viewBinding = true
         dataBinding = false
+        buildConfig = true
     }
     lint {
         abortOnError = false

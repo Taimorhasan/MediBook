@@ -7,24 +7,47 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function isAdmin() {
-      let user = get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
-      return isSignedIn() && 
-             (user.get('role', '').lower() == 'admin' ||
-              'admin' in user.get('roleIds', []));
+    function currentUser() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
     }
 
+    function isAdmin() {
+      return isSignedIn() &&
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             (currentUser().get('role', '').lower() == 'admin' ||
+              currentUser().get('roleIds', []).hasAny(['admin', 'Admin', 'ADMIN']));
+    }
+
+    // Permissions come from the user's role document (roles/{role}.permissions),
+    // plus an optional per-user 'permissions' override list.
     function hasPermission(permission) {
-      let user = get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
-      return isSignedIn() && 
-             (isAdmin() || 
-              permission in user.get('permissions', []));
+      let roleId = currentUser().get('role', '').lower();
+      return isSignedIn() && (
+        isAdmin() ||
+        permission in currentUser().get('permissions', []) ||
+        (roleId != '' &&
+         exists(/databases/$(database)/documents/roles/$(roleId)) &&
+         permission in get(/databases/$(database)/documents/roles/$(roleId)).data.get('permissions', []))
+      );
     }
 
     // Users collection
     match /users/{userId} {
       allow read: if isSignedIn();
-      allow write: if request.auth.uid == userId || isAdmin();
+      // Self sign-up may only create a patient or doctor account; admins can create any role.
+      allow create: if isAdmin() || (
+        isSignedIn() && request.auth.uid == userId &&
+        request.resource.data.get('role', 'patient') in ['patient', 'doctor'] &&
+        request.resource.data.get('roleIds', [request.resource.data.get('role', 'patient')])
+          == [request.resource.data.get('role', 'patient')] &&
+        !('permissions' in request.resource.data)
+      );
+      // Users can edit their own profile but never their own role or permissions.
+      allow update: if isAdmin() || (
+        isSignedIn() && request.auth.uid == userId &&
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'roleIds', 'permissions'])
+      );
+      allow delete: if isAdmin();
     }
 
     // Roles collection
@@ -55,6 +78,12 @@ service cloud.firestore {
         )
       );
       allow delete: if isAdmin() || hasPermission('manage_doctors');
+    }
+
+    // Schedules collection
+    match /schedules/{scheduleId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin() || hasPermission('manage_schedules');
     }
 
     // Hospitals collection
@@ -89,6 +118,45 @@ service cloud.firestore {
       allow update: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
     }
     
+    // Chats: one per patient and doctor, opened once an appointment between them is confirmed.
+    match /chats/{chatId} {
+      function isParty(data) {
+        return request.auth.uid == data.patientId || request.auth.uid == data.doctorId;
+      }
+      function confirmedAppointment(data) {
+        let appt = get(/databases/$(database)/documents/appointments/$(data.appointmentId)).data;
+        return appt.patientId == data.patientId
+            && appt.doctorId == data.doctorId
+            && appt.status in ['confirmed', 'completed'];
+      }
+
+      // resource is null when the chat doesn't exist yet; the app checks before creating it.
+      allow get: if isSignedIn() && (resource == null || isParty(resource.data));
+      allow list: if isSignedIn() && isParty(resource.data);
+      allow create: if isSignedIn()
+        && chatId == request.resource.data.patientId + '_' + request.resource.data.doctorId
+        && isParty(request.resource.data)
+        && confirmedAppointment(request.resource.data);
+      allow update: if isSignedIn() && isParty(resource.data)
+        && request.resource.data.patientId == resource.data.patientId
+        && request.resource.data.doctorId == resource.data.doctorId
+        && request.resource.data.appointmentId == resource.data.appointmentId;
+
+      match /messages/{messageId} {
+        function chat() {
+          return get(/databases/$(database)/documents/chats/$(chatId)).data;
+        }
+        allow read: if isSignedIn() && isParty(chat());
+        allow create: if isSignedIn() && isParty(chat())
+          && request.resource.data.senderId == request.auth.uid
+          && request.resource.data.createdAt is int
+          && request.resource.data.get('text', '') is string
+          && request.resource.data.get('text', '').size() <= 2000
+          && request.resource.data.get('imageUrl', '') is string
+          && (request.resource.data.get('text', '') != '' || request.resource.data.get('imageUrl', '') != '');
+      }
+    }
+
     // General fallback
     match /{path=**} {
       allow read, write: if isAdmin();

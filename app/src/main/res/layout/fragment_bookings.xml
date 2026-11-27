@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A tab with a title, an Upcoming/Past switch and a board. Shared by patient Bookings and doctor Schedule. -->
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clipToPadding="false"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="@dimen/screen_padding"
+        android:paddingTop="20dp"
+        android:paddingEnd="@dimen/screen_padding"
+        android:paddingBottom="@dimen/nav_clearance">
+
+        <TextView
+            android:id="@+id/bookings_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/bookings_title"
+            android:textAppearance="@style/TextAppearance.MediBook.Headline" />
+
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/bookings_toggle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            app:checkedButton="@id/bookings_upcoming"
+            app:selectionRequired="true"
+            app:singleSelection="true">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/bookings_upcoming"
+                style="@style/Widget.MediBook.Segment"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/upcoming" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/bookings_past"
+                style="@style/Widget.MediBook.Segment"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/past" />
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+
+        <include
+            android:id="@+id/bookings_state"
+            layout="@layout/view_state" />
+
+        <include
+            android:id="@+id/bookings_board"
+            layout="@layout/view_board"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp" />
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

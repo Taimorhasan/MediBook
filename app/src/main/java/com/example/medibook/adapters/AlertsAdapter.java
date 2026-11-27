@@ -1,215 +1,84 @@
 package com.example.medibook.adapters;
 
-import android.content.Context;
-import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.medibook.R;
-import com.example.medibook.activities.user.BookingsListActivity;
-import com.example.medibook.activities.user.DoctorListActivity;
 import com.example.medibook.models.Notification;
-import com.example.medibook.repositories.NotificationRepository;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import com.example.medibook.utils.Ui;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
-public class AlertsAdapter extends RecyclerView.Adapter<AlertsAdapter.AlertViewHolder> {
+/** Alert rows: an icon for the kind of update, the message, its age and an unread dot. */
+public class AlertsAdapter extends RecyclerView.Adapter<AlertsAdapter.Holder> {
 
-    private List<Notification> notificationsList;
-    private Context context;
-    private NotificationRepository notificationRepository;
+    public interface OnClick {
+        void onClick(Notification notification);
+    }
 
-    public AlertsAdapter(List<Notification> notificationsList, Context context) {
-        this.notificationsList = notificationsList;
-        this.context = context;
-        this.notificationRepository = new NotificationRepository();
+    private final List<Notification> items = new ArrayList<>();
+    private final OnClick onClick;
+
+    public AlertsAdapter(OnClick onClick) {
+        this.onClick = onClick;
+    }
+
+    public void submit(List<Notification> list) {
+        items.clear();
+        items.addAll(list);
+        notifyDataSetChanged();
+    }
+
+    private static int icon(String type) {
+        String t = type == null ? "" : type;
+        if (t.endsWith("confirmed")) return R.drawable.ic_check_circle;
+        if (t.endsWith("completed")) return R.drawable.ic_check;
+        if (t.endsWith("cancelled")) return R.drawable.ic_calendar_x;
+        if (t.endsWith("request")) return R.drawable.ic_calendar_plus;
+        if (t.endsWith("booked")) return R.drawable.ic_hourglass_medium;
+        return R.drawable.ic_bell;
     }
 
     @NonNull
     @Override
-    public AlertViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_alert, parent, false);
-        return new AlertViewHolder(view);
+    public Holder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        return new Holder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_alert, parent, false));
     }
 
     @Override
-    public void onBindViewHolder(@NonNull AlertViewHolder holder, int position) {
-        holder.bind(notificationsList.get(position));
+    public void onBindViewHolder(@NonNull Holder h, int position) {
+        Notification n = items.get(position);
+        h.icon.setImageResource(icon(n.getType()));
+        h.title.setText(Ui.orDash(n.getTitle()));
+        h.body.setText(n.getMessage());
+        h.time.setText(Ui.relativeTime(h.itemView.getContext(), n.getTimestamp()));
+        h.dot.setVisibility(n.isRead() ? View.INVISIBLE : View.VISIBLE);
+        h.title.setTextColor(ContextCompat.getColor(h.itemView.getContext(), n.isRead() ? R.color.mb_mute : R.color.mb_ink));
+        h.itemView.setOnClickListener(v -> onClick.onClick(n));
     }
 
     @Override
     public int getItemCount() {
-        return notificationsList.size();
+        return items.size();
     }
 
-    class AlertViewHolder extends RecyclerView.ViewHolder {
-        private View accentLine;
-        private View iconBackground;
-        private ImageView alertIcon;
-        private TextView alertTitle;
-        private TextView alertDescription;
-        private TextView alertTimestamp;
-        private TextView badgeNew;
-        private Button alertActionButton;
+    static final class Holder extends RecyclerView.ViewHolder {
+        final ImageView icon;
+        final TextView title, body, time;
+        final View dot;
 
-        public AlertViewHolder(@NonNull View itemView) {
-            super(itemView);
-            accentLine = itemView.findViewById(R.id.accentLine);
-            iconBackground = itemView.findViewById(R.id.iconBackground);
-            alertIcon = itemView.findViewById(R.id.alertIcon);
-            alertTitle = itemView.findViewById(R.id.alertTitle);
-            alertDescription = itemView.findViewById(R.id.alertDescription);
-            alertTimestamp = itemView.findViewById(R.id.alertTimestamp);
-            badgeNew = itemView.findViewById(R.id.badgeNew);
-            alertActionButton = itemView.findViewById(R.id.alertActionButton);
-        }
-
-        public void bind(Notification notification) {
-            // Set title
-            String title = notification.getTitle() != null ? notification.getTitle() : "Alert";
-            alertTitle.setText(title);
-            
-            // Set description
-            alertDescription.setText(notification.getMessage() != null ? notification.getMessage() : "");
-            
-            // Set timestamp
-            String timeAgo = getTimeAgo(notification.getTimestamp());
-            alertTimestamp.setText(timeAgo);
-            
-            // Show/hide NEW badge
-            if (!notification.isRead() && isRecent(notification.getTimestamp())) {
-                badgeNew.setVisibility(View.VISIBLE);
-            } else {
-                badgeNew.setVisibility(View.GONE);
-            }
-            
-            // Set icon based on notification type
-            setAlertIcon(notification);
-            
-            // Set accent line for important alerts (Reminders/Confirmations)
-            if (title.toLowerCase().contains("confirmed") ||
-                title.toLowerCase().contains("reminder")) {
-                accentLine.setVisibility(View.VISIBLE);
-            } else {
-                accentLine.setVisibility(View.GONE);
-            }
-            
-            // Show/hide action button (Check-in for upcoming appointments)
-            if (isAppointmentAlert(notification)) {
-                alertActionButton.setVisibility(View.VISIBLE);
-                alertActionButton.setText("View");
-                alertActionButton.setOnClickListener(v -> {
-                    markAsRead(notification);
-                    context.startActivity(new Intent(context, BookingsListActivity.class));
-                });
-            } else {
-                alertActionButton.setVisibility(View.GONE);
-            }
-            
-            // Mark as read when clicked
-            itemView.setOnClickListener(v -> {
-                if (!notification.isRead()) {
-                    markAsRead(notification);
-                }
-                if (isAppointmentAlert(notification)) {
-                    context.startActivity(new Intent(context, BookingsListActivity.class));
-                } else if (isBookingPrompt(notification)) {
-                    context.startActivity(new Intent(context, DoctorListActivity.class));
-                }
-            });
-        }
-
-        private void setAlertIcon(Notification notification) {
-            String title = notification.getTitle() != null ? notification.getTitle().toLowerCase() : "";
-            
-            if (title.contains("appointment") || title.contains("reminder")) {
-                alertIcon.setImageResource(android.R.drawable.ic_menu_my_calendar);
-                iconBackground.setBackgroundResource(R.drawable.bg_alert_icon);
-            } else if (title.contains("confirmed") || title.contains("update")) {
-                alertIcon.setImageResource(android.R.drawable.ic_menu_info_details);
-                // You can create bg_alert_icon_confirmed.xml similar to bg_alert_icon but with green color
-                iconBackground.setBackgroundResource(R.drawable.bg_alert_icon); 
-            } else if (title.contains("new feature")) {
-                alertIcon.setImageResource(android.R.drawable.ic_dialog_info);
-                iconBackground.setBackgroundResource(R.drawable.bg_alert_icon);
-            } else {
-                alertIcon.setImageResource(android.R.drawable.ic_dialog_alert);
-                iconBackground.setBackgroundResource(R.drawable.bg_alert_icon);
-            }
-        }
-
-        private void markAsRead(Notification notification) {
-            if (notification.getNotificationId() != null && notification.getNotificationId().startsWith("local-")) {
-                notification.setRead(true);
-                int position = getAdapterPosition();
-                if (position != RecyclerView.NO_POSITION) {
-                    notifyItemChanged(position);
-                }
-                return;
-            }
-
-            notificationRepository.markAsRead(notification.getNotificationId(), new NotificationRepository.NotificationCallback() {
-                @Override
-                public void onSuccess() {
-                        notification.setRead(true);
-                    int position = getAdapterPosition();
-                    if (position != RecyclerView.NO_POSITION) {
-                        notifyItemChanged(position);
-                    }
-                }
-
-                @Override
-                public void onFailure(String error) {
-                    android.widget.Toast.makeText(context, "Could not mark alert as read", android.widget.Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
-
-        private boolean isAppointmentAlert(Notification notification) {
-            String type = notification.getType() != null ? notification.getType().toLowerCase() : "";
-            String title = notification.getTitle() != null ? notification.getTitle().toLowerCase() : "";
-            return type.contains("appointment") || title.contains("appointment");
-        }
-
-        private boolean isBookingPrompt(Notification notification) {
-            String type = notification.getType() != null ? notification.getType().toLowerCase() : "";
-            String title = notification.getTitle() != null ? notification.getTitle().toLowerCase() : "";
-            return type.contains("doctor") || title.contains("doctor") || title.contains("booking");
-        }
-
-        private String getTimeAgo(long timestamp) {
-            long now = System.currentTimeMillis();
-            long diff = now - timestamp;
-
-            if (diff < 60000) { // Less than a minute
-                return "Just now";
-            } else if (diff < 3600000) { // Less than an hour
-                long minutes = diff / 60000;
-                return minutes + " min ago";
-            } else if (diff < 86400000) { // Less than 24 hours
-                long hours = diff / 3600000;
-                return hours + " hr ago";
-            } else {
-                SimpleDateFormat sdf = new SimpleDateFormat("MMM dd", Locale.getDefault());
-                return sdf.format(new Date(timestamp));
-            }
-        }
-
-        private boolean isRecent(long timestamp) {
-            long now = System.currentTimeMillis();
-            long diff = now - timestamp;
-            return diff < 86400000; // Less than 24 hours
+        Holder(View v) {
+            super(v);
+            icon = v.findViewById(R.id.alert_icon);
+            title = v.findViewById(R.id.alert_title);
+            body = v.findViewById(R.id.alert_body);
+            time = v.findViewById(R.id.alert_time);
+            dot = v.findViewById(R.id.alert_dot);
         }
     }
 }

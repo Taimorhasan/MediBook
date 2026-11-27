@@ -14,8 +14,9 @@ public class Doctor {
     private int imageResId;
     private List<String> availableDays;
     private String bio;
+    // Defaults to true so documents without an isActive field are not read (and re-saved) as inactive.
     @com.google.firebase.firestore.PropertyName("isActive")
-    private boolean isActive;
+    private boolean isActive = true;
     @com.google.firebase.firestore.PropertyName("isVerified")
     private boolean isVerified;
     private String hospitalName;

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- MediBook mark: an appointment pass with a cross cut out. Tint it to recolour. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp" android:height="48dp"
+    android:viewportWidth="48" android:viewportHeight="48">
+    <path android:fillColor="@color/mb_ink" android:fillType="evenOdd"
+        android:pathData="M10,10 H38 A6,6 0 0 1 44,16 V20 A4,4 0 0 0 44,28 V32 A6,6 0 0 1 38,38 H10 A6,6 0 0 1 4,32 V28 A4,4 0 0 0 4,20 V16 A6,6 0 0 1 10,10 Z M21.5,16 H26.5 V21.5 H32 V26.5 H26.5 V32 H21.5 V26.5 H16 V21.5 H21.5 Z" />
+</vector>

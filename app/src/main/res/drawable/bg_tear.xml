@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Dashed tear line across a pass. Needs layerType software on API < 28 to dash. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="line">
+    <stroke android:width="1.5dp" android:color="@color/mb_line" android:dashWidth="6dp" android:dashGap="5dp" />
+</shape>

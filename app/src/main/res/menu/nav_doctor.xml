@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/nav_today" android:icon="@drawable/ic_nav_clipboard_text" android:title="@string/tab_today" />
+    <item android:id="@+id/nav_schedule" android:icon="@drawable/ic_nav_calendar_dots" android:title="@string/tab_schedule" />
+    <item android:id="@+id/nav_alerts" android:icon="@drawable/ic_nav_chat_circle_text" android:title="@string/tab_inbox" />
+    <item android:id="@+id/nav_profile" android:icon="@drawable/ic_nav_user_circle" android:title="@string/tab_profile" />
+</menu>

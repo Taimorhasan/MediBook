@@ -38,12 +38,12 @@ public class RoleRepository {
                 .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
     }
 
+    /** The id is the lower-cased name, because users store it and the security rules read roles/{id}. */
     public void createRole(Role role, RoleCallback callback) {
-        db.collection(COLLECTION_ROLES).add(role)
-                .addOnSuccessListener(documentReference -> {
-                    role.setRoleId(documentReference.getId());
-                    callback.onSuccess(role);
-                })
+        String id = role.getRoleName().trim().toLowerCase(java.util.Locale.US).replaceAll("[^a-z0-9]+", "_");
+        role.setRoleId(id);
+        db.collection(COLLECTION_ROLES).document(id).set(role)
+                .addOnSuccessListener(v -> callback.onSuccess(role))
                 .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
     }
 
@@ -57,14 +57,6 @@ public class RoleRepository {
         db.collection(COLLECTION_ROLES).document(roleId).delete()
                 .addOnSuccessListener(aVoid -> callback.onSuccess())
                 .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
-    }
-
-    public void addRole(Role role) {
-        if (role.getRoleId() != null && !role.getRoleId().isEmpty()) {
-            db.collection(COLLECTION_ROLES).document(role.getRoleId()).set(role);
-        } else {
-            db.collection(COLLECTION_ROLES).add(role);
-        }
     }
 
     public void getRolesByIds(List<String> roleIds, RolesCallback callback) {

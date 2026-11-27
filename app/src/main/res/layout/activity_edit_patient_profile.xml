@@ -1,175 +1,127 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8F9FA">
+    android:orientation="vertical">
 
-    <LinearLayout
+    <include layout="@layout/view_toolbar" />
+
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="24dp">
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
-        <!-- Header -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Edit Profile"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            android:textColor="#1F2937"
-            android:layout_marginBottom="24dp" />
-
-        <!-- Profile Image Section -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:gravity="center"
-            android:layout_marginBottom="24dp">
+            android:paddingStart="@dimen/screen_padding"
+            android:paddingTop="8dp"
+            android:paddingEnd="@dimen/screen_padding"
+            android:paddingBottom="24dp">
 
-            <ImageView
-                android:id="@+id/profile_image"
-                android:layout_width="120dp"
-                android:layout_height="120dp"
-                android:src="@android:drawable/ic_menu_myplaces"
-                android:scaleType="centerCrop"
-                android:contentDescription="Profile Picture"
-                android:background="@drawable/profile_image_bg"
-                android:layout_marginBottom="16dp" />
+            <include
+                android:id="@+id/edit_photo"
+                layout="@layout/view_photo_header" />
 
-            <Button
-                android:id="@+id/upload_photo_button"
-                android:layout_width="wrap_content"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/edit_name_layout"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Upload Photo"
-                android:backgroundTint="#10B981"
-                android:textColor="#FFFFFF" />
+                android:layout_marginTop="16dp"
+                android:hint="@string/full_name"
+                app:startIconDrawable="@drawable/ic_user_circle">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edit_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPersonName|textCapWords" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/edit_phone_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:hint="@string/phone"
+                app:placeholderText="@string/phone_hint"
+                app:startIconDrawable="@drawable/ic_phone">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edit_phone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="phone"
+                    android:maxLength="11" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/edit_age_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:hint="@string/age">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edit_age"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:maxLength="3" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MediBook.TextInput.Dropdown"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:hint="@string/gender">
+
+                <AutoCompleteTextView
+                    android:id="@+id/edit_gender"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MediBook.TextInput.Dropdown"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:hint="@string/blood_group"
+                app:startIconDrawable="@drawable/ic_drop">
+
+                <AutoCompleteTextView
+                    android:id="@+id/edit_blood"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:hint="@string/bio"
+                app:counterEnabled="true"
+                app:counterMaxLength="300">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edit_bio"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="top"
+                    android:inputType="textMultiLine|textCapSentences"
+                    android:maxLength="300"
+                    android:minLines="3" />
+            </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
-        <!-- Name -->
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Full Name"
-            android:layout_marginBottom="16dp"
-            app:startIconDrawable="@android:drawable/ic_menu_myplaces"
-            app:startIconTint="#10B981">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/name_edit_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="text" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Phone -->
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Phone Number"
-            android:layout_marginBottom="16dp"
-            app:startIconDrawable="@android:drawable/ic_dialog_dialer"
-            app:startIconTint="#10B981">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/phone_edit_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="phone" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Age -->
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Age"
-            android:layout_marginBottom="16dp"
-            app:startIconDrawable="@android:drawable/ic_dialog_info"
-            app:startIconTint="#10B981">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/age_edit_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="number" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Gender -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Gender"
-            android:textColor="#6B7280"
-            android:textSize="12sp"
-            android:layout_marginBottom="8dp" />
-
-        <Spinner
-            android:id="@+id/gender_spinner"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:entries="@array/gender_array"
-            android:layout_marginBottom="16dp" />
-
-        <!-- Blood Group -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Blood Group"
-            android:textColor="#6B7280"
-            android:textSize="12sp"
-            android:layout_marginBottom="8dp" />
-
-        <Spinner
-            android:id="@+id/blood_group_spinner"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:entries="@array/blood_group_array"
-            android:layout_marginBottom="16dp" />
-
-        <!-- Bio -->
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Bio"
-            android:layout_marginBottom="24dp"
-            app:startIconDrawable="@android:drawable/ic_menu_edit"
-            app:startIconTint="#10B981">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/bio_edit_text"
-                android:layout_width="match_parent"
-                android:layout_height="120dp"
-                android:inputType="textMultiLine"
-                android:gravity="top" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Progress Bar -->
-        <ProgressBar
-            android:id="@+id/progress_bar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="16dp"
-            android:visibility="gone" />
-
-        <!-- Save Button -->
-        <Button
-            android:id="@+id/save_button"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:text="Save Profile"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:background="#10B981"
-            android:textColor="#FFFFFF"
-            android:elevation="8dp" />
-
-    </LinearLayout>
-
-</ScrollView>
+    <include
+        android:id="@+id/edit_bar"
+        layout="@layout/view_bottom_bar" />
+</LinearLayout>

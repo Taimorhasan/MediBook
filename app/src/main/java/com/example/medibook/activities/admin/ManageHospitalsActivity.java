@@ -1,178 +1,146 @@
 package com.example.medibook.activities.admin;
 
 import android.os.Bundle;
+import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ProgressBar;
-import android.widget.Toast;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.medibook.R;
-import com.example.medibook.activities.common.BaseActivity;
-import com.example.medibook.adapters.HospitalAdapter;
+import com.example.medibook.adapters.RowAdapter;
 import com.example.medibook.models.Hospital;
 import com.example.medibook.repositories.AuthRepository;
 import com.example.medibook.repositories.HospitalRepository;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import java.util.ArrayList;
+import com.example.medibook.utils.StateView;
+import com.example.medibook.utils.Ui;
+import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.textfield.TextInputLayout;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-public class ManageHospitalsActivity extends BaseActivity implements HospitalAdapter.OnHospitalActionListener {
-
-    private RecyclerView recyclerView;
-    private HospitalAdapter adapter;
-    private HospitalRepository hospitalRepository;
-    private ProgressBar progressBar;
-    private View emptyView;
-    private List<Hospital> hospitalList = new ArrayList<>();
-    private FloatingActionButton addFab;
+/** Admins add, edit and delete the hospitals doctors are assigned to. */
+public class ManageHospitalsActivity extends AppCompatActivity {
+    private final HospitalRepository repo = new HospitalRepository();
+    private StateView state;
+    private View board;
+    private RowAdapter<Hospital> adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_manage_hospitals);
-        if (!checkRoleAndRedirect("admin")) {
-            return;
-        }
+        setContentView(R.layout.activity_manage_list);
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setTitle(R.string.manage_hospitals);
+        toolbar.setNavigationOnClickListener(v -> finish());
+        state = new StateView(findViewById(R.id.manage_state));
+        board = findViewById(R.id.manage_board);
+        adapter = new RowAdapter<>((h, row) -> {
+            row.title.setText(Ui.orDash(h.getName()));
+            row.sub.setText(Ui.blank(h.getAddress()) ? Ui.orDash(h.getPhone()) : h.getAddress());
+            Ui.avatar(row.avatar.findViewById(R.id.avatar_image), row.avatar.findViewById(R.id.avatar_initials), null, h.getName());
+            row.tag.setVisibility(View.GONE);
+        }, this::actions);
+        Ui.board((RecyclerView) board.findViewById(R.id.board_list), adapter);
 
-        initViews();
-        setupToolbar();
-        hospitalRepository = new HospitalRepository();
-        loadHospitals();
+        MaterialButton add = findViewById(R.id.manage_bar).findViewById(R.id.bar_button);
+        add.setText(R.string.add_hospital);
+        add.setIconResource(R.drawable.ic_plus);
+        add.setIconGravity(MaterialButton.ICON_GRAVITY_TEXT_START);
+        add.setOnClickListener(v -> edit(null));
+        load();
     }
 
-    private void setupToolbar() {
-        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle("Hospitals");
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
-        toolbar.setNavigationOnClickListener(v -> onBackPressed());
-    }
-
-    private void initViews() {
-        recyclerView = findViewById(R.id.hospitals_recycler_view);
-        progressBar = findViewById(R.id.loading_progress);
-        addFab = findViewById(R.id.add_hospital_fab);
-        emptyView = findViewById(R.id.empty_view);
-
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new HospitalAdapter(hospitalList, this, this);
-        recyclerView.setAdapter(adapter);
-
-        addFab.setOnClickListener(v -> showHospitalDialog(null));
-    }
-
-    private void loadHospitals() {
-        progressBar.setVisibility(View.VISIBLE);
-        hospitalRepository.getAllHospitals(new HospitalRepository.HospitalsCallback() {
+    private void load() {
+        state.loading();
+        board.setVisibility(View.GONE);
+        repo.getAllHospitals(new HospitalRepository.HospitalsCallback() {
             @Override
             public void onSuccess(List<Hospital> hospitals) {
-                progressBar.setVisibility(View.GONE);
-                hospitalList = hospitals;
-                adapter.updateList(hospitalList);
-                emptyView.setVisibility(hospitalList.isEmpty() ? View.VISIBLE : View.GONE);
+                if (isFinishing()) return;
+                Collections.sort(hospitals, (a, b) -> Ui.orDash(a.getName()).compareToIgnoreCase(Ui.orDash(b.getName())));
+                adapter.submit(hospitals);
+                board.setVisibility(hospitals.isEmpty() ? View.GONE : View.VISIBLE);
+                if (hospitals.isEmpty()) {
+                    state.empty(R.drawable.ic_buildings, getString(R.string.no_hospitals), null, null, null);
+                } else {
+                    state.hide();
+                }
             }
 
             @Override
             public void onFailure(String error) {
-                progressBar.setVisibility(View.GONE);
-                Toast.makeText(ManageHospitalsActivity.this, "Error: " + error, Toast.LENGTH_SHORT).show();
+                if (!isFinishing()) state.error(error, ManageHospitalsActivity.this::load);
             }
         });
     }
 
-    @Override
-    public void onEditHospital(Hospital hospital) {
-        showHospitalDialog(hospital);
+    private void actions(Hospital h) {
+        new Ui.Sheet(this, Ui.orDash(h.getName()), h.getAddress())
+                .action(R.drawable.ic_pencil_simple, getString(R.string.edit), false, () -> edit(h))
+                .action(R.drawable.ic_trash, getString(R.string.delete), true, () -> new MaterialAlertDialogBuilder(this)
+                        .setTitle(getString(R.string.delete_hospital_confirm, Ui.orDash(h.getName())))
+                        .setNegativeButton(R.string.cancel, null)
+                        .setPositiveButton(R.string.delete, (d, w) -> repo.deleteHospital(h.getHospitalId(), reload()))
+                        .show())
+                .show();
     }
 
-    private void showHospitalDialog(Hospital hospital) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        View view = LayoutInflater.from(this).inflate(R.layout.dialog_hospital, null);
-        
-        EditText nameEdit = view.findViewById(R.id.edit_hospital_name);
-        EditText addressEdit = view.findViewById(R.id.edit_hospital_address);
-        EditText phoneEdit = view.findViewById(R.id.edit_hospital_phone);
-        EditText emailEdit = view.findViewById(R.id.edit_hospital_email);
-
-        if (hospital != null) {
-            builder.setTitle("Edit Hospital");
-            nameEdit.setText(hospital.getName());
-            addressEdit.setText(hospital.getAddress());
-            phoneEdit.setText(hospital.getPhone());
-            emailEdit.setText(hospital.getEmail());
-        } else {
-            builder.setTitle("Add New Hospital");
+    private void edit(@Nullable Hospital existing) {
+        View form = LayoutInflater.from(this).inflate(R.layout.dialog_hospital, null);
+        EditText name = form.findViewById(R.id.hospital_name), address = form.findViewById(R.id.hospital_address);
+        EditText phone = form.findViewById(R.id.hospital_phone), email = form.findViewById(R.id.hospital_email);
+        if (existing != null) {
+            name.setText(existing.getName());
+            address.setText(existing.getAddress());
+            phone.setText(existing.getPhone());
+            email.setText(existing.getEmail());
         }
+        AlertDialog dialog = new MaterialAlertDialogBuilder(this)
+                .setTitle(existing == null ? R.string.add_hospital : R.string.edit_hospital)
+                .setView(form)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.save, null)
+                .show();
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String n = text(name), e = text(email);
+            TextInputLayout nameLayout = form.findViewById(R.id.hospital_name_layout);
+            TextInputLayout emailLayout = form.findViewById(R.id.hospital_email_layout);
+            nameLayout.setError(n.isEmpty() ? getString(R.string.error_required) : null);
+            emailLayout.setError(e.isEmpty() || Patterns.EMAIL_ADDRESS.matcher(e).matches() ? null : getString(R.string.error_email));
+            if (nameLayout.getError() != null || emailLayout.getError() != null) return;
 
-        builder.setView(view);
-        builder.setPositiveButton(hospital != null ? "Update" : "Add", (dialog, which) -> {
-            String name = nameEdit.getText().toString().trim();
-            String address = addressEdit.getText().toString().trim();
-            String phone = phoneEdit.getText().toString().trim();
-            String email = emailEdit.getText().toString().trim();
-
-            if (name.isEmpty() || address.isEmpty()) {
-                Toast.makeText(this, "Name and Address are required", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            if (hospital != null) {
-                hospital.setName(name);
-                hospital.setAddress(address);
-                hospital.setPhone(phone);
-                hospital.setEmail(email);
-                updateHospital(hospital);
+            Hospital h = existing != null ? existing : new Hospital();
+            if (h.getHospitalId() == null) h.setHospitalId(UUID.randomUUID().toString());
+            h.setName(n);
+            h.setAddress(text(address));
+            h.setPhone(text(phone));
+            h.setEmail(e);
+            dialog.dismiss();
+            if (existing == null) {
+                repo.addHospital(h, new HospitalRepository.HospitalCallback() {
+                    @Override public void onSuccess(Hospital hospital) { load(); }
+                    @Override public void onFailure(String error) { Ui.snack(board, getString(R.string.error_generic, error)); }
+                });
             } else {
-                Hospital newHospital = new Hospital(
-                        UUID.randomUUID().toString(),
-                        name, address, phone, email, 0.0, 0.0
-                );
-                addHospital(newHospital);
-            }
-        });
-        builder.setNegativeButton("Cancel", null);
-        builder.show();
-    }
-
-    private void addHospital(Hospital hospital) {
-        progressBar.setVisibility(View.VISIBLE);
-        hospitalRepository.addHospital(hospital, new HospitalRepository.HospitalCallback() {
-            @Override
-            public void onSuccess(Hospital addedHospital) {
-                progressBar.setVisibility(View.GONE);
-                Toast.makeText(ManageHospitalsActivity.this, "Hospital added", Toast.LENGTH_SHORT).show();
-                loadHospitals();
-            }
-
-            @Override
-            public void onFailure(String error) {
-                progressBar.setVisibility(View.GONE);
-                Toast.makeText(ManageHospitalsActivity.this, "Error: " + error, Toast.LENGTH_SHORT).show();
+                repo.updateHospital(h, reload());
             }
         });
     }
 
-    private void updateHospital(Hospital hospital) {
-        progressBar.setVisibility(View.VISIBLE);
-        hospitalRepository.updateHospital(hospital, new AuthRepository.VoidCallback() {
-            @Override
-            public void onSuccess() {
-                progressBar.setVisibility(View.GONE);
-                Toast.makeText(ManageHospitalsActivity.this, "Hospital updated", Toast.LENGTH_SHORT).show();
-                loadHospitals();
-            }
+    private AuthRepository.VoidCallback reload() {
+        return new AuthRepository.VoidCallback() {
+            @Override public void onSuccess() { load(); }
+            @Override public void onFailure(String error) { Ui.snack(board, getString(R.string.error_generic, error)); }
+        };
+    }
 
-            @Override
-            public void onFailure(String error) {
-                progressBar.setVisibility(View.GONE);
-                Toast.makeText(ManageHospitalsActivity.this, "Error: " + error, Toast.LENGTH_SHORT).show();
-            }
-        });
+    private static String text(EditText e) {
+        return e.getText() == null ? "" : e.getText().toString().trim();
     }
 }

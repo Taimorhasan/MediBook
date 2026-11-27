@@ -3,232 +3,131 @@ package com.example.medibook.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-import com.google.android.material.chip.Chip;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.medibook.R;
 import com.example.medibook.models.Appointment;
+import com.example.medibook.utils.Ui;
+import com.google.android.material.button.MaterialButton;
+import java.util.ArrayList;
 import java.util.List;
 
-public class AppointmentAdapter extends RecyclerView.Adapter<AppointmentAdapter.AppointmentViewHolder> {
+/** Appointment board rows for patients, doctors and admins. */
+public class AppointmentAdapter extends RecyclerView.Adapter<AppointmentAdapter.Holder> {
 
-    private List<Appointment> appointmentList;
-    private OnAppointmentClickListener listener;
-    private boolean showDoctorActions;
-    private boolean showPatientCancel;
+    public enum Viewer { PATIENT, DOCTOR, ADMIN }
 
-    public interface OnAppointmentClickListener {
-        void onAppointmentClick(Appointment appointment);
-        void onCancelAppointment(Appointment appointment);
-        default void onConfirmAppointment(Appointment appointment) {}
-        default void onCompleteAppointment(Appointment appointment) {}
+    public interface OnClick {
+        void onClick(Appointment appointment);
     }
 
-    public AppointmentAdapter(List<Appointment> appointmentList, OnAppointmentClickListener listener) {
-        this(appointmentList, listener, false, false);
+    /** Fills a row's inline buttons; hide both to show none. */
+    public interface Actions {
+        void bind(Appointment appointment, MaterialButton primary, MaterialButton secondary);
     }
 
-    public AppointmentAdapter(List<Appointment> appointmentList, OnAppointmentClickListener listener, boolean showDoctorActions, boolean showPatientCancel) {
-        this.appointmentList = appointmentList;
-        this.listener = listener;
-        this.showDoctorActions = showDoctorActions;
-        this.showPatientCancel = showPatientCancel;
+    private final List<Appointment> items = new ArrayList<>();
+    private final Viewer viewer;
+    private final OnClick onClick;
+    @Nullable private final Actions actions;
+    private long seen = Long.MAX_VALUE;
+
+    public AppointmentAdapter(Viewer viewer, OnClick onClick, @Nullable Actions actions) {
+        this.viewer = viewer;
+        this.onClick = onClick;
+        this.actions = actions;
     }
 
-    public void updateList(List<Appointment> newList) {
-        this.appointmentList = newList;
+    /** @param seen when the viewer last looked; newer changes are highlighted. */
+    public void submit(List<Appointment> list, long seen) {
+        items.clear();
+        items.addAll(list);
+        this.seen = seen;
         notifyDataSetChanged();
+    }
+
+    /** The signature move: a change the viewer hasn't seen yet keeps its highlight. */
+    public static boolean changed(Appointment a, Viewer viewer, long seen) {
+        if (viewer == Viewer.PATIENT) {
+            // Only a status change counts for patients, not the booking they made themselves.
+            return a.getUpdatedAt() - a.getCreatedAt() > 2000 && a.getUpdatedAt() > seen;
+        }
+        if (viewer == Viewer.DOCTOR) {
+            return Math.max(a.getCreatedAt(), a.getUpdatedAt()) > seen;
+        }
+        return false;
     }
 
     @NonNull
     @Override
-    public AppointmentViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_appointment_home, parent, false);
-        return new AppointmentViewHolder(view, listener, appointmentList);
+    public Holder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        return new Holder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_appointment, parent, false));
     }
 
     @Override
-    public void onBindViewHolder(@NonNull AppointmentViewHolder holder, int position) {
-        Appointment appointment = appointmentList.get(position);
-
-        // Set primary name based on who is viewing the appointment.
-        if (showDoctorActions) {
-            holder.doctorNameTextView.setText(getPatientDisplayName(appointment));
+    public void onBindViewHolder(@NonNull Holder h, int position) {
+        Appointment a = items.get(position);
+        h.day.setText(Ui.dayShort(a.getDate()));
+        h.time.setText(Ui.orDash(a.getTime()));
+        switch (viewer) {
+            case PATIENT:
+                h.title.setText(Ui.doctorName(a.getDoctorName()));
+                h.sub.setText(Ui.blank(a.getDoctorSpecialty()) ? Ui.ref(a.getAppointmentId()) : a.getDoctorSpecialty());
+                break;
+            case DOCTOR:
+                h.title.setText(Ui.orDash(a.getPatientName()));
+                h.sub.setText(Ui.blank(a.getNotes()) ? Ui.ref(a.getAppointmentId()) : a.getNotes());
+                break;
+            default:
+                h.title.setText(Ui.orDash(a.getPatientName()));
+                h.sub.setText(Ui.doctorName(a.getDoctorName()));
+        }
+        Ui.status(h.status, a.getStatus());
+        boolean changed = changed(a, viewer, seen);
+        if (changed) {
+            h.root.setBackgroundColor(ContextCompat.getColor(h.root.getContext(), R.color.mb_hot_bg));
         } else {
-            String doctorName = appointment.getDoctorName();
-            holder.doctorNameTextView.setText(doctorName != null ? "Dr. " + doctorName : "Dr. Name");
+            h.root.setBackgroundResource(selectableBackground(h.root));
         }
+        h.root.setOnClickListener(v -> onClick.onClick(a));
 
-        // Set specialty (placeholder for now - would need to get from doctor data)
-        holder.specialtyTextView.setText("Specialty");
+        h.primary.setVisibility(View.GONE);
+        h.secondary.setVisibility(View.GONE);
+        if (actions != null) actions.bind(a, h.primary, h.secondary);
+        boolean anyAction = h.primary.getVisibility() == View.VISIBLE || h.secondary.getVisibility() == View.VISIBLE;
+        h.actions.setVisibility(anyAction ? View.VISIBLE : View.GONE);
+    }
 
-        // Set date and time
-        String dateTime = formatDateTime(appointment.getDate(), appointment.getTime());
-        holder.dateTimeTextView.setText(dateTime);
-
-        // Set status
-        String status = appointment.getStatus();
-        if (status != null) {
-            holder.statusTextView.setText(status.substring(0, 1).toUpperCase() + status.substring(1));
-            updateStatusColor(holder.statusTextView, status);
-        } else {
-            holder.statusTextView.setText("Pending");
-            updateStatusColor(holder.statusTextView, "pending");
-        }
-
-        // Set month and day
-        if (appointment.getDate() != null) {
-            String[] dateParts = appointment.getDate().split("-");
-            if (dateParts.length >= 3) {
-                try {
-                    int month = Integer.parseInt(dateParts[1]);
-                    int day = Integer.parseInt(dateParts[2]);
-                    holder.monthTextView.setText(getMonthAbbrev(month));
-                    holder.dayTextView.setText(String.valueOf(day));
-                } catch (NumberFormatException e) {
-                    holder.monthTextView.setText("---");
-                    holder.dayTextView.setText("--");
-                }
-            }
-        }
-
-        bindActionButtons(holder, appointment);
+    private static int selectableBackground(View v) {
+        android.util.TypedValue tv = new android.util.TypedValue();
+        v.getContext().getTheme().resolveAttribute(android.R.attr.selectableItemBackground, tv, true);
+        return tv.resourceId;
     }
 
     @Override
     public int getItemCount() {
-        return appointmentList.size();
+        return items.size();
     }
 
-    public static class AppointmentViewHolder extends RecyclerView.ViewHolder {
-        TextView doctorNameTextView, specialtyTextView, dateTimeTextView, statusTextView, monthTextView, dayTextView;
-        LinearLayout actionButtonsLayout;
-        Button confirmButton, completeButton, cancelButton;
+    static final class Holder extends RecyclerView.ViewHolder {
+        final View root, actions;
+        final TextView day, time, title, sub, status;
+        final MaterialButton primary, secondary;
 
-        public AppointmentViewHolder(@NonNull View itemView, OnAppointmentClickListener listener, List<Appointment> appointments) {
-            super(itemView);
-            doctorNameTextView = itemView.findViewById(R.id.doctor_name_text);
-            specialtyTextView = itemView.findViewById(R.id.specialty_text);
-            dateTimeTextView = itemView.findViewById(R.id.date_time_text);
-            statusTextView = itemView.findViewById(R.id.status_text);
-            monthTextView = itemView.findViewById(R.id.month_text);
-            dayTextView = itemView.findViewById(R.id.day_text);
-            actionButtonsLayout = itemView.findViewById(R.id.action_buttons_layout);
-            confirmButton = itemView.findViewById(R.id.confirm_appointment_button);
-            completeButton = itemView.findViewById(R.id.complete_appointment_button);
-            cancelButton = itemView.findViewById(R.id.cancel_appointment_button);
-
-            itemView.setOnClickListener(v -> {
-                int position = getAdapterPosition();
-                if (position != RecyclerView.NO_POSITION && listener != null) {
-                    listener.onAppointmentClick(appointments.get(position));
-                }
-            });
-        }
-    }
-
-    private void bindActionButtons(AppointmentViewHolder holder, Appointment appointment) {
-        if (holder.actionButtonsLayout == null) return;
-
-        String status = appointment.getStatus() != null ? appointment.getStatus().toLowerCase() : "pending";
-        boolean canDoctorAct = showDoctorActions && ("pending".equals(status) || "confirmed".equals(status));
-        boolean canPatientCancel = showPatientCancel && ("pending".equals(status) || "confirmed".equals(status));
-
-        holder.actionButtonsLayout.setVisibility((canDoctorAct || canPatientCancel) ? View.VISIBLE : View.GONE);
-
-        if (holder.confirmButton != null) {
-            holder.confirmButton.setVisibility(canDoctorAct && "pending".equals(status) ? View.VISIBLE : View.GONE);
-            holder.confirmButton.setOnClickListener(v -> {
-                if (listener != null) listener.onConfirmAppointment(appointment);
-            });
-        }
-
-        if (holder.completeButton != null) {
-            holder.completeButton.setVisibility(canDoctorAct && "confirmed".equals(status) ? View.VISIBLE : View.GONE);
-            holder.completeButton.setOnClickListener(v -> {
-                if (listener != null) listener.onCompleteAppointment(appointment);
-            });
-        }
-
-        if (holder.cancelButton != null) {
-            holder.cancelButton.setVisibility((canDoctorAct || canPatientCancel) ? View.VISIBLE : View.GONE);
-            holder.cancelButton.setOnClickListener(v -> {
-                if (listener != null) listener.onCancelAppointment(appointment);
-            });
-        }
-    }
-
-    private String formatDateTime(String date, String time) {
-        if (date == null || time == null) return "Date & Time";
-
-        try {
-            // Parse date (assuming YYYY-MM-DD format)
-            String[] dateParts = date.split("-");
-            if (dateParts.length >= 3) {
-                int year = Integer.parseInt(dateParts[0]);
-                int month = Integer.parseInt(dateParts[1]);
-                int day = Integer.parseInt(dateParts[2]);
-
-                // Format as "MMM dd, yyyy • HH:mm"
-                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.getDefault());
-                java.util.Date parsedDate = new java.util.Date(year - 1900, month - 1, day);
-                String formattedDate = sdf.format(parsedDate);
-
-                return formattedDate + " • " + time;
-            }
-        } catch (Exception e) {
-            // Fallback
-        }
-
-        return date + " • " + time;
-    }
-
-    private String getPatientDisplayName(Appointment appointment) {
-        String patientName = appointment.getPatientName();
-        if (patientName != null && !patientName.trim().isEmpty()) {
-            return patientName;
-        }
-        String patientId = appointment.getPatientId();
-        if (patientId != null && patientId.length() > 8) {
-            return "Patient " + patientId.substring(0, 8);
-        }
-        return "Patient";
-    }
-
-    private String getMonthAbbrev(int month) {
-        String[] months = {"JAN", "FEB", "MAR", "APR", "MAY", "JUN",
-                         "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
-        if (month >= 1 && month <= 12) {
-            return months[month - 1];
-        }
-        return "---";
-    }
-
-    private void updateStatusColor(TextView statusTextView, String status) {
-        switch (status.toLowerCase()) {
-            case "confirmed":
-                statusTextView.setBackgroundResource(R.color.status_confirmed_bg);
-                statusTextView.setTextColor(statusTextView.getContext().getColor(R.color.status_confirmed_text));
-                break;
-            case "pending":
-                statusTextView.setBackgroundResource(R.color.status_pending_bg);
-                statusTextView.setTextColor(statusTextView.getContext().getColor(R.color.status_pending_text));
-                break;
-            case "cancelled":
-                statusTextView.setBackgroundResource(R.color.status_cancelled_bg);
-                statusTextView.setTextColor(statusTextView.getContext().getColor(R.color.status_cancelled_text));
-                break;
-            case "completed":
-                statusTextView.setBackgroundResource(R.color.status_completed_bg);
-                statusTextView.setTextColor(statusTextView.getContext().getColor(R.color.status_completed_text));
-                break;
-            default:
-                statusTextView.setBackgroundResource(R.color.status_pending_bg);
-                statusTextView.setTextColor(statusTextView.getContext().getColor(R.color.status_pending_text));
-                break;
+        Holder(View v) {
+            super(v);
+            root = v;
+            day = v.findViewById(R.id.row_day);
+            time = v.findViewById(R.id.row_time);
+            title = v.findViewById(R.id.row_title);
+            sub = v.findViewById(R.id.row_sub);
+            status = v.findViewById(R.id.row_status);
+            actions = v.findViewById(R.id.row_actions);
+            primary = v.findViewById(R.id.row_primary);
+            secondary = v.findViewById(R.id.row_secondary);
         }
     }
 }

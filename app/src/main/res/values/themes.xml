@@ -1,50 +1,374 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    
-    <!-- Base application theme -->
-    <style name="Theme.MediBook" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <!-- Primary brand color -->
-        <item name="colorPrimary">@color/primary_blue</item>
-        <item name="colorPrimaryVariant">@color/primary_dark</item>
-        <item name="colorOnPrimary">@color/white</item>
-        
-        <!-- Secondary brand color -->
-        <item name="colorSecondary">@color/teal_200</item>
-        <item name="colorSecondaryVariant">@color/teal_700</item>
-        <item name="colorOnSecondary">@color/black</item>
-        
-        <!-- Status bar -->
-        <item name="android:statusBarColor">@color/primary_dark</item>
-        <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
-        
-        <!-- Backgrounds -->
-        <item name="android:windowBackground">@color/background_light</item>
-        <item name="colorSurface">@color/surface</item>
-        <item name="colorOnSurface">@color/text_dark</item>
-    </style>
-    
-    <!-- Splash theme (no action bar, full screen) -->
-    <style name="Theme.MediBook.Splash" parent="Theme.MediBook">
-        <item name="android:windowFullscreen">true</item>
-        <item name="android:windowContentOverlay">@null</item>
-    </style>
-    
-    <style name="Theme.MediBook.NoActionBar" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <!-- Customize your theme here -->
-        <item name="colorPrimary">@color/primary_blue</item>
-        <item name="colorPrimaryVariant">@color/primary_dark</item>
-        <item name="colorOnPrimary">@color/white</item>
-        <item name="android:statusBarColor">@color/primary_blue</item>
+
+    <style name="Base.Theme.MediBook" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/mb_ink</item>
+        <item name="colorOnPrimary">@color/mb_on_ink</item>
+        <item name="colorPrimaryContainer">@color/mb_panel_alt</item>
+        <item name="colorOnPrimaryContainer">@color/mb_ink</item>
+        <item name="colorSecondary">@color/mb_ink</item>
+        <item name="colorOnSecondary">@color/mb_on_ink</item>
+        <item name="colorSecondaryContainer">@color/mb_panel_alt</item>
+        <item name="colorOnSecondaryContainer">@color/mb_ink</item>
+        <item name="colorTertiary">@color/mb_hot</item>
+        <item name="colorSurface">@color/mb_panel</item>
+        <item name="colorOnSurface">@color/mb_ink</item>
+        <item name="colorSurfaceVariant">@color/mb_panel_alt</item>
+        <item name="colorOnSurfaceVariant">@color/mb_mute</item>
+        <item name="colorSurfaceContainerLowest">@color/mb_panel</item>
+        <item name="colorSurfaceContainerLow">@color/mb_panel</item>
+        <item name="colorSurfaceContainer">@color/mb_panel</item>
+        <item name="colorSurfaceContainerHigh">@color/mb_panel</item>
+        <item name="colorSurfaceContainerHighest">@color/mb_panel_alt</item>
+        <item name="colorOutline">@color/mb_line</item>
+        <item name="colorOutlineVariant">@color/mb_line</item>
+        <item name="colorError">@color/mb_error</item>
+        <item name="android:colorBackground">@color/mb_ground</item>
+        <item name="android:windowBackground">@color/mb_ground</item>
+        <item name="android:statusBarColor">@color/mb_ground</item>
+        <item name="android:navigationBarColor">@color/mb_ground</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">true</item>
+        <item name="android:textColorHighlight">@color/mb_hot_bg</item>
+        <item name="android:colorControlActivated">@color/mb_ink</item>
+
+        <!-- Default face via styles, not a theme-wide fontFamily, which would override every text appearance. -->
+        <item name="android:textViewStyle">@style/Widget.MediBook.TextView</item>
+        <item name="editTextStyle">@style/Widget.MediBook.EditText</item>
+        <item name="textAppearanceHeadlineMedium">@style/TextAppearance.MediBook.Headline</item>
+        <item name="textAppearanceTitleLarge">@style/TextAppearance.MediBook.Title</item>
+        <item name="textAppearanceTitleMedium">@style/TextAppearance.MediBook.TitleSmall</item>
+        <item name="textAppearanceBodyLarge">@style/TextAppearance.MediBook.Body</item>
+        <item name="textAppearanceBodyMedium">@style/TextAppearance.MediBook.Body</item>
+        <item name="textAppearanceBodySmall">@style/TextAppearance.MediBook.BodySmall</item>
+        <item name="textAppearanceLabelLarge">@style/TextAppearance.MediBook.Button</item>
+
+        <item name="shapeAppearanceSmallComponent">@style/Shape.MediBook.Small</item>
+        <item name="shapeAppearanceMediumComponent">@style/Shape.MediBook.Medium</item>
+        <item name="materialButtonStyle">@style/Widget.MediBook.Button</item>
+        <item name="materialButtonOutlinedStyle">@style/Widget.MediBook.Button.Outlined</item>
+        <item name="borderlessButtonStyle">@style/Widget.MediBook.Button.Text</item>
+        <item name="textInputStyle">@style/Widget.MediBook.TextInput</item>
+        <item name="chipStyle">@style/Widget.MediBook.Chip</item>
+        <item name="materialCardViewStyle">@style/Widget.MediBook.Card</item>
+        <item name="circularProgressIndicatorStyle">@style/Widget.MediBook.Progress</item>
+        <item name="snackbarStyle">@style/Widget.MediBook.Snackbar</item>
+        <item name="snackbarTextViewStyle">@style/Widget.MediBook.SnackbarText</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.MediBook.Dialog</item>
+        <item name="bottomSheetDialogTheme">@style/ThemeOverlay.MediBook.BottomSheet</item>
     </style>
 
-    <style name="ShapeAppearanceOverlay_MediBook_Circle">
+    <style name="Theme.MediBook" parent="Base.Theme.MediBook" />
+
+    <style name="Theme.MediBook.Splash" parent="Theme.MediBook">
+        <item name="android:windowBackground">@drawable/bg_splash</item>
+    </style>
+
+    <!-- Type: Manrope for UI, JetBrains Mono for times, dates, refs and counts. -->
+    <style name="TextAppearance.MediBook.Headline" parent="TextAppearance.Material3.HeadlineMedium">
+        <item name="fontFamily">@font/manrope_extrabold</item>
+        <item name="android:fontFamily">@font/manrope_extrabold</item>
+        <item name="android:textSize">28sp</item>
+        <item name="android:letterSpacing">-0.01</item>
+        <item name="android:textColor">@color/mb_ink</item>
+    </style>
+    <style name="TextAppearance.MediBook.Title" parent="TextAppearance.Material3.TitleLarge">
+        <item name="fontFamily">@font/manrope_extrabold</item>
+        <item name="android:fontFamily">@font/manrope_extrabold</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@color/mb_ink</item>
+    </style>
+    <style name="TextAppearance.MediBook.TitleSmall" parent="TextAppearance.Material3.TitleMedium">
+        <item name="fontFamily">@font/manrope_bold</item>
+        <item name="android:fontFamily">@font/manrope_bold</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/mb_ink</item>
+    </style>
+    <style name="TextAppearance.MediBook.Body" parent="TextAppearance.Material3.BodyLarge">
+        <item name="fontFamily">@font/manrope_medium</item>
+        <item name="android:fontFamily">@font/manrope_medium</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@color/mb_ink</item>
+    </style>
+    <style name="TextAppearance.MediBook.BodySmall" parent="TextAppearance.Material3.BodySmall">
+        <item name="fontFamily">@font/manrope_medium</item>
+        <item name="android:fontFamily">@font/manrope_medium</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">@color/mb_mute</item>
+    </style>
+    <style name="TextAppearance.MediBook.Caption" parent="TextAppearance.Material3.LabelSmall">
+        <item name="fontFamily">@font/manrope_bold</item>
+        <item name="android:fontFamily">@font/manrope_bold</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:letterSpacing">0.1</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">@color/mb_mute</item>
+    </style>
+    <style name="TextAppearance.MediBook.Button" parent="TextAppearance.Material3.LabelLarge">
+        <item name="fontFamily">@font/manrope_extrabold</item>
+        <item name="android:fontFamily">@font/manrope_extrabold</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:letterSpacing">0</item>
+    </style>
+    <style name="TextAppearance.MediBook.Mono" parent="TextAppearance.Material3.BodyLarge">
+        <item name="fontFamily">@font/jetbrains_mono_medium</item>
+        <item name="android:fontFamily">@font/jetbrains_mono_medium</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/mb_ink</item>
+    </style>
+    <style name="TextAppearance.MediBook.MonoLarge" parent="TextAppearance.MediBook.Mono">
+        <item name="fontFamily">@font/jetbrains_mono_bold</item>
+        <item name="android:fontFamily">@font/jetbrains_mono_bold</item>
+        <item name="android:textSize">17sp</item>
+    </style>
+    <style name="TextAppearance.MediBook.NavLabel" parent="TextAppearance.Material3.LabelSmall">
+        <item name="fontFamily">@font/manrope_bold</item>
+        <item name="android:fontFamily">@font/manrope_bold</item>
+        <item name="android:textSize">11sp</item>
+    </style>
+
+    <style name="Widget.MediBook.TextView" parent="Widget.AppCompat.TextView">
+        <item name="android:textAppearance">@style/TextAppearance.MediBook.Body</item>
+    </style>
+    <style name="Widget.MediBook.EditText" parent="Widget.Material3.TextInputEditText.OutlinedBox">
+        <item name="android:fontFamily">@font/manrope_medium</item>
+        <item name="android:textColor">@color/mb_ink</item>
+    </style>
+
+    <style name="MediBook.BrandCaption" parent="">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:fontFamily">@font/manrope_bold</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:letterSpacing">0.1</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">@color/mb_on_ink</item>
+        <item name="android:alpha">0.6</item>
+    </style>
+    <style name="MediBook.BrandValue" parent="">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">3dp</item>
+        <item name="android:fontFamily">@font/manrope_bold</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">@color/mb_on_ink</item>
+    </style>
+
+    <style name="MediBook.StatusPill" parent="">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingStart">8dp</item>
+        <item name="android:paddingEnd">8dp</item>
+        <item name="android:paddingTop">4dp</item>
+        <item name="android:paddingBottom">4dp</item>
+        <item name="android:fontFamily">@font/manrope_extrabold</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:letterSpacing">0.08</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:maxLines">1</item>
+    </style>
+
+    <!-- Shapes -->
+    <style name="Shape.MediBook.Small" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">10dp</item>
+    </style>
+    <style name="Shape.MediBook.Medium" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">16dp</item>
+    </style>
+
+    <!-- Components -->
+    <style name="Widget.MediBook.Button" parent="Widget.Material3.Button">
+        <item name="android:minHeight">52dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="backgroundTint">@color/selector_button_bg</item>
+        <item name="android:textColor">@color/selector_button_text</item>
+        <item name="android:textAppearance">@style/TextAppearance.MediBook.Button</item>
+        <item name="shapeAppearance">@style/Shape.MediBook.Small</item>
+        <item name="iconTint">@color/mb_on_ink</item>
+        <item name="iconSize">20dp</item>
+    </style>
+    <style name="Widget.MediBook.Button.Outlined" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:minHeight">52dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:textColor">@color/mb_ink</item>
+        <item name="strokeColor">@color/mb_line</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="android:textAppearance">@style/TextAppearance.MediBook.Button</item>
+        <item name="shapeAppearance">@style/Shape.MediBook.Small</item>
+        <item name="iconTint">@color/mb_ink</item>
+        <item name="iconSize">20dp</item>
+    </style>
+    <style name="Widget.MediBook.Button.Small" parent="Widget.MediBook.Button">
+        <item name="android:minHeight">40dp</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:paddingStart">14dp</item>
+        <item name="android:paddingEnd">14dp</item>
+    </style>
+    <style name="Widget.MediBook.Button.Outlined.Small" parent="Widget.MediBook.Button.Outlined">
+        <item name="android:minHeight">40dp</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:paddingStart">14dp</item>
+        <item name="android:paddingEnd">14dp</item>
+    </style>
+    <style name="Widget.MediBook.Segment" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:minHeight">44dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="backgroundTint">@color/selector_chip_bg</item>
+        <item name="android:textColor">@color/selector_chip_text</item>
+        <item name="strokeColor">@color/selector_chip_stroke</item>
+        <item name="android:textAppearance">@style/TextAppearance.MediBook.ChipText</item>
+        <item name="android:checkable">true</item>
+    </style>
+    <style name="Widget.MediBook.Button.Text" parent="Widget.Material3.Button.TextButton">
+        <item name="android:textColor">@color/mb_ink</item>
+        <item name="android:textAppearance">@style/TextAppearance.MediBook.Button</item>
+        <item name="android:textSize">14sp</item>
+        <item name="iconTint">@color/mb_ink</item>
+    </style>
+    <style name="Widget.MediBook.Button.Danger" parent="Widget.MediBook.Button.Outlined">
+        <item name="android:textColor">@color/mb_error</item>
+        <item name="iconTint">@color/mb_error</item>
+    </style>
+
+    <style name="Widget.MediBook.TextInput" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxBackgroundColor">@color/mb_panel</item>
+        <item name="boxStrokeColor">@color/selector_input_stroke</item>
+        <item name="boxStrokeWidth">1dp</item>
+        <item name="boxStrokeWidthFocused">1.5dp</item>
+        <item name="boxCornerRadiusTopStart">12dp</item>
+        <item name="boxCornerRadiusTopEnd">12dp</item>
+        <item name="boxCornerRadiusBottomStart">12dp</item>
+        <item name="boxCornerRadiusBottomEnd">12dp</item>
+        <item name="hintTextColor">@color/mb_ink</item>
+        <item name="android:textColorHint">@color/mb_mute</item>
+        <item name="startIconTint">@color/mb_mute</item>
+        <item name="endIconTint">@color/mb_mute</item>
+        <item name="errorTextColor">@color/mb_error</item>
+        <item name="boxStrokeErrorColor">@color/mb_error</item>
+    </style>
+
+    <style name="Widget.MediBook.TextInput.Dropdown" parent="Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+        <item name="boxBackgroundColor">@color/mb_panel</item>
+        <item name="boxStrokeColor">@color/selector_input_stroke</item>
+        <item name="boxStrokeWidth">1dp</item>
+        <item name="boxStrokeWidthFocused">1.5dp</item>
+        <item name="boxCornerRadiusTopStart">12dp</item>
+        <item name="boxCornerRadiusTopEnd">12dp</item>
+        <item name="boxCornerRadiusBottomStart">12dp</item>
+        <item name="boxCornerRadiusBottomEnd">12dp</item>
+        <item name="hintTextColor">@color/mb_ink</item>
+        <item name="android:textColorHint">@color/mb_mute</item>
+        <item name="startIconTint">@color/mb_mute</item>
+        <item name="endIconTint">@color/mb_mute</item>
+    </style>
+
+    <style name="Widget.MediBook.Chip" parent="Widget.Material3.Chip.Filter">
+        <item name="chipBackgroundColor">@color/selector_chip_bg</item>
+        <item name="android:textColor">@color/selector_chip_text</item>
+        <item name="chipStrokeColor">@color/selector_chip_stroke</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="checkedIconVisible">false</item>
+        <item name="chipMinHeight">40dp</item>
+        <item name="shapeAppearance">@style/Shape.MediBook.Small</item>
+        <item name="android:textAppearance">@style/TextAppearance.MediBook.ChipText</item>
+    </style>
+    <style name="TextAppearance.MediBook.ChipText" parent="TextAppearance.Material3.LabelLarge">
+        <item name="fontFamily">@font/manrope_bold</item>
+        <item name="android:fontFamily">@font/manrope_bold</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="Widget.MediBook.Card" parent="Widget.Material3.CardView.Outlined">
+        <item name="cardBackgroundColor">@color/mb_panel</item>
+        <item name="strokeColor">@color/mb_line</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="cardElevation">0dp</item>
+        <item name="shapeAppearance">@style/Shape.MediBook.Medium</item>
+    </style>
+
+    <style name="Widget.MediBook.Progress" parent="Widget.Material3.CircularProgressIndicator">
+        <item name="indicatorColor">@color/mb_ink</item>
+        <item name="trackColor">@color/mb_line</item>
+        <item name="indicatorSize">32dp</item>
+        <item name="trackThickness">3dp</item>
+    </style>
+
+    <style name="Widget.MediBook.Snackbar" parent="Widget.Material3.Snackbar">
+        <item name="backgroundTint">@color/mb_ink</item>
+        <item name="shapeAppearance">@style/Shape.MediBook.Small</item>
+    </style>
+    <style name="Widget.MediBook.SnackbarText" parent="Widget.Material3.Snackbar.TextView">
+        <item name="android:textColor">@color/mb_on_ink</item>
+        <item name="fontFamily">@font/manrope_bold</item>
+        <item name="android:fontFamily">@font/manrope_bold</item>
+    </style>
+
+    <style name="Widget.MediBook.Toolbar" parent="Widget.Material3.Toolbar">
+        <item name="android:background">@color/mb_ground</item>
+        <item name="navigationIcon">@drawable/ic_arrow_left</item>
+        <item name="navigationIconTint">@color/mb_ink</item>
+        <item name="navigationContentDescription">@string/back</item>
+        <item name="titleTextAppearance">@style/TextAppearance.MediBook.TitleSmall</item>
+        <item name="titleTextColor">@color/mb_ink</item>
+    </style>
+
+    <!-- Floating pill navigation -->
+    <style name="Widget.MediBook.FloatingNav" parent="Widget.Material3.BottomNavigationView">
+        <item name="android:background">@android:color/transparent</item>
+        <item name="backgroundTint">@android:color/transparent</item>
+        <item name="elevation">0dp</item>
+        <item name="itemIconTint">@color/selector_nav_icon</item>
+        <item name="itemTextColor">@color/selector_nav_text</item>
+        <item name="itemIconSize">22dp</item>
+        <item name="itemActiveIndicatorStyle">@style/Widget.MediBook.FloatingNav.Indicator</item>
+        <item name="itemTextAppearanceActive">@style/TextAppearance.MediBook.NavLabel</item>
+        <item name="itemTextAppearanceInactive">@style/TextAppearance.MediBook.NavLabel</item>
+        <item name="itemPaddingTop">8dp</item>
+        <item name="itemPaddingBottom">10dp</item>
+        <item name="labelVisibilityMode">labeled</item>
+        <item name="itemRippleColor">@android:color/transparent</item>
+    </style>
+    <style name="Widget.MediBook.FloatingNav.Indicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:color">@color/mb_ink</item>
+        <item name="android:width">52dp</item>
+        <item name="android:height">30dp</item>
+        <item name="marginHorizontal">4dp</item>
+    </style>
+
+    <!-- Dialogs and sheets -->
+    <style name="ThemeOverlay.MediBook.Dialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="colorSurface">@color/mb_panel</item>
+        <item name="colorPrimary">@color/mb_ink</item>
+        <item name="shapeAppearanceOverlay">@style/Shape.MediBook.Medium</item>
+        <item name="materialAlertDialogTitleTextStyle">@style/MediBook.DialogTitle</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.MediBook.Button.Text</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Widget.MediBook.Button.Text</item>
+    </style>
+    <style name="MediBook.DialogTitle" parent="MaterialAlertDialog.Material3.Title.Text">
+        <item name="android:textAppearance">@style/TextAppearance.MediBook.Title</item>
+    </style>
+    <style name="ThemeOverlay.MediBook.BottomSheet" parent="ThemeOverlay.Material3.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/Widget.MediBook.BottomSheet</item>
+        <item name="android:navigationBarColor">@color/mb_panel</item>
+    </style>
+    <style name="Widget.MediBook.BottomSheet" parent="Widget.Material3.BottomSheet.Modal">
+        <item name="backgroundTint">@color/mb_panel</item>
+        <item name="shapeAppearance">@style/Shape.MediBook.Sheet</item>
+    </style>
+    <style name="Shape.MediBook.Circle" parent="">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">50%</item>
     </style>
-
-    <style name="ShapeAppearanceOverlay_MediBook_Rounded">
+    <style name="Shape.MediBook.Sheet" parent="">
         <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">14dp</item>
+        <item name="cornerSizeTopLeft">24dp</item>
+        <item name="cornerSizeTopRight">24dp</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
     </style>
-    
 </resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="screen_padding">20dp</dimen>
+    <!-- Space under scrolling content so the last row clears the floating nav. -->
+    <dimen name="nav_clearance">112dp</dimen>
+</resources>

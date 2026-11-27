@@ -219,17 +219,16 @@ public class AuthRepository {
             return;
         }
         // First remove FCM token from Firestore
+        // Sign out whether or not the token removal succeeds; report the outcome exactly once.
         db.collection("users").document(userId)
                 .update("fcmToken", "")
                 .addOnCompleteListener(task -> {
-                    // Then sign out from Firebase
                     mAuth.signOut();
-                    callback.onSuccess();
-                })
-                .addOnFailureListener(e -> {
-                    // Still sign out even if token removal fails
-                    mAuth.signOut();
-                    callback.onFailure(e.getMessage());
+                    if (task.isSuccessful()) {
+                        callback.onSuccess();
+                    } else {
+                        callback.onFailure(task.getException() != null ? task.getException().getMessage() : "Token cleanup failed");
+                    }
                 });
     }
 
@@ -287,6 +286,12 @@ public class AuthRepository {
             .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
     }
 
+    public void sendPasswordReset(String email, VoidCallback callback) {
+        mAuth.sendPasswordResetEmail(email)
+            .addOnSuccessListener(v -> callback.onSuccess())
+            .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
+    }
+
     // 🔹 Get current user
     public FirebaseUser getCurrentUser() {
         return mAuth.getCurrentUser();
@@ -318,7 +323,11 @@ public class AuthRepository {
                                 @Override
                                 public void onSuccess() {
                                     secondaryApp.delete();
-                                    callback.onSuccess();
+                                    if ("doctor".equals(role)) {
+                                        new DoctorRepository().ensureDoctorProfile(newUser.getUid(), name, email, phone, callback);
+                                    } else {
+                                        callback.onSuccess();
+                                    }
                                 }
                                 @Override
                                 public void onFailure(String error) {

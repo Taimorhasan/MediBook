@@ -1,39 +1,35 @@
 package com.example.medibook.models;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-public class Permission {
-    public static final String MANAGE_USERS = "manage_users";
-    public static final String MANAGE_DOCTORS = "manage_doctors";
-    public static final String MANAGE_HOSPITALS = "manage_hospitals";
-    public static final String MANAGE_ROLES = "manage_roles";
-    public static final String VIEW_REPORTS = "view_reports";
-    public static final String VIEW_DASHBOARD = "view_dashboard";
-    public static final String ACT_AS_USER = "act_as_user";
+/**
+ * Permission keys stored on roles. Firestore rules check manage_doctors, manage_hospitals,
+ * manage_roles, manage_appointments, manage_schedules and view_reports; the rest describe the role.
+ */
+public final class Permission {
+    private static final String[][] ALL = {
+            {"manage_users", "Manage users"},
+            {"manage_roles", "Manage roles and permissions"},
+            {"manage_doctors", "Verify and manage doctors"},
+            {"manage_hospitals", "Manage hospitals"},
+            {"manage_appointments", "Change any appointment's status"},
+            {"manage_all_appointments", "Manage all appointments"},
+            {"view_all_appointments", "See all appointments"},
+            {"view_reports", "See reports and all bookings"},
+            {"manage_schedules", "Manage schedules"},
+            {"view_doctor_appointments", "See their patients' appointments"},
+            {"update_appointments", "Update their appointments"},
+            {"send_notifications", "Send notifications"},
+            {"view_doctors", "Browse doctors"},
+            {"book_appointment", "Book appointments"},
+            {"view_own_appointments", "See own appointments"},
+            {"cancel_own_appointment", "Cancel own appointments"},
+    };
 
-    public static List<String> getAllPermissions() {
-        List<String> permissions = new ArrayList<>();
-        permissions.add(MANAGE_USERS);
-        permissions.add(MANAGE_DOCTORS);
-        permissions.add(MANAGE_HOSPITALS);
-        permissions.add(MANAGE_ROLES);
-        permissions.add(VIEW_REPORTS);
-        permissions.add(VIEW_DASHBOARD);
-        permissions.add(ACT_AS_USER);
-        return permissions;
-    }
+    private Permission() {}
 
-    public static String getPermissionLabel(String permission) {
-        switch (permission) {
-            case MANAGE_USERS: return "Manage Users";
-            case MANAGE_DOCTORS: return "Manage Doctors";
-            case MANAGE_HOSPITALS: return "Manage Hospitals";
-            case MANAGE_ROLES: return "Manage Roles & Permissions";
-            case VIEW_REPORTS: return "View Reports";
-            case VIEW_DASHBOARD: return "View Dashboard";
-            case ACT_AS_USER: return "Act As User (Impersonation)";
-            default: return permission;
-        }
+    public static List<String[]> getAll() {
+        return Arrays.asList(ALL);
     }
 }

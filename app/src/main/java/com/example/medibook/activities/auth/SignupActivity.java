@@ -2,300 +2,147 @@ package com.example.medibook.activities.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Patterns;
 import android.view.View;
-import android.widget.ProgressBar;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
+import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.medibook.R;
-import com.example.medibook.activities.user.UserLoginActivity;
+import com.example.medibook.activities.doctor.EditDoctorProfileActivity;
+import com.example.medibook.models.Doctor;
 import com.example.medibook.repositories.AuthRepository;
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.textfield.TextInputEditText;
+import com.example.medibook.repositories.DoctorDetailRepository;
+import com.example.medibook.utils.RoleRouter;
+import com.example.medibook.utils.SessionManager;
+import com.example.medibook.utils.Ui;
+import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.button.MaterialButtonToggleGroup;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.api.ApiException;
-import com.google.firebase.auth.GoogleAuthProvider;
-import com.example.medibook.activities.user.UserHomeActivity;
-import com.example.medibook.activities.doctor.DoctorDashboardActivity;
-import com.example.medibook.activities.admin.AdminDashboardActivity;
 
+/**
+ * Creates a patient account, or with EXTRA_DOCTOR a doctor account that waits for an admin to
+ * verify it before it can sign in.
+ */
 public class SignupActivity extends AppCompatActivity {
+    public static final String EXTRA_DOCTOR = "doctor";
 
-    private TextInputEditText nameEditText, emailEditText, phoneEditText, passwordEditText;
-    private TextInputLayout nameLayout, emailLayout, phoneLayout, passwordLayout;
-    private MaterialButton signupButton, btnGoogleSignIn;
-    private TextView loginRedirect;
-    private ProgressBar progressBar;
-    private AuthRepository authRepository;
-    private com.example.medibook.utils.SessionManager sessionManager;
-    private GoogleSignInClient mGoogleSignInClient;
-    private static final int RC_SIGN_IN = 9001;
+    private final AuthRepository auth = new AuthRepository();
+    private boolean doctor;
+    private View overlay;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
-        
-        initializeViews();
-        setupGoogleSignIn();
-        setupClickListeners();
-    }
+        doctor = getIntent().getBooleanExtra(EXTRA_DOCTOR, false);
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setNavigationOnClickListener(v -> finish());
+        overlay = findViewById(R.id.progress_overlay);
 
-    private void initializeViews() {
-        nameEditText = findViewById(R.id.nameEditText);
-        emailEditText = findViewById(R.id.emailEditText);
-        phoneEditText = findViewById(R.id.phoneEditText);
-        passwordEditText = findViewById(R.id.passwordEditText);
-        
-        nameLayout = findViewById(R.id.nameLayout);
-        emailLayout = findViewById(R.id.emailLayout);
-        phoneLayout = findViewById(R.id.phoneLayout);
-        passwordLayout = findViewById(R.id.passwordLayout);
-        
-        signupButton = findViewById(R.id.signupButton);
-        btnGoogleSignIn = findViewById(R.id.btnGoogleSignIn);
-        loginRedirect = findViewById(R.id.loginRedirect);
-        progressBar = findViewById(R.id.progressBar);
-        
-        authRepository = new AuthRepository();
-        sessionManager = new com.example.medibook.utils.SessionManager(this);
-    }
+        ((AutoCompleteTextView) findViewById(R.id.specialty_input)).setAdapter(
+                new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, EditDoctorProfileActivity.SPECIALTIES));
 
-    private void setupGoogleSignIn() {
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build();
+        MaterialCardView brand = findViewById(R.id.brand);
+        // Compact here: the title alone, so no tear and no notches.
+        brand.findViewById(R.id.brand_segments).setVisibility(View.GONE);
+        brand.findViewById(R.id.brand_tear).setVisibility(View.GONE);
+        if (savedInstanceState == null) Ui.rise(brand);
 
-        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
-    }
-
-    private void setupClickListeners() {
-        // ✅ Sign Up Button - WITH VALIDATIONS
-        signupButton.setOnClickListener(v -> {
-            if (validateInputs()) {
-                performSignup();
-            }
+        MaterialButtonToggleGroup roles = findViewById(R.id.role_toggle);
+        roles.check(doctor ? R.id.role_doctor : R.id.role_patient);
+        roles.addOnButtonCheckedListener((group, id, checked) -> {
+            if (checked) showRole(id == R.id.role_doctor);
         });
+        showRole(doctor);
 
-        // ✅ Google Sign Up - Native Flow
-        btnGoogleSignIn.setOnClickListener(v -> signInWithGoogle());
-
-        // ✅ Already have account? Go to Login
-        loginRedirect.setOnClickListener(v -> {
-            Intent intent = new Intent(SignupActivity.this, UserLoginActivity.class);
-            startActivity(intent);
-            finish();
-        });
+        findViewById(R.id.signup_button).setOnClickListener(v -> submit());
+        findViewById(R.id.signin_redirect).setOnClickListener(v -> finish());
     }
 
-    // ✅✅✅ COMPREHENSIVE VALIDATIONS ✅✅✅
-    private boolean validateInputs() {
-        String name = nameEditText.getText().toString().trim();
-        String email = emailEditText.getText().toString().trim();
-        String phone = phoneEditText.getText().toString().trim();
-        String password = passwordEditText.getText().toString().trim();
-        
-        boolean isValid = true;
-
-        // Clear previous errors
-        nameLayout.setError(null);
-        emailLayout.setError(null);
-        phoneLayout.setError(null);
-        passwordLayout.setError(null);
-
-        // 🔹 NAME: Not empty, no numbers, min 3 chars
-        if (TextUtils.isEmpty(name)) {
-            nameLayout.setError("Name is required");
-            nameEditText.requestFocus();
-            isValid = false;
-        } else if (name.matches(".*\\d.*")) {
-            nameLayout.setError("Name cannot contain numbers");
-            nameEditText.requestFocus();
-            isValid = false;
-        } else if (name.length() < 3) {
-            nameLayout.setError("Name must be at least 3 characters");
-            nameEditText.requestFocus();
-            isValid = false;
-        }
-
-        // 🔹 EMAIL: Not empty, valid format
-        if (TextUtils.isEmpty(email)) {
-            emailLayout.setError("Email is required");
-            emailEditText.requestFocus();
-            isValid = false;
-        } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            emailLayout.setError("Please enter a valid email address");
-            emailEditText.requestFocus();
-            isValid = false;
-        }
-
-        // 🔹 PHONE: Not empty, digits only, EXACTLY 11 digits
-        if (TextUtils.isEmpty(phone)) {
-            phoneLayout.setError("Phone number is required");
-            phoneEditText.requestFocus();
-            isValid = false;
-        } else if (!phone.matches("^[0-9]+$")) {
-            phoneLayout.setError("Phone number must contain only digits");
-            phoneEditText.requestFocus();
-            isValid = false;
-        } else if (phone.length() != 11) {
-            phoneLayout.setError("Phone number must be exactly 11 digits");
-            phoneEditText.requestFocus();
-            isValid = false;
-        }
-
-        // 🔹 PASSWORD: Not empty, min 8 chars
-        if (TextUtils.isEmpty(password)) {
-            passwordLayout.setError("Password is required");
-            passwordEditText.requestFocus();
-            isValid = false;
-        } else if (password.length() < 8) {
-            passwordLayout.setError("Password must be at least 8 characters");
-            passwordEditText.requestFocus();
-            isValid = false;
-        }
-
-        return isValid;
+    /** Doctors add specialty and experience, and wait for an admin to verify them. */
+    private void showRole(boolean asDoctor) {
+        doctor = asDoctor;
+        ((TextView) findViewById(R.id.brand).findViewById(R.id.brand_title))
+                .setText(asDoctor ? R.string.brand_title_doctor : R.string.brand_title_signup);
+        ((TextView) findViewById(R.id.signup_subtitle))
+                .setText(asDoctor ? R.string.doctor_signup_subtitle : R.string.signup_subtitle);
+        findViewById(R.id.doctor_fields).setVisibility(asDoctor ? View.VISIBLE : View.GONE);
     }
 
-    // ✅ SIGNUP: Save to Firebase Auth + Firestore
-    private void performSignup() {
-        String name = nameEditText.getText().toString().trim();
-        String email = emailEditText.getText().toString().trim();
-        String phone = phoneEditText.getText().toString().trim();
-        String password = passwordEditText.getText().toString().trim();
+    private void submit() {
+        String name = text(R.id.name_input), email = text(R.id.email_input), phone = text(R.id.phone_input);
+        String password = text(R.id.password_input), confirm = text(R.id.confirm_input);
+        String specialty = text(R.id.specialty_input), experience = text(R.id.experience_input);
 
-        progressBar.setVisibility(View.VISIBLE);
-        signupButton.setEnabled(false);
+        boolean ok = check(R.id.name_layout, name.length() >= 2 && !name.matches(".*\\d.*"), R.string.error_required)
+                & check(R.id.email_layout, Patterns.EMAIL_ADDRESS.matcher(email).matches(), R.string.error_email)
+                & check(R.id.phone_layout, phone.matches("03\\d{9}"), R.string.error_phone)
+                & check(R.id.password_layout, password.length() >= 6, R.string.error_password_short)
+                & check(R.id.confirm_layout, confirm.equals(password), R.string.error_password_match);
+        if (doctor) {
+            ok &= check(R.id.specialty_layout, !specialty.isEmpty(), R.string.error_required)
+                    & check(R.id.experience_layout, !experience.isEmpty(), R.string.error_required);
+        }
+        if (!ok) return;
 
-        // 🔹 Create user in Firebase Auth + Firestore
-        authRepository.signUp(name, email, phone, password, "patient", new AuthRepository.AuthCallback() {
+        overlay.setVisibility(View.VISIBLE);
+        auth.signUp(name, email, phone, password, doctor ? "doctor" : "patient", new AuthRepository.AuthCallback() {
             @Override
             public void onSuccess(FirebaseUser user) {
-                progressBar.setVisibility(View.GONE);
-                
-                Toast.makeText(SignupActivity.this, "Account created successfully!", Toast.LENGTH_SHORT).show();
-                
-                // 🔹 Redirect to Login to complete the flow
-                Intent intent = new Intent(SignupActivity.this, UserLoginActivity.class);
-                startActivity(intent);
+                if (doctor) {
+                    createDoctorProfile(user, name, email, phone, specialty, experience);
+                } else {
+                    RoleRouter.route(SignupActivity.this, user.getUid(), SignupActivity.this::fail);
+                }
+            }
+
+            @Override
+            public void onFailure(String error) {
+                fail(getString(R.string.signup_failed, error));
+            }
+        });
+    }
+
+    private void createDoctorProfile(FirebaseUser user, String name, String email, String phone,
+                                     String specialty, String experience) {
+        Doctor d = new Doctor(user.getUid(), name, specialty, "", phone, email, experience, null, "", true);
+        d.setVerified(false);
+        new DoctorDetailRepository().saveDoctorProfile(user.getUid(), d, new DoctorDetailRepository.VoidCallback() {
+            @Override
+            public void onSuccess() {
+                // Doctors can't use the app until an admin verifies them.
+                auth.signOut();
+                new SessionManager(SignupActivity.this).clearSession();
+                startActivity(new Intent(SignupActivity.this, UnifiedLoginActivity.class)
+                        .putExtra(UnifiedLoginActivity.EXTRA_MESSAGE, getString(R.string.doctor_created))
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
                 finish();
             }
 
             @Override
             public void onFailure(String error) {
-                progressBar.setVisibility(View.GONE);
-                signupButton.setEnabled(true);
-                
-                // 🔹 Handle specific Firebase errors
-                if (error.contains("email already in use")) {
-                    emailLayout.setError("This email is already registered");
-                    emailEditText.requestFocus();
-                } else {
-                    Toast.makeText(SignupActivity.this, "Signup failed: " + error, Toast.LENGTH_LONG).show();
-                }
+                auth.signOut();
+                fail(getString(R.string.signup_failed, error));
             }
         });
     }
 
-    private void signInWithGoogle() {
-        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-        startActivityForResult(signInIntent, RC_SIGN_IN);
+    private void fail(String message) {
+        overlay.setVisibility(View.GONE);
+        Ui.snack(findViewById(R.id.signup_button), message);
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == RC_SIGN_IN) {
-            com.google.android.gms.tasks.Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            try {
-                GoogleSignInAccount account = task.getResult(ApiException.class);
-                if (account != null) {
-                    firebaseAuthWithGoogle(account.getIdToken());
-                }
-            } catch (ApiException e) {
-                String errorMsg = "Google Sign-In failed (Code: " + e.getStatusCode() + ")";
-                if (e.getStatusCode() == 10) {
-                    errorMsg += ": Developer Error. Check SHA-1 in Firebase Console.";
-                }
-                Toast.makeText(this, errorMsg, Toast.LENGTH_LONG).show();
-            }
-        }
+    private boolean check(int layoutId, boolean valid, int errorRes) {
+        ((TextInputLayout) findViewById(layoutId)).setError(valid ? null : getString(errorRes));
+        return valid;
     }
 
-    private void firebaseAuthWithGoogle(String idToken) {
-        progressBar.setVisibility(View.VISIBLE);
-        authRepository.signInWithCredential(GoogleAuthProvider.getCredential(idToken, null), new AuthRepository.AuthCallback() {
-            @Override
-            public void onSuccess(FirebaseUser user) {
-                checkUserAndNavigate(user);
-            }
-
-            @Override
-            public void onFailure(String error) {
-                progressBar.setVisibility(View.GONE);
-                Toast.makeText(SignupActivity.this, "Authentication failed: " + error, Toast.LENGTH_SHORT).show();
-            }
-        });
+    private String text(int id) {
+        CharSequence s = ((EditText) findViewById(id)).getText();
+        return s == null ? "" : s.toString().trim();
     }
-
-    private void checkUserAndNavigate(FirebaseUser user) {
-        authRepository.checkUserExists(user.getUid(), exists -> {
-            if (exists) {
-                // If user exists, redirect based on their role
-                authRepository.getUserRole(user.getUid(), role -> {
-                    progressBar.setVisibility(View.GONE);
-                    
-                    // Save Session
-                    String finalRole = role != null ? role : "patient";
-                    boolean saved = sessionManager.saveUserSession(user.getUid(), finalRole);
-                    android.util.Log.d("Signup", "Session saved: " + saved + " for existing user role: " + finalRole);
-
-                    if ("admin".equals(role)) {
-                        Toast.makeText(SignupActivity.this, "Welcome back, Admin!", Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(SignupActivity.this, AdminDashboardActivity.class));
-                    } else if ("doctor".equals(role)) {
-                        Toast.makeText(SignupActivity.this, "Welcome back, Doctor!", Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(SignupActivity.this, DoctorDashboardActivity.class));
-                    } else {
-                        Toast.makeText(SignupActivity.this, "Welcome back!", Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(SignupActivity.this, UserHomeActivity.class));
-                    }
-                    finish();
-                });
-            } else {
-                // New user, create as patient
-                authRepository.createUserProfile(user.getUid(), 
-                    user.getDisplayName() != null ? user.getDisplayName() : "Google User",
-                    user.getEmail(), "", "patient", new AuthRepository.VoidCallback() {
-                        @Override
-                        public void onSuccess() {
-                            progressBar.setVisibility(View.GONE);
-                            // Save Session
-                            boolean saved = sessionManager.saveUserSession(user.getUid(), "patient");
-                            android.util.Log.d("Signup", "Session saved: " + saved + " for new user role: patient");
-                            
-                            Toast.makeText(SignupActivity.this, "Registration successful!", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(SignupActivity.this, UserHomeActivity.class));
-                            finish();
-                        }
-
-                        @Override
-                        public void onFailure(String error) {
-                            progressBar.setVisibility(View.GONE);
-                            Toast.makeText(SignupActivity.this, "Failed to create profile: " + error, Toast.LENGTH_SHORT).show();
-                        }
-                    });
-            }
-        });
-    }
-}
+}

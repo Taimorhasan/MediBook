@@ -24,7 +24,13 @@ public class HospitalRepository {
     public void getAllHospitals(HospitalsCallback callback) {
         db.collection("hospitals").get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    List<Hospital> hospitals = queryDocumentSnapshots.toObjects(Hospital.class);
+                    List<Hospital> hospitals = new java.util.ArrayList<>();
+                    for (com.google.firebase.firestore.DocumentSnapshot doc : queryDocumentSnapshots) {
+                        Hospital h = doc.toObject(Hospital.class);
+                        if (h == null) continue;
+                        h.setHospitalId(doc.getId()); // older documents don't store their own id
+                        hospitals.add(h);
+                    }
                     callback.onSuccess(hospitals);
                 })
                 .addOnFailureListener(e -> callback.onFailure(e.getMessage()));

@@ -1,15 +1,27 @@
+# Build output
 *.iml
 .gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
 /build
+/app/build
 /captures
 .externalNativeBuild
 .cxx
+
+# Machine-specific settings and secrets: never commit these
 local.properties
+/.idea
+.DS_Store
+*.jks
+*.keystore
+
+# Firebase client config: download your own from the Firebase console (see README)
+app/google-services.json
+
+# Claude Code: per-user settings stay local
+.claude/settings.local.json
+
+# Impeccable working files (design mocks, review captures, downloaded references)
+.impeccable/mocks/
+.impeccable/questions/
+.impeccable/review/
+.impeccable/reference/

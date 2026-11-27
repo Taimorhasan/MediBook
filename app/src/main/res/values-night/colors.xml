@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Dark theme tokens. Same names as values/colors.xml. -->
+<resources>
+    <color name="mb_ground">#0D0F12</color>
+    <color name="mb_panel">#171A1F</color>
+    <color name="mb_panel_alt">#1E2228</color>
+    <color name="mb_ink">#ECEFF3</color>
+    <color name="mb_on_ink">#0D0F12</color>
+    <color name="mb_mute">#9AA3AE</color>
+    <color name="mb_faint">#6B737D</color>
+    <color name="mb_line">#2A2F37</color>
+
+    <color name="mb_hot">#FF7A45</color>
+    <color name="mb_hot_bg">#3A1C0E</color>
+    <color name="mb_on_hot">#0D0F12</color>
+
+    <color name="mb_ok">#4CC98A</color>
+    <color name="mb_ok_bg">#12301F</color>
+    <color name="mb_error">#F97066</color>
+
+    <color name="mb_scrim">#99000000</color>
+</resources>

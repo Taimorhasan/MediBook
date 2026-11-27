@@ -1,64 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Light theme tokens. Dark values live in values-night/colors.xml under the same names. -->
 <resources>
-    <!-- Primary Brand Colors -->
-    <color name="primary_blue">#0066CC</color>
-    <color name="primary_dark">#004C99</color>
-    <color name="primary_light">#3399FF</color>
+    <color name="mb_ground">#F1F3F5</color>
+    <color name="mb_panel">#FFFFFF</color>
+    <color name="mb_panel_alt">#F7F8FA</color>
+    <color name="mb_ink">#111418</color>
+    <color name="mb_on_ink">#FFFFFF</color>
+    <color name="mb_mute">#5F6873</color>
+    <color name="mb_faint">#8B939C</color>
+    <color name="mb_line">#DDE1E6</color>
 
-    <!-- Background & Surface -->
-    <color name="background_light">#F8F9FA</color>
-    <color name="background_white">#FFFFFF</color>
-    <color name="surface">#FFFFFF</color>
+    <!-- The one change colour: a status that changed since last seen, unread alerts, pending. -->
+    <color name="mb_hot">#C93C0A</color>
+    <color name="mb_hot_bg">#FFE9DF</color>
+    <color name="mb_on_hot">#FFFFFF</color>
 
-    <!-- Text Colors -->
-    <color name="text_dark">#1A1A1A</color>
-    <color name="text_medium">#424242</color>
-    <color name="text_gray">#9E9E9E</color>
-    <color name="text_light">#BDBDBD</color>
-    <color name="text_white">#FFFFFF</color>
-    
-    <!-- ✅ ADD THIS MISSING COLOR -->
-    <color name="text_secondary">#6C757D</color>
+    <color name="mb_ok">#17834F</color>
+    <color name="mb_ok_bg">#E3F4EA</color>
+    <color name="mb_error">#B42318</color>
 
-    <!-- Status & Feedback -->
-    <color name="success">#4CAF50</color>
-    <color name="warning">#FF9800</color>
-    <color name="error">#F44336</color>
-    <color name="info">#2196F3</color>
-
-    <!-- Status Colors for Appointments -->
-    <color name="status_confirmed_bg">#D1FAE5</color>
-    <color name="status_confirmed_text">#059669</color>
-    <color name="status_pending_bg">#FEF3C7</color>
-    <color name="status_pending_text">#D97706</color>
-    <color name="status_cancelled_bg">#FEE2E2</color>
-    <color name="status_cancelled_text">#DC2626</color>
-    <color name="status_completed_bg">#DBEAFE</color>
-    <color name="status_completed_text">#2563EB</color>
-
-    <!-- Chip Colors -->
-    <color name="chip_background">#FFFFFF</color>
-    <color name="chip_text">#374151</color>
-    <color name="chip_stroke">#D1D5DB</color>
-
-    <!-- Borders & Dividers -->
-    <color name="divider">#E0E0E0</color>
-    <color name="border">#CCCCCC</color>
-
-    <!-- Progress -->
-    <color name="progress_background">#E0E0E0</color>
-    <color name="progress_primary">#0066CC</color>
-
-    <!-- Basic Colors -->
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-
-    <!-- Admin Panel Colors -->
-    <color name="bg_light">#F8F9FA</color>
-    <color name="error_red">#DC3545</color>
+    <color name="mb_scrim">#66000000</color>
 </resources>

@@ -6,6 +6,7 @@ public class Appointment {
     private String patientName;
     private String doctorId;
     private String doctorName;
+    private String doctorSpecialty;
     private String hospitalId;
     private String scheduleId;
     private String slotTime;
@@ -46,6 +47,8 @@ public class Appointment {
     public void setDoctorId(String doctorId) { this.doctorId = doctorId; }
     public String getDoctorName() { return doctorName; }
     public void setDoctorName(String doctorName) { this.doctorName = doctorName; }
+    public String getDoctorSpecialty() { return doctorSpecialty; }
+    public void setDoctorSpecialty(String doctorSpecialty) { this.doctorSpecialty = doctorSpecialty; }
     public String getHospitalId() { return hospitalId; }
     public void setHospitalId(String hospitalId) { this.hospitalId = hospitalId; }
     public String getScheduleId() { return scheduleId; }

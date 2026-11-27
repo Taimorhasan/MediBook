@@ -25,7 +25,13 @@ public class UserRepository {
     public void getAllUsers(UsersCallback callback) {
         db.collection("users").get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    List<User> users = queryDocumentSnapshots.toObjects(User.class);
+                    List<User> users = new ArrayList<>();
+                    for (com.google.firebase.firestore.DocumentSnapshot doc : queryDocumentSnapshots) {
+                        User u = doc.toObject(User.class);
+                        if (u == null) continue;
+                        u.setUserId(doc.getId()); // delete and role changes rely on the real document id
+                        users.add(u);
+                    }
                     callback.onSuccess(users);
                 })
                 .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
@@ -48,6 +54,19 @@ public class UserRepository {
                         callback.onFailure("User not found");
                     }
                 })
+                .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
+    }
+
+    /**
+     * Removes an account's MediBook data: users/{uid}, and doctors/{uid} for doctors, in one batch.
+     * The Firebase Auth login itself can only be deleted server-side; without a profile the app blocks it.
+     */
+    public void deleteAccountData(String userId, boolean doctor, AuthRepository.VoidCallback callback) {
+        com.google.firebase.firestore.WriteBatch batch = db.batch();
+        batch.delete(db.collection("users").document(userId));
+        if (doctor) batch.delete(db.collection("doctors").document(userId));
+        batch.commit()
+                .addOnSuccessListener(v -> callback.onSuccess())
                 .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
     }
 

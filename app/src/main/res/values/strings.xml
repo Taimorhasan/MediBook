@@ -247,6 +247,14 @@
     <string name="no_users">No users match.</string>
     <string name="user_added">User added</string>
     <string name="role_changed">Role changed to %1$s</string>
+    <string name="delete_user">Delete user</string>
+    <string name="delete_doctor">Delete doctor</string>
+    <string name="delete_account_title">Delete %1$s?</string>
+    <string name="delete_user_body">Their profile is removed and they can no longer sign in to MediBook. Upcoming appointments are cancelled and each doctor is told. Past appointments and chats stay for the doctor\'s records.</string>
+    <string name="delete_doctor_body">Their doctor listing and profile are removed, so patients can no longer find or book them, and they can no longer sign in. Upcoming appointments are cancelled and each patient is told.</string>
+    <string name="account_deleted">%1$s deleted</string>
+    <string name="cant_delete_self">You can\'t delete the account you\'re signed in with.</string>
+    <string name="notif_account_removed_body">Your appointment with %1$s on %2$s at %3$s was cancelled because their account was removed.</string>
     <string name="more_title">More</string>
     <string name="manage_hospitals">Hospitals</string>
     <string name="manage_hospitals_desc">Add and edit hospitals doctors work at</string>

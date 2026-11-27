@@ -16,6 +16,7 @@ import com.example.medibook.repositories.AuthRepository;
 import com.example.medibook.repositories.DoctorRepository;
 import com.example.medibook.repositories.RoleRepository;
 import com.example.medibook.repositories.UserRepository;
+import com.example.medibook.utils.AccountRemoval;
 import com.example.medibook.utils.Ui;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputLayout;
@@ -117,6 +118,9 @@ public class AdminUsersFragment extends AdminListFragment<User> {
     private void actions(User u) {
         new Ui.Sheet(requireContext(), Ui.orDash(u.getName()), u.getEmail())
                 .action(R.drawable.ic_user_gear, getString(R.string.change_role), false, () -> changeRole(u))
+                .action(R.drawable.ic_trash, getString(R.string.delete_user), true,
+                        () -> AccountRemoval.confirm(requireView(), u.getUserId(), Ui.orDash(u.getName()),
+                                "doctor".equals(roleOf(u)), this::load))
                 .show();
     }
 

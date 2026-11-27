@@ -11,6 +11,7 @@ import com.example.medibook.models.Hospital;
 import com.example.medibook.repositories.AuthRepository;
 import com.example.medibook.repositories.DoctorRepository;
 import com.example.medibook.repositories.HospitalRepository;
+import com.example.medibook.utils.AccountRemoval;
 import com.example.medibook.utils.Ui;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import java.util.Collections;
@@ -117,6 +118,8 @@ public class AdminDoctorsFragment extends AdminListFragment<Doctor> {
                         () -> startActivity(new Intent(requireContext(), DoctorProfileActivity.class)
                                 .putExtra(DoctorProfileActivity.EXTRA_DOCTOR_ID, d.getDoctorId())
                                 .putExtra(DoctorProfileActivity.EXTRA_PREVIEW, true)))
+                .action(R.drawable.ic_trash, getString(R.string.delete_doctor), true,
+                        () -> AccountRemoval.confirm(requireView(), d.getDoctorId(), Ui.doctorName(d.getName()), true, this::load))
                 .show();
     }
 
